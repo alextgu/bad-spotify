@@ -1,0 +1,29 @@
+# --- core ---
+pydantic>=2.7
+pyyaml>=6.0
+python-dotenv>=1.0
+
+# --- agent graph ---
+langgraph>=0.2.0
+langchain-core>=0.3.0
+
+# --- models (all optional at runtime; mock backends exist) ---
+google-genai>=0.3.0          # Gemini: perception + judge
+elevenlabs>=1.0              # narrator voice
+# twelvelabs                 # optional: post-session recap only, NOT the live loop
+
+# --- capture ---
+opencv-python>=4.9
+sounddevice>=0.4.6
+numpy>=1.26
+librosa>=0.10                # local audio features (tempo, onsets, centroid)
+
+# --- music ---
+spotipy>=2.23                # playback control only (audio-features is dead)
+requests>=2.31
+beautifulsoup4>=4.12         # everynoise genre-map scrape
+
+# --- hud ---
+fastapi>=0.110
+uvicorn[standard]>=0.29
+websockets>=12.0

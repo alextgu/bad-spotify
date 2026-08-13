@@ -1,0 +1,55 @@
+# ---------------------------------------------------------------
+# bad-spotify: the agent that plays the worst possible music
+# ---------------------------------------------------------------
+
+capture:
+  source: replay          # replay | webcam | glasses
+  frame_interval_s: 5.0
+  audio_window_s: 3.0
+  replay_dir: data/replay/park_afternoon
+
+gate:
+  # Only escalate to the expensive model when the world actually changed.
+  frame_diff_threshold: 0.18     # mean abs pixel delta, normalised 0-1
+  audio_rms_delta: 0.12
+  onset_spike_ratio: 1.8         # onset rate vs rolling median
+  force_escalate_after_s: 45     # never go fully blind
+
+perceive:
+  backend: mock           # mock | gemini
+  model: gemini-2.5-flash
+  timeout_s: 4.0
+
+antagonize:
+  cruelty: 0.85           # 0 = merely inappropriate, 1 = a war crime
+  strategies:             # these fan out in parallel
+    - genre_antipode
+    - tempo_clash
+    - lyrical_irony
+  candidates_per_strategy: 4
+
+judge:
+  backend: mock           # mock | gemini
+  model: gemini-2.5-flash
+  timeout_s: 4.0
+
+dj:
+  min_track_seconds: 25         # commitment: no thrashing
+  cooldown_seconds: 8           # hard floor between any two switches
+  agreement_reads: 2            # hysteresis: N consecutive agreeing scene reads
+  max_consecutive_failures: 3
+
+player:
+  backend: mock           # mock | local | spotify
+  local_library: data/library
+  volume: 0.7
+
+voice:
+  backend: mock           # mock | elevenlabs
+  duck_to: 0.25           # duck music to this while narrating
+  max_quip_chars: 120
+
+hud:
+  enabled: true
+  host: 127.0.0.1
+  port: 8420

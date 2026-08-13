@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bad spotify — the agent that gets it wrong on purpose</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --plane:        #0d0d0d;
+    --surface-1:    #1a1a19;
+    --surface-2:    #212120;
+    --text-primary: #ffffff;
+    --text-secondary:#c3c2b7;
+    --muted:        #898781;
+    --grid:         #2c2c2a;
+    --baseline:     #383835;
+    --border:       rgba(255,255,255,0.10);
+
+    /* two series: what the world IS vs what we're about to do about it */
+    --series-scene:  #3987e5;
+    --series-target: #d95926;
+
+    --critical: #d03b3b;
+    --good:     #0ca30c;
+
+    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --r: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--plane);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.45;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* faint engineering grid, kept well below the ink */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity: .35;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .shell { position: relative; z-index: 1; max-width: 1500px; margin: 0 auto; padding: 20px 24px 132px; }
+
+  /* ---------------------------------------------------------- header --- */
+  header {
+    display: flex; align-items: center; gap: 16px;
+    padding-bottom: 16px; margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand h1 {
+    margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -0.01em;
+  }
+  .brand .tag { color: var(--muted); font-size: 12px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 11px; border-radius: 999px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    font-size: 12px; color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: none; }
+  .dot.live { background: var(--good); box-shadow: 0 0 0 3px rgba(12,163,12,.18); }
+  .dot.down { background: var(--critical); box-shadow: 0 0 0 3px rgba(208,59,59,.18); }
+  .spacer { flex: 1; }
+
+  /* ----------------------------------------------------------- layout -- */
+  .grid { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(340px,.85fr); gap: 18px; }
+  @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 16px 18px;
+    margin-bottom: 18px;
+  }
+  .card h2 {
+    margin: 0 0 2px; font-size: 11px; font-weight: 650;
+    letter-spacing: .09em; text-transform: uppercase; color: var(--muted);
+  }
+  .card .sub { margin: 0 0 14px; font-size: 12px; color: var(--muted); }
+
+  /* ------------------------------------------------------ scene card --- */
+  .scene-setting { font-size: 21px; font-weight: 600; letter-spacing: -0.015em; margin: 6px 0 4px; }
+  .scene-activity { color: var(--text-secondary); margin-bottom: 14px; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .fact {
+    font-size: 12px; padding: 4px 9px; border-radius: 6px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .fact b { color: var(--text-primary); font-weight: 600; }
+  .swatches { display: flex; gap: 5px; margin-left: 2px; }
+  .swatch { width: 15px; height: 15px; border-radius: 4px; border: 1px solid var(--border); }
+
+  /* --------------------------------------------------- dumbbell chart -- */
+  .legend { display: flex; gap: 16px; margin-bottom: 14px; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-secondary); }
+  .lg { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+  .rows { display: flex; flex-direction: column; gap: 3px; }
+  .row {
+    display: grid; grid-template-columns: 92px 1fr 52px;
+    align-items: center; gap: 12px;
+    padding: 5px 6px; border-radius: 7px; cursor: default;
+  }
+  .row:hover { background: var(--surface-2); }
+  .row .axis { font-size: 12px; color: var(--text-secondary); text-align: right; }
+  .row .gap {
+    font-size: 12px; font-family: var(--mono); font-variant-numeric: tabular-nums;
+    color: var(--muted); text-align: right;
+  }
+  .row.wide .gap { color: var(--text-primary); font-weight: 600; }
+
+  .track { position: relative; height: 26px; }
+  .track .line {
+    position: absolute; left: 0; right: 0; top: 50%; height: 2px;
+    transform: translateY(-50%); background: var(--baseline); border-radius: 1px;
+  }
+  .track .mid {
+    position: absolute; left: 50%; top: 4px; bottom: 4px; width: 1px;
+    background: var(--grid);
+  }
+  .track .conn {
+    position: absolute; top: 50%; height: 2px; transform: translateY(-50%);
+    background: var(--muted); border-radius: 1px;
+    transition: left .5s cubic-bezier(.4,0,.2,1), width .5s cubic-bezier(.4,0,.2,1);
+  }
+  .mark {
+    position: absolute; top: 50%; width: 11px; height: 11px; border-radius: 50%;
+    transform: translate(-50%,-50%);
+    box-shadow: 0 0 0 2px var(--surface-1);   /* 2px surface ring for overlap */
+    transition: left .5s cubic-bezier(.4,0,.2,1);
+  }
+  .mark.scene  { background: var(--series-scene); z-index: 2; }
+  .mark.target { background: var(--series-target); }
+
+  .linkbtn {
+    background: none; border: none; padding: 0; cursor: pointer;
+    color: var(--muted); font-size: 12px; font-family: var(--font);
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .linkbtn:hover { color: var(--text-secondary); }
+
+  table.data { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
+  table.data th, table.data td {
+    text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+  }
+  table.data th { color: var(--muted); font-weight: 600; }
+  table.data td:first-child, table.data th:first-child { text-align: left; color: var(--text-secondary); }
+
+  /* ------------------------------------------------------- cruelty ----- */
+  .hero { display: flex; align-items: baseline; gap: 10px; margin: 2px 0 10px; }
+  .hero .val { font-size: 40px; font-weight: 650; letter-spacing: -0.03em; line-height: 1; }
+  .hero .unit { color: var(--muted); font-size: 13px; }
+  .meter { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+  .meter > i {
+    display: block; height: 100%; border-radius: 4px;
+    background: var(--series-target); transition: width .4s ease;
+  }
+  input[type=range] { width: 100%; margin-top: 14px; accent-color: var(--series-target); }
+  .rangelabels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* --------------------------------------------------------- feed ------ */
+  .feed { display: flex; flex-direction: column; gap: 8px; max-height: 620px; overflow-y: auto; padding-right: 4px; }
+  .feed::-webkit-scrollbar { width: 6px; }
+  .feed::-webkit-scrollbar-thumb { background: var(--baseline); border-radius: 3px; }
+
+  .ev {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-left: 2px solid var(--baseline);
+    border-radius: 8px; padding: 9px 12px;
+    animation: slide .32s cubic-bezier(.2,.7,.3,1);
+  }
+  @keyframes slide { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+  .ev .top { display: flex; align-items: center; gap: 8px; }
+  .ev .kind {
+    font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); font-weight: 650;
+  }
+  .ev .time { margin-left: auto; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .ev .label { margin-top: 3px; color: var(--text-primary); }
+  .ev .meta { margin-top: 3px; font-size: 12px; color: var(--muted); font-family: var(--mono); word-break: break-word; }
+  .ev.is-error { border-left-color: var(--critical); }
+  .ev.is-error .kind { color: var(--critical); }
+  .ev.is-play { border-left-color: var(--series-target); }
+  .ev.is-scene { border-left-color: var(--series-scene); }
+
+  /* ------------------------------------------------------ now playing -- */
+  .now {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    background: rgba(26,26,25,.94);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    padding: 13px 24px;
+  }
+  .now-inner { max-width: 1500px; margin: 0 auto; display: flex; align-items: center; gap: 18px; }
+  .now .art {
+    width: 46px; height: 46px; border-radius: 8px; flex: none;
+    background: var(--surface-2); border: 1px solid var(--border);
+    display: grid; place-items: center; font-size: 19px;
+  }
+  .now .title { font-weight: 600; letter-spacing: -0.01em; }
+  .now .artist { color: var(--muted); font-size: 12px; }
+  .now .quip {
+    margin-left: auto; max-width: 46%; text-align: right;
+    color: var(--text-secondary); font-style: italic;
+  }
+  .badge {
+    font-size: 10px; letter-spacing: .07em; text-transform: uppercase;
+    padding: 3px 7px; border-radius: 5px; border: 1px solid var(--border);
+    color: var(--muted); margin-left: 8px; white-space: nowrap;
+  }
+
+  /* -------------------------------------------------------- inject ----- */
+  .inject { display: flex; gap: 8px; margin-top: 12px; }
+  .inject input {
+    flex: 1; background: var(--surface-2); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 7px;
+    padding: 9px 11px; font-family: var(--font); font-size: 13px;
+  }
+  .inject input:focus { outline: 2px solid var(--series-scene); outline-offset: -1px; }
+  .btn {
+    background: var(--series-scene); color: #fff; border: none;
+    border-radius: 7px; padding: 9px 15px; font-weight: 600; font-size: 13px;
+    cursor: pointer; font-family: var(--font);
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn.ghost { background: var(--surface-2); color: var(--text-secondary); border: 1px solid var(--border); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+  .chip {
+    font-size: 12px; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--text-secondary);
+  }
+  .chip:hover { border-color: var(--series-scene); color: var(--text-primary); }
+
+  /* ----------------------------------------------------- onboarding ---- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(5,5,5,.82); backdrop-filter: blur(6px);
+    display: grid; place-items: center; padding: 24px;
+  }
+  .overlay[hidden] { display: none; }
+  .ob {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 30px 32px; max-width: 520px; width: 100%;
+  }
+  .ob h3 { margin: 0 0 8px; font-size: 21px; letter-spacing: -0.02em; }
+  .ob p { color: var(--text-secondary); margin: 0 0 16px; }
+  .steps { display: flex; gap: 6px; margin-bottom: 20px; }
+  .steps i { height: 3px; flex: 1; border-radius: 2px; background: var(--baseline); }
+  .steps i.on { background: var(--series-scene); }
+  .ob-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+
+<!-- ------------------------------------------------------ onboarding --- -->
+<div class="overlay" id="onboarding">
+  <div class="ob" role="dialog" aria-labelledby="ob-title">
+    <div class="steps"><i class="on"></i><i></i><i></i></div>
+    <h3 id="ob-title">This assistant is not trying to help you.</h3>
+    <p id="ob-body">
+      It watches what is happening around you and plays the single worst
+      possible soundtrack for it. That is the entire feature set. It will
+      speak to you, but only to announce what it has done.
+    </p>
+    <div class="ob-actions">
+      <button class="btn ghost" id="ob-skip">Skip</button>
+      <button class="btn" id="ob-next">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+  <header>
+    <div class="brand">
+      <h1>bad spotify</h1>
+      <span class="tag">wearable anti-assistant</span>
+    </div>
+    <span class="pill"><i class="dot" id="conn-dot"></i><span id="conn-text">connecting</span></span>
+    <span class="pill" id="backends">—</span>
+    <div class="spacer"></div>
+    <span class="pill"><span id="corpus-size">0</span>&nbsp;tracks</span>
+  </header>
+
+  <div class="grid">
+    <!-- ------------------------------------------------ left column --- -->
+    <div>
+      <section class="card">
+        <h2>What it sees</h2>
+        <div class="scene-setting" id="setting">waiting for a first look…</div>
+        <div class="scene-activity" id="activity">—</div>
+        <div class="facts" id="facts"></div>
+      </section>
+
+      <section class="card">
+        <h2>The gap</h2>
+        <p class="sub">
+          Blue is the world as it is. Orange is where the music is headed.
+          The longer the connector, the worse this is about to get.
+        </p>
+
+        <div class="legend">
+          <span><i class="lg" style="background:var(--series-scene)"></i>Scene</span>
+          <span><i class="lg" style="background:var(--series-target)"></i>Target</span>
+        </div>
+
+        <div class="rows" id="vibe-rows"></div>
+
+        <div style="margin-top:12px">
+          <button class="linkbtn" id="toggle-table" aria-expanded="false">Show values as table</button>
+        </div>
+        <div id="table-wrap" hidden>
+          <table class="data">
+            <caption class="sr">Scene and target vibe values across five axes</caption>
+            <thead><tr><th>Axis</th><th>Scene</th><th>Target</th><th>Gap</th></tr></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Cruelty</h2>
+        <p class="sub">How far past “inappropriate” it is allowed to go.</p>
+        <div class="hero">
+          <span class="val" id="cruelty-val">0.85</span>
+          <span class="unit">of 1.00</span>
+        </div>
+        <div class="meter"><i id="cruelty-bar" style="width:85%"></i></div>
+        <input type="range" id="cruelty" min="0" max="1" step="0.05" value="0.85"
+               aria-label="Cruelty level">
+        <div class="rangelabels"><span>mildly wrong</span><span>a war crime</span></div>
+      </section>
+
+      <section class="card">
+        <h2>Scene injection</h2>
+        <p class="sub">
+          Describe a situation and the real pipeline runs on it — no camera,
+          no network luck. This is the button you press on stage.
+        </p>
+        <div class="inject">
+          <input id="inject-text" placeholder="a hospital waiting room at 3am"
+                 aria-label="Scene to inject">
+          <button class="btn" id="inject-go">Run</button>
+        </div>
+        <div class="chips" id="chips"></div>
+      </section>
+    </div>
+
+    <!-- ----------------------------------------------- right column --- -->
+    <div>
+      <section class="card" style="margin-bottom:0">
+        <h2>Reasoning trace</h2>
+        <p class="sub">Every decision the agent makes, as it makes it.</p>
+        <div class="feed" id="feed"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ----------------------------------------------------- now playing --- -->
+<div class="now">
+  <div class="now-inner">
+    <div class="art" id="np-art">♪</div>
+    <div>
+      <div class="title" id="np-title">nothing playing</div>
+      <div class="artist"><span id="np-artist">the silence is temporary</span><span class="badge" id="np-strategy" hidden></span></div>
+    </div>
+    <div class="quip" id="np-quip"></div>
+  </div>
+</div>
+
+<script>
+const AXES = ["valence","arousal","density","brightness","organicness"];
+let sceneVibe  = {valence:.5, arousal:.5, density:.5, brightness:.5, organicness:.5};
+let targetVibe = {valence:.5, arousal:.5, density:.5, brightness:.5, organicness:.5};
+
+/* ---------------------------------------------------- dumbbell rows --- */
+function buildRows() {
+  const host = document.getElementById("vibe-rows");
+  host.innerHTML = "";
+  for (const axis of AXES) {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.id = "row-" + axis;
+    row.innerHTML = `
+      <div class="axis">${axis}</div>
+      <div class="track">
+        <div class="line"></div><div class="mid"></div>
+        <div class="conn" id="conn-${axis}"></div>
+        <div class="mark scene"  id="s-${axis}"></div>
+        <div class="mark target" id="t-${axis}"></div>
+      </div>
+      <div class="gap" id="g-${axis}">—</div>`;
+    host.appendChild(row);
+  }
+}
+
+function renderVibes() {
+  const tbody = document.getElementById("table-body");
+  tbody.innerHTML = "";
+  for (const axis of AXES) {
+    const s = sceneVibe[axis] ?? .5, t = targetVibe[axis] ?? .5;
+    const gap = Math.abs(s - t);
+    const sp = (s * 100).toFixed(1), tp = (t * 100).toFixed(1);
+    document.getElementById("s-" + axis).style.left = sp + "%";
+    document.getElementById("t-" + axis).style.left = tp + "%";
+    const conn = document.getElementById("conn-" + axis);
+    conn.style.left  = Math.min(s, t) * 100 + "%";
+    conn.style.width = gap * 100 + "%";
+    document.getElementById("g-" + axis).textContent = gap.toFixed(2);
+    document.getElementById("row-" + axis).classList.toggle("wide", gap >= .5);
+    document.getElementById("row-" + axis).title =
+      `${axis} — scene ${s.toFixed(2)}, target ${t.toFixed(2)}, gap ${gap.toFixed(2)}`;
+    tbody.insertAdjacentHTML("beforeend",
+      `<tr><td>${axis}</td><td>${s.toFixed(2)}</td><td>${t.toFixed(2)}</td><td>${gap.toFixed(2)}</td></tr>`);
+  }
+}
+
+document.getElementById("toggle-table").addEventListener("click", (e) => {
+  const wrap = document.getElementById("table-wrap");
+  const open = wrap.hasAttribute("hidden");
+  if (open) { wrap.removeAttribute("hidden"); } else { wrap.setAttribute("hidden", ""); }
+  e.target.textContent = open ? "Hide table" : "Show values as table";
+  e.target.setAttribute("aria-expanded", String(open));
+});
+
+/* ------------------------------------------------------------ feed --- */
+const KIND_ORDER = { scene: "is-scene", play: "is-play", error: "is-error" };
+
+function addEvent(ev) {
+  const feed = document.getElementById("feed");
+  const el = document.createElement("div");
+  el.className = "ev " + (KIND_ORDER[ev.kind] || "");
+  const t = new Date((ev.ts || Date.now() / 1000) * 1000);
+  const meta = summarise(ev);
+  el.innerHTML = `
+    <div class="top">
+      <span class="kind">${ev.kind}</span>
+      <span class="time">${t.toLocaleTimeString([], {hour12:false})}</span>
+    </div>
+    <div class="label"></div>
+    ${meta ? `<div class="meta"></div>` : ""}`;
+  el.querySelector(".label").textContent = ev.label;
+  if (meta) el.querySelector(".meta").textContent = meta;
+  feed.prepend(el);
+  while (feed.children.length > 60) feed.lastChild.remove();
+}
+
+function summarise(ev) {
+  const d = ev.detail || {};
+  switch (ev.kind) {
+    case "gate":   return d.reason || "";
+    case "scene":  return `${d.setting || ""} · confidence ${(d.confidence ?? 0).toFixed(2)} · ${d.latency_ms ?? 0}ms · ${d.source || ""}`;
+    case "antivibe": return (d.target_genres || []).join(", ");
+    case "candidates": return (d.picks || []).map(p => `${p.title} (${p.score})`).join("  ·  ");
+    case "verdict": return d.reasoning || "";
+    case "dj":      return d.reason || "";
+    case "play":    return [(d.genres||[]).join(", "), d.elapsed_ms ? d.elapsed_ms + "ms end-to-end" : ""].filter(Boolean).join(" · ");
+    case "error":   return d.error || "";
+    default:        return "";
+  }
+}
+
+/* --------------------------------------------------------- handlers --- */
+function onEvent(ev) {
+  addEvent(ev);
+  const d = ev.detail || {};
+  if (ev.kind === "scene") {
+    document.getElementById("setting").textContent = d.setting || ev.label;
+    document.getElementById("activity").textContent = d.activity || "";
+    sceneVibe = d.vibe || sceneVibe;
+    renderVibes();
+    const facts = document.getElementById("facts");
+    facts.innerHTML = "";
+    const items = [
+      ["mood", ev.label], ["tempo", d.tempo], ["meter", d.meter],
+      ["confidence", (d.confidence ?? 0).toFixed(2)], ["audio", d.audio],
+    ];
+    for (const [k, v] of items) {
+      if (!v) continue;
+      const s = document.createElement("span");
+      s.className = "fact";
+      s.innerHTML = `${k} <b></b>`;
+      s.querySelector("b").textContent = v;
+      facts.appendChild(s);
+    }
+    if ((d.colors || []).length) {
+      const s = document.createElement("span");
+      s.className = "fact";
+      s.innerHTML = `palette <span class="swatches"></span>`;
+      const sw = s.querySelector(".swatches");
+      d.colors.slice(0, 4).forEach(c => {
+        const i = document.createElement("i");
+        i.className = "swatch";
+        i.style.background = c;
+        i.title = c;
+        sw.appendChild(i);
+      });
+      facts.appendChild(s);
+    }
+  }
+  if (ev.kind === "antivibe") { targetVibe = d.target || targetVibe; renderVibes(); }
+  if (ev.kind === "play" || ev.kind === "verdict") {
+    if (ev.kind === "verdict") {
+      document.getElementById("np-title").textContent = ev.label;
+      document.getElementById("np-artist").textContent = d.artist || "";
+      document.getElementById("np-quip").textContent = d.quip ? `“${d.quip}”` : "";
+      const b = document.getElementById("np-strategy");
+      b.textContent = d.strategy || "";
+      b.hidden = !d.strategy;
+    }
+  }
+}
+
+/* ------------------------------------------------------- connection --- */
+function connect() {
+  const ws = new WebSocket(`ws://${location.host}/ws`);
+  const dot = document.getElementById("conn-dot");
+  const txt = document.getElementById("conn-text");
+  ws.onopen = () => { dot.className = "dot live"; txt.textContent = "live"; };
+  ws.onclose = () => {
+    dot.className = "dot down"; txt.textContent = "reconnecting";
+    setTimeout(connect, 1500);
+  };
+  ws.onmessage = (m) => { try { onEvent(JSON.parse(m.data)); } catch (e) {} };
+}
+
+/* ---------------------------------------------------------- controls -- */
+const slider = document.getElementById("cruelty");
+slider.addEventListener("input", () => {
+  const v = parseFloat(slider.value);
+  document.getElementById("cruelty-val").textContent = v.toFixed(2);
+  document.getElementById("cruelty-bar").style.width = (v * 100) + "%";
+});
+slider.addEventListener("change", () => {
+  fetch("/api/cruelty", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({value: parseFloat(slider.value)}),
+  }).catch(() => {});
+});
+
+const PRESETS = [
+  "a sunlit park, people reading on the grass",
+  "a hospital waiting room at 3am",
+  "a toddler's birthday party, cake being cut",
+  "a silent library during exam week",
+  "an empty parking garage at night",
+  "a first date at a candlelit restaurant",
+];
+const chips = document.getElementById("chips");
+PRESETS.forEach(p => {
+  const c = document.createElement("button");
+  c.className = "chip";
+  c.textContent = p;
+  c.onclick = () => { document.getElementById("inject-text").value = p; inject(); };
+  chips.appendChild(c);
+});
+
+function inject() {
+  const text = document.getElementById("inject-text").value.trim();
+  if (!text) return;
+  fetch("/api/inject", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({scene: text}),
+  }).catch(() => {});
+}
+document.getElementById("inject-go").onclick = inject;
+document.getElementById("inject-text").addEventListener("keydown", e => {
+  if (e.key === "Enter") inject();
+});
+
+/* -------------------------------------------------------- onboarding -- */
+const OB = [
+  ["This assistant is not trying to help you.",
+   "It watches what is happening around you and plays the single worst possible soundtrack for it. That is the entire feature set. It will speak to you, but only to announce what it has done."],
+  ["It reads the room, then betrays it.",
+   "One vision pass turns a frame and three seconds of audio into five numbers. The agent reflects those numbers through the middle of the vibe space and hunts for whatever sits at the other end."],
+  ["You control exactly one thing.",
+   "The cruelty dial. Everything else is its decision, and it will not take requests. Press a scene chip below to watch it think."],
+];
+let obStep = 0;
+const overlay = document.getElementById("onboarding");
+function paintOb() {
+  document.getElementById("ob-title").textContent = OB[obStep][0];
+  document.getElementById("ob-body").textContent = OB[obStep][1];
+  document.querySelectorAll(".steps i").forEach((el, i) =>
+    el.classList.toggle("on", i <= obStep));
+  document.getElementById("ob-next").textContent =
+    obStep === OB.length - 1 ? "Start" : "Next";
+}
+document.getElementById("ob-next").onclick = () => {
+  if (obStep === OB.length - 1) { overlay.hidden = true; return; }
+  obStep++; paintOb();
+};
+document.getElementById("ob-skip").onclick = () => { overlay.hidden = true; };
+
+/* ------------------------------------------------------------- boot --- */
+buildRows();
+renderVibes();
+paintOb();
+connect();
+fetch("/api/state").then(r => r.json()).then(s => {
+  document.getElementById("corpus-size").textContent = s.corpus_size ?? 0;
+  const b = s.backends || {};
+  document.getElementById("backends").textContent =
+    Object.entries(b).map(([k, v]) => `${k}:${v}`).join("  ") || "mock";
+  if (typeof s.cruelty === "number") {
+    slider.value = s.cruelty;
+    slider.dispatchEvent(new Event("input"));
+  }
+}).catch(() => {});
+</script>
+</body>
+</html>
