@@ -1,66 +1,153 @@
 # How it works
 
-Anything marked **TEMPORARY** isn't settled yet. Don't build on it without flagging it.
+Plain language, no code. **This file explains how the thing works.** For what's
+built versus not built, see `STATUS.md` — keeping those separate is the only way
+they stay accurate.
+
+Anything marked **TEMPORARY** isn't settled. Don't build on it without saying so.
+
+---
 
 ## The loop
 
 Six steps, over and over, about every five seconds.
 
-1. **Look.** Take a picture and listen for a few seconds.
-2. **Is anything new?** If the room looks and sounds the same as last time, stop here and save the effort. Only carry on when something actually changed — someone walked in, it got loud, the lights changed.
-3. **Understand the moment.** Describe what's happening in one go: where we are, what people are doing, how it feels.
-4. **Flip it.** Work out the exact opposite of that feeling. This is the whole point of the project.
-5. **Pick the song.** Come up with a handful of candidates for "worst possible right now," then choose the funniest one and write a one-line remark to say out loud.
-6. **Queue it, or cut in.** Usually it just lines the song up next. But if the room has changed a lot *and* the current song has had a fair run, it cuts in immediately — because the wrong music is much funnier while the moment is still happening.
+**1. Look.** Take a picture and listen to the last few seconds of sound.
 
-## What we notice about a moment
+**2. Has anything changed?** Compare against the last look. If the room is
+different — someone walked in, it got loud, the lights changed — carry on to the
+expensive thinking. If it's the same, skip it and reuse what we already worked
+out. Either way we still go to step 6, because "nothing changed" is useful
+information too. It's the difference between *the scene is stable* and *we don't
+know what the scene is*.
+
+**3. Understand the moment.** Describe what's happening: where we are, what
+people are doing, how it feels. One description covering everything, produced in
+one go.
+
+**4. Flip it.** Work out the opposite of that feeling. This is the whole point
+of the project.
+
+**5. Pick the song.** Three different ideas of "worst" each propose candidates.
+Then one final choice picks the funniest of them, and writes a one-line remark
+to say out loud.
+
+**6. Queue it, or cut in.** Usually it lines the song up to play next. But if the
+room changed a lot *and* the current song has already had a fair run, it cuts in
+immediately — wrong music is much funnier while the moment is still happening.
+
+---
+
+## What it notices about a moment
+
+Everything in this table comes back in **one answer**, not one question per row.
+Asking separately would cost more, take longer, and give more chances to fail.
 
 | | What it means |
 |---|---|
 | Mood | Happy, tense, sad, calm |
-| Speed | Is it fast or slow — drums, pace, how much is happening |
-| Steady or not | A regular beat versus something loose like jazz |
+| Speed | Fast or slow — pace, drums, how much is going on |
+| Steady or not | A regular beat versus something loose, like jazz |
 | Instruments and sounds | What a genre is made of |
 | Colour | What colours are in the scene, and what they'd sound like |
-| Nicheness | How obscure something is — mainstream versus deep cut. **TEMPORARY** |
-| Weather | **TEMPORARY** — probably looked up, not seen |
+| Nicheness | Mainstream versus deep cut. **TEMPORARY** — agreed as an idea, not used yet |
+| Weather | **TEMPORARY** — would be looked up, not seen |
 
-All of this comes back in one answer, not one question per item. Asking separately costs more, takes longer, and gives more chances to fail.
+It also says how sure it is. If it isn't sure, nothing happens — see the
+guardrails below.
 
-## How we decide what's "worst"
+---
 
-Two things, and we need both.
+## How it decides what's "worst"
 
-**The maths.** Every moment and every song gets scored on the same handful of qualities. "Opposite" is just flipping every score. It's fast, it's free, and it's easy to show someone on a slide.
+Two things, and it needs both.
 
-**The taste.** The maths alone gives boring answers — often some obscure noise record nobody's heard of. The genuinely funny choice needs to be *specific* and it needs to be *recognised*. Funeral music at a birthday party. A Christmas song in August. A silly chase tune during a tense moment. Only something that understands culture can spot that.
+**The maths.** Every moment and every song is scored on the same handful of
+qualities. "Opposite" is just flipping every score. Fast, free, and easy to show
+someone on a slide.
 
-So the maths narrows it down to a shortlist, and taste picks the winner. Never one without the other.
+**The taste.** The maths on its own gives boring answers — usually some obscure
+noise record nobody has heard of. A genuinely funny choice has to be *specific*
+and it has to be *recognised*. Funeral music at a birthday party. A Christmas
+song in August. A silly chase tune during a tense moment. Only something that
+understands culture spots that.
 
-**On nicheness:** the joke dies if nobody knows the song. Obscure is only funny when the *mismatch* is obvious without knowing the track. Treat mainstream as the default and reach for deep cuts deliberately.
+**So the maths makes a shortlist and taste picks the winner.** Never one alone.
 
-## How we stop it going haywire
+**On nicheness:** the joke dies if nobody knows the song. Obscure is only funny
+when the mismatch is obvious *without* knowing the track. Mainstream is the
+default; reach for deep cuts on purpose, not by accident.
 
-- **Lining up the next song is cheap; cutting one off has to be earned.** Queueing is nearly always allowed. Interrupting needs two things at once: the room genuinely changed, and the current song has already played long enough.
-- A song is safe from being cut for its first stretch, no matter what happens in the room.
-- It has to see the same change twice before reacting. One odd reading isn't enough.
-- If it's unsure what it's looking at, it does nothing.
-- If any part breaks, there's a backup list of always-wrong songs ready to go.
+---
 
-**The rule: it is never silent.** Silence is the only actual bug. Playing the wrong thing is the product working.
+## How it's stopped from going haywire
+
+- **Lining up the next song is cheap. Cutting one off has to be earned.**
+  Queueing is nearly always allowed. Interrupting needs two things at once: the
+  room genuinely changed, and the current song has already played long enough.
+- A song is safe from being cut for its first stretch, whatever happens.
+- It has to see the same change twice before acting. One odd reading isn't enough.
+- If it isn't sure what it's looking at, it does nothing.
+- If any part breaks, a backup list of always-wrong songs plays anyway.
+
+**The rule: it is never silent.** Silence is the only actual bug. Playing the
+wrong thing is the product working correctly.
+
+---
 
 ## Where the music comes from
 
-- A hand-picked list of songs, each scored by hand. Small on purpose — famous songs beat a huge pile of unknown ones, because recognition is what makes it land.
-- We're not analysing audio to work out what songs are. We label them once, ourselves.
-- There's a public map of music genres laid out by how similar they are. Useful for finding opposites. **TEMPORARY** — we've got a way to pull it in, but nothing uses it yet.
-- Bigger free music datasets exist if the hand-picked list runs out. **TEMPORARY** — only if we need them.
+- **A hand-picked list of songs, scored by hand.** Small on purpose: famous songs
+  beat a huge pile of unknown ones, because recognition is what makes it land.
+- **We don't analyse audio to work out what songs are.** We label them once,
+  ourselves. Spotify's own music-analysis tools were shut off to new apps in
+  2024, and we don't need them.
+- **Spotify is only the speaker.** It finds the track and plays it. All the
+  judgement is ours.
+- There's a public map of music genres arranged by similarity — useful for
+  finding opposites. **TEMPORARY**: we can pull it in, but nothing uses it yet.
+- Bigger free music datasets exist if the hand-picked list runs out.
+  **TEMPORARY**: only if we need them.
 
-## What you see on screen
+---
 
-Cards in the top-right corner, Jarvis-style, showing what it's thinking as it thinks it: what it saw, what it decided was the opposite, what it considered, what it picked, and why.
+## What people see
 
-Plus a dial for how cruel it's allowed to be, and a box where you can type a situation — "a hospital waiting room at 3am" — and watch the whole thing run without needing a camera. That's the button we press when demoing.
+Three surfaces, for three different audiences.
+
+**The DJ face** — what judges watch while it runs. A character that reacts: it
+takes on the colours of the room, says its line, and shows what's playing and
+whether it queued the song or cut in. Beside it, a running list of its reasoning.
+
+**The engineering view** — what we use while building. The same information in
+much more detail, plus a cruelty dial and a box where you type a situation
+("a hospital waiting room at 3am") and watch the whole thing run without a
+camera.
+
+**The site** — our presentation format. It explains the project, and has a demo
+area where you watch a video and see which song it chose at each point in the
+footage. It replays a recording rather than running live, so there's nothing to
+host and nothing that can fail on stage.
+
+**We keep the reasoning visible on all of them.** Seeing *why* it chose funeral
+doom is the difference between an agent and a shuffle button.
+
+---
+
+## For the demo: video instead of glasses
+
+We don't have Ray-Bans, so we film something and feed the recording in as though
+it were happening live. Nothing downstream knows the difference — same steps,
+same timing, same decisions.
+
+It's also better than a live camera for presenting: the same video gives the
+same run at every rehearsal, and there's no camera, lighting, or permission to
+fail on stage.
+
+A run can be recorded to a file listing every song, **where in the video it
+starts**, and why. That file is what the site replays.
+
+---
 
 ## What we're using
 
@@ -69,41 +156,17 @@ Plus a dial for how cruel it's allowed to be, and a box where you can type a sit
 | Gemini | Understanding the scene, and picking the funniest song |
 | LangGraph | Holding the steps together and keeping the order sane |
 | ElevenLabs | The voice that announces what it's done |
-| Spotify | Actually playing the music |
+| Spotify | Finding and playing the music. Needs Premium |
+| Next.js | The presentation site |
 | Twelve Labs | **TEMPORARY** — too slow for the live loop. Best use is a recap at the end: "here's every moment we ruined." Cut it if we don't build that screen |
-| Training our own model | Cut. No time, and no need — good instructions plus a well-chosen song list does the job |
+| Training our own model | **Cut.** No time, and no need — good instructions plus a well-chosen song list does the job |
 
-## Still open
+---
 
-- It'll repeat the same joke if left running a long time. No memory yet.
-- Nobody's timed the real thing end to end.
-- Glasses aren't wired up — building for normal video first, moving over later.
+## Where to go next
 
-## What's left to build
-
-Every part below already exists as a working stand-in, so the whole thing runs
-end to end today with fake versions of each piece. Finishing a part means
-swapping the stand-in for the real thing. They can be done in any order, by
-different people, without waiting on each other.
-
-**1. Seeing the moment**
-*World in, description out.* Getting pictures and sound off a real camera, and turning them into an honest description of what's happening. Right now it returns canned answers and has never been pointed at a real camera.
-*Finished when:* it runs off a real laptop or phone for ten minutes without falling over, and the descriptions it gives back actually match the room — including saying so when it isn't sure.
-
-**2. Choosing the worst song**
-*Description in, song out.* The opposite-finder, the song list, and the final pick. All three are working, but on fake input only, and the song list is about fifty tracks with no nicheness scores yet.
-*Finished when:* it covers the situations we'll actually demo, doesn't repeat itself, and the picks make a room laugh more often than not — funny, not just technically opposite.
-
-**3. Playing it out loud**
-*Song in, sound out.* Spotify playback and the voice that announces it. Spotify is now built — there's a one-command setup that logs you in, checks the account, finds a speaker, looks up all our songs in advance, and plays a test track to prove it works. Nobody has run it yet. The voice is still untested.
-*Finished when:* someone runs the setup script clean, and a song we choose actually starts playing with the voice line on top and the music dipping underneath.
-
-**4. The screen**
-Built and working — the thinking cards, the cruelty dial, and the type-a-situation box all run today.
-*Finished when:* it also shows what the camera sees, and there's an end-of-session recap.
-
-**Already done:** deciding *when* to change the song — the timing rules and the backup list. Tested. Leave it alone unless it misbehaves.
-
-**Not needed to win:** glasses. A small companion app feeds pictures and sound in from them; nothing else has to change.
-
-**Do #3 first.** It's the only one that can quietly fail on demo day and it has the fiddliest setup. Everything else can be improved right up to the deadline; that one either works or it doesn't.
+| I want to know… | Read |
+|---|---|
+| What's actually finished, and what to work on | `STATUS.md` |
+| How to run it, and who owns which part | `README.md` |
+| How the site connects to the agent | `frontend/README.md` |

@@ -29,11 +29,11 @@ Last updated: 13 Aug 2026 (evening)
 | The song list (47 songs) | Built, unproven | |
 | Picking the funniest one | Built, unproven | |
 | The voice | Built, unproven | |
-| The screen | Built, unproven | |
 | Video file as input | Built, unproven | |
 | Recording a run for the site | Built, unproven | |
-| DJ icon look | Built, unproven | |
-| Hosted site (presentation format) | Deferred on purpose | |
+| Screens — DJ face and engineering view | Built, unproven | |
+| Site — scaffold + demo ground | Built, unproven | |
+| Site — diagram + landing page | Not started | |
 | Glasses | Not started — and not needed | |
 
 "Built, unproven" is not a criticism. Everything was deliberately built to run
@@ -95,7 +95,14 @@ Tested against a generated clip, never against real footage.
 *To prove it:* run it on an actual video someone filmed.
 *Needs:* ffmpeg installed, otherwise it runs vision-only.
 
-**7. Recording a run**
+**7. The site scaffold**
+`frontend/` — Next.js, TypeScript, Tailwind. Builds clean. The demo ground works:
+it reads a recorded run, plays the video, and pops up each decision at the point
+in the footage where the song lands. The landing page and the diagram are
+skeletons with notes left in them.
+*To prove it:* drop in real footage and a real recording, and walk someone through it.
+
+**8. Recording a run**
 `--record NAME` writes every decision to `data/sessions/NAME.json` — which song,
 where in the video it starts, and why. This is what the presentation site will
 read, so the site needs no backend and no keys.
@@ -122,14 +129,17 @@ useful for us and it's the wrong thing to show a judge.
 rather than the full dashboard. Showing it is a real differentiator and half of
 why the technical work reads as serious, so it was worth keeping in a smaller form.
 
-**A hosted site — this is our presentation format, not a product.**
-
-**Deferred. Don't build it yet.** Spec so far, so we don't lose it:
+**A hosted site — this is our presentation format, not a product.** The spec:
 
 - Explains the whole thing with a clear diagram
 - Has a testing area: drop in a video, and it shows which songs it picked and
   *where in the video* each one plays
 - Ships with a hardcoded sample video so it always works
+
+**Half built.** `frontend/` exists and the demo area works — it replays a
+recorded run against the video. The diagram and the landing page are still
+skeletons. Don't sink time into polish until the backend has been proven with
+real footage; a beautiful site replaying a bad run helps nobody.
 
 **Audio on the site:** it names the song and people can look it up themselves.
 For our own demo videos the music is overlaid onto the video. That sidesteps the
@@ -152,6 +162,9 @@ Don't re-open these without a reason.
 - **13 Aug** — Two screens, not one. The DJ face at `/dj` for judges, the
   engineering view at `/` for us. The reasoning stays visible on both — it's the
   difference between an agent and a shuffle button.
+- **13 Aug** — The site is Next.js, in its own `frontend/` folder, and static.
+  It replays a recorded run rather than calling the agent, so there's no backend
+  to host and nothing live to fail.
 - **Earlier** — One question to understand the scene, not one per detail.
 - **Earlier** — Our own song list and scoring; Spotify is only the speaker.
   (Their music-analysis endpoints were shut off to new apps in 2024.)

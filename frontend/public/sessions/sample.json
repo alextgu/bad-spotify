@@ -1,0 +1,136 @@
+{
+  "session": "sample",
+  "source": "/tmp/demo/park.mp4",
+  "moment_count": 1,
+  "README": "Each entry in `moments` is one decision. `video_time` is where the scene was read; `played.at_video_time` is where the song actually starts -- use that one for the timeline, since the scene is often read a few seconds earlier. `played.mode` is 'queue' (lines up next) or 'interrupt' (cuts in now).",
+  "moments": [
+    {
+      "video_time": 0.0,
+      "wall_time": 1786661737.7669826,
+      "scene": {
+        "setting": "sunlit public park, people reading on the grass",
+        "activity": "walking slowly on a path",
+        "mood": "peaceful",
+        "confidence": 0.9,
+        "tempo": "slow",
+        "meter": "steady",
+        "colors": [
+          "#8FBF6A",
+          "#CFE8A0",
+          "#4A7BC8"
+        ],
+        "vibe": {
+          "valence": 0.85,
+          "arousal": 0.15,
+          "density": 0.25,
+          "brightness": 0.9,
+          "organicness": 0.9
+        }
+      },
+      "opposite": {
+        "target_vibe": {
+          "valence": 0.255,
+          "arousal": 0.745,
+          "density": 0.675,
+          "brightness": 0.0,
+          "organicness": 0.21999999999999997
+        },
+        "looking_for": [
+          "funeral doom",
+          "death metal",
+          "drone",
+          "noise",
+          "despair",
+          "dread",
+          "gabber",
+          "rave"
+        ],
+        "why": "scene reads peaceful (dominant axis 'brightness', deviation 0.40); cruelty 0.85; serenity punished with maximum heaviness; silence violated; christmas music outside december"
+      },
+      "considered": {
+        "genre_antipode": [
+          {
+            "title": "Bodies",
+            "artist": "Drowning Pool",
+            "score": 0.911,
+            "why": "d(scene)=1.42 d(target)=0.68"
+          },
+          {
+            "title": "Duality",
+            "artist": "Slipknot",
+            "score": 0.907,
+            "why": "d(scene)=1.41 d(target)=0.63"
+          },
+          {
+            "title": "Hammer Smashed Face",
+            "artist": "Cannibal Corpse",
+            "score": 0.849,
+            "why": "d(scene)=1.53 d(target)=0.63"
+          }
+        ],
+        "tempo_clash": [
+          {
+            "title": "Sandstorm",
+            "artist": "Darude",
+            "score": 0.501,
+            "why": "arousal gap 0.70, meter clash 0.00"
+          },
+          {
+            "title": "O Fortuna",
+            "artist": "Carl Orff",
+            "score": 0.499,
+            "why": "arousal gap 0.70, meter clash 0.00"
+          },
+          {
+            "title": "Bodies",
+            "artist": "Drowning Pool",
+            "score": 0.494,
+            "why": "arousal gap 0.71, meter clash 0.00"
+          }
+        ],
+        "lyrical_irony": [
+          {
+            "title": "Hammer Smashed Face",
+            "artist": "Cannibal Corpse",
+            "score": 0.882,
+            "why": "taboo hits: ['brutal', 'death metal']"
+          },
+          {
+            "title": "Thunderdome Anthem",
+            "artist": "Various",
+            "score": 0.778,
+            "why": "taboo hits: ['assault', 'gabber', 'rave']"
+          },
+          {
+            "title": "Ete",
+            "artist": "Bell Witch",
+            "score": 0.681,
+            "why": "taboo hits: ['despair', 'funeral doom']"
+          }
+        ]
+      },
+      "chosen": {
+        "title": "Bodies",
+        "artist": "Drowning Pool",
+        "quip": "Correcting the atmosphere.",
+        "strategy": "genre_antipode",
+        "cruelty": 0.911,
+        "why": "highest wrongness score via genre_antipode: d(scene)=1.42 d(target)=0.68",
+        "runner_ups": [
+          "Duality",
+          "Hammer Smashed Face",
+          "Hammer Smashed Face"
+        ]
+      },
+      "played": {
+        "at_video_time": 5.0,
+        "mode": "interrupt",
+        "track_id": "bodiesdrowning",
+        "genres": [
+          "nu metal"
+        ],
+        "latency_ms": 10
+      }
+    }
+  ]
+}

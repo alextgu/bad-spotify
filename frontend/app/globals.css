@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+
+body {
+  background: #0d0d0d;
+  color: #ffffff;
+}
+
+/* Faint engineering grid, same as the agent's own screens. */
+.grid-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(#2c2c2a 1px, transparent 1px),
+    linear-gradient(90deg, #2c2c2a 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
