@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bad spotify</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --plane:        #0d0d0d;
+    --surface-1:    #1a1a19;
+    --surface-2:    #212120;
+    --text-primary: #ffffff;
+    --text-secondary:#c3c2b7;
+    --muted:        #898781;
+    --border:       rgba(255,255,255,0.10);
+    --accent:       #d95926;
+    --scene:        #3987e5;
+    --good:         #0ca30c;
+    --critical:     #d03b3b;
+    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Driven live from the scene's own colours. The orb wears the room. */
+    --orb-a: #3987e5;
+    --orb-b: #d95926;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 700px at 50% 8%, #17171a 0%, var(--plane) 62%);
+    color: var(--text-primary);
+    font-family: var(--font);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ------------------------------------------------------------ header -- */
+  header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 22px;
+    flex: none;
+  }
+  .brand { font-size: 14px; font-weight: 650; letter-spacing: -0.01em; }
+  .brand span { color: var(--muted); font-weight: 400; margin-left: 8px; font-size: 12px; }
+  .spacer { flex: 1; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 11px; border-radius: 999px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    font-size: 12px; color: var(--text-secondary);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+  .dot.live { background: var(--good); box-shadow: 0 0 0 3px rgba(12,163,12,.18); }
+  .dot.down { background: var(--critical); }
+  a.linkout { color: var(--muted); font-size: 12px; text-decoration: none;
+              border-bottom: 1px solid var(--border); padding-bottom: 1px; }
+  a.linkout:hover { color: var(--text-secondary); }
+
+  /* -------------------------------------------------------------- stage -- */
+  main {
+    flex: 1; min-height: 0;
+    display: grid; grid-template-columns: 1fr 360px; gap: 24px;
+    padding: 0 22px 22px;
+  }
+  @media (max-width: 940px) { main { grid-template-columns: 1fr; } .ticker { display: none; } }
+
+  .stage {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 26px; min-height: 0;
+  }
+
+  /* ---------------------------------------------------------------- orb -- */
+  .orb-wrap { position: relative; width: 260px; height: 260px; flex: none; }
+
+  .orb {
+    position: absolute; inset: 0; border-radius: 50%;
+    background:
+      radial-gradient(circle at 32% 28%, var(--orb-a) 0%, transparent 58%),
+      radial-gradient(circle at 70% 72%, var(--orb-b) 0%, transparent 62%),
+      linear-gradient(150deg, var(--orb-a), var(--orb-b));
+    filter: blur(2px) saturate(1.15);
+    animation: drift 9s ease-in-out infinite;
+    transition: background 1.4s ease;
+  }
+  .orb::after {
+    content: ""; position: absolute; inset: 14%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 34%, rgba(255,255,255,.4), transparent 62%);
+    mix-blend-mode: screen;
+  }
+  @keyframes drift {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50%      { transform: scale(1.045) rotate(8deg); }
+  }
+
+  /* Rings pulse outward. Faster while it's thinking, hard pulse when it acts. */
+  .ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1px solid var(--orb-b);
+    opacity: 0;
+  }
+  .listening .ring { animation: pulse 3.4s ease-out infinite; }
+  .thinking  .ring { animation: pulse 1.15s ease-out infinite; }
+  .ring:nth-child(2) { animation-delay: .4s; }
+  .ring:nth-child(3) { animation-delay: .8s; }
+  @keyframes pulse {
+    0%   { transform: scale(1);    opacity: .55; }
+    100% { transform: scale(1.65); opacity: 0; }
+  }
+  .orb-wrap.acting .orb { animation: thump .55s cubic-bezier(.2,.8,.3,1); }
+  @keyframes thump {
+    0% { transform: scale(1); } 40% { transform: scale(1.13); } 100% { transform: scale(1); }
+  }
+
+  /* ------------------------------------------------------------- speech -- */
+  .state {
+    font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--muted); min-height: 16px;
+  }
+  .quip {
+    font-size: clamp(22px, 3.4vw, 40px); font-weight: 600;
+    letter-spacing: -0.028em; line-height: 1.18;
+    text-align: center; max-width: 20ch; min-height: 1.2em;
+    transition: opacity .35s ease;
+  }
+  .quip.fade { opacity: 0; }
+  .seeing {
+    color: var(--text-secondary); font-size: 14px; text-align: center;
+    max-width: 46ch; min-height: 20px;
+  }
+  .seeing b { color: var(--text-primary); font-weight: 600; }
+
+  /* --------------------------------------------------------- nowplaying -- */
+  .now {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 12px 18px 12px 12px;
+    min-width: 340px; max-width: 560px;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity .4s ease, transform .4s ease;
+  }
+  .now.show { opacity: 1; transform: none; }
+  .now .art {
+    width: 52px; height: 52px; border-radius: 9px; flex: none;
+    background: linear-gradient(140deg, var(--orb-a), var(--orb-b));
+    display: grid; place-items: center; font-size: 21px;
+    transition: background 1.4s ease;
+  }
+  .now .meta { min-width: 0; }
+  .now .t { font-weight: 600; letter-spacing: -0.012em;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .now .a { color: var(--muted); font-size: 13px; }
+  .now .mode {
+    margin-left: auto; flex: none;
+    font-size: 10px; letter-spacing: .09em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 6px;
+    border: 1px solid var(--border); color: var(--muted);
+  }
+  .now .mode.interrupt { color: var(--accent); border-color: var(--accent); }
+
+  /* ------------------------------------------------------------ ticker -- */
+  .ticker {
+    display: flex; flex-direction: column; min-height: 0;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px;
+  }
+  .ticker h2 {
+    margin: 0 0 2px; font-size: 10px; font-weight: 650;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+  }
+  .ticker .sub { margin: 0 0 12px; font-size: 11px; color: var(--muted); }
+  .lines { flex: 1; min-height: 0; overflow-y: auto; display: flex;
+           flex-direction: column; gap: 7px; padding-right: 4px; }
+  .lines::-webkit-scrollbar { width: 5px; }
+  .lines::-webkit-scrollbar-thumb { background: #383835; border-radius: 3px; }
+  .line {
+    font-size: 12px; line-height: 1.4; color: var(--text-secondary);
+    padding-left: 10px; border-left: 2px solid #383835;
+    animation: slide .3s cubic-bezier(.2,.7,.3,1);
+  }
+  .line k {
+    display: block; font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1px;
+  }
+  .line.scene { border-left-color: var(--scene); }
+  .line.verdict, .line.play { border-left-color: var(--accent); }
+  .line.error { border-left-color: var(--critical); }
+  .line em { color: var(--muted); font-style: normal; font-family: var(--mono); font-size: 11px; }
+  @keyframes slide { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">bad spotify<span>it is not trying to help you</span></div>
+  <div class="spacer"></div>
+  <span class="pill"><i class="dot" id="dot"></i><span id="conn">connecting</span></span>
+  <a class="linkout" href="/">engineering view</a>
+</header>
+
+<main>
+  <div class="stage">
+    <div class="orb-wrap listening" id="orbwrap">
+      <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+      <div class="orb" id="orb"></div>
+    </div>
+
+    <div class="state" id="state">listening</div>
+    <div class="quip" id="quip"></div>
+    <div class="seeing" id="seeing">waiting for something to ruin…</div>
+
+    <div class="now" id="now">
+      <div class="art" id="art">♪</div>
+      <div class="meta">
+        <div class="t" id="title">—</div>
+        <div class="a" id="artist"></div>
+      </div>
+      <div class="mode" id="mode" hidden></div>
+    </div>
+  </div>
+
+  <!-- The reasoning stays on screen. It is the difference between an agent
+       and a shuffle button, and it is most of why the build reads as serious. -->
+  <aside class="ticker">
+    <h2>Why</h2>
+    <p class="sub">Its reasoning, as it happens.</p>
+    <div class="lines" id="lines"></div>
+  </aside>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let quipTimer = null;
+
+/* ------------------------------------------------------------- helpers -- */
+function setState(text, mode) {
+  $("state").textContent = text;
+  const w = $("orbwrap");
+  w.classList.toggle("thinking", mode === "thinking");
+  w.classList.toggle("listening", mode !== "thinking");
+}
+
+function thump() {
+  const w = $("orbwrap");
+  w.classList.remove("acting");
+  void w.offsetWidth;          // restart the animation
+  w.classList.add("acting");
+}
+
+function setPalette(colors) {
+  if (!colors || colors.length === 0) return;
+  const a = colors[0];
+  const b = colors[colors.length > 1 ? 1 : 0];
+  document.documentElement.style.setProperty("--orb-a", a);
+  document.documentElement.style.setProperty("--orb-b", b);
+}
+
+function say(text) {
+  const el = $("quip");
+  el.classList.add("fade");
+  clearTimeout(quipTimer);
+  quipTimer = setTimeout(() => {
+    el.textContent = text ? `“${text}”` : "";
+    el.classList.remove("fade");
+  }, 220);
+}
+
+function addLine(kind, label, detail) {
+  const box = $("lines");
+  const el = document.createElement("div");
+  el.className = "line " + kind;
+  const k = document.createElement("k");
+  k.textContent = kind;
+  el.appendChild(k);
+  el.appendChild(document.createTextNode(label));
+  if (detail) {
+    const em = document.createElement("em");
+    em.textContent = " " + detail;
+    el.appendChild(document.createElement("br"));
+    el.appendChild(em);
+  }
+  box.prepend(el);
+  while (box.children.length > 40) box.lastChild.remove();
+}
+
+/* -------------------------------------------------------------- events -- */
+function onEvent(ev) {
+  const d = ev.detail || {};
+
+  switch (ev.kind) {
+    case "gate":
+      if (ev.label === "escalate") setState("something changed", "thinking");
+      break;
+
+    case "scene": {
+      setPalette(d.colors);
+      setState("reading the room", "thinking");
+      const seeing = $("seeing");
+      seeing.innerHTML = "";
+      seeing.appendChild(document.createTextNode("It sees "));
+      const b = document.createElement("b");
+      b.textContent = d.setting || ev.label;
+      seeing.appendChild(b);
+      seeing.appendChild(document.createTextNode(
+        d.confidence != null ? ` · ${Math.round(d.confidence * 100)}% sure` : ""));
+      addLine("scene", d.setting || ev.label,
+              `mood ${ev.label}${d.tempo ? " · " + d.tempo : ""}`);
+      break;
+    }
+
+    case "antivibe":
+      setState("finding the opposite", "thinking");
+      addLine("antivibe", "Looking for " + (d.target_genres || []).slice(0, 4).join(", "),
+              ev.label);
+      break;
+
+    case "candidates":
+      addLine("candidates", ev.label,
+              (d.picks || []).map(p => p.title).join(" · "));
+      break;
+
+    case "verdict":
+      addLine("verdict", `${ev.label} — ${d.artist || ""}`, d.reasoning || "");
+      break;
+
+    case "dj":
+      if (ev.label === "hold") {
+        setState("holding", "listening");
+        addLine("dj", "holding", d.reason || "");
+      }
+      break;
+
+    case "voice":
+      say(ev.label);
+      break;
+
+    case "play": {
+      thump();
+      setState("playing something terrible", "listening");
+      $("now").classList.add("show");
+      const [t, a] = (ev.label || "").split(" - ");
+      $("title").textContent = t || ev.label;
+      $("artist").textContent = a || "";
+      const m = $("mode");
+      m.textContent = d.mode === "interrupt" ? "cut in" : "queued";
+      m.className = "mode " + (d.mode === "interrupt" ? "interrupt" : "");
+      m.hidden = false;
+      addLine("play", ev.label,
+              `${d.mode || ""}${d.elapsed_ms ? " · " + d.elapsed_ms + "ms" : ""}`);
+      break;
+    }
+
+    case "error":
+      addLine("error", ev.label, d.error || "");
+      break;
+  }
+}
+
+/* ---------------------------------------------------------- connection -- */
+function connect() {
+  const ws = new WebSocket(`ws://${location.host}/ws`);
+  ws.onopen = () => { $("dot").className = "dot live"; $("conn").textContent = "live"; };
+  ws.onclose = () => {
+    $("dot").className = "dot down"; $("conn").textContent = "reconnecting";
+    setTimeout(connect, 1500);
+  };
+  ws.onmessage = (m) => { try { onEvent(JSON.parse(m.data)); } catch (e) {} };
+}
+connect();
+</script>
+</body>
+</html>

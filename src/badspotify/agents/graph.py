@@ -72,6 +72,8 @@ class BadSpotifyGraph:
         self.per_strategy = int(acfg.get("candidates_per_strategy", 4))
 
         self._pool = ThreadPoolExecutor(max_workers=4)
+        self._last_scene: Optional[SceneRead] = None
+        self._last_verdict: Optional[Verdict] = None
         self._compiled = self._compile()
 
     # ------------------------------------------------------------- nodes --
@@ -83,16 +85,32 @@ class BadSpotifyGraph:
                  audio_delta=round(v.audio_delta, 4), onset_ratio=round(v.onset_ratio, 2))
         return {**state, "escalate": v.escalate, "gate_reason": v.reason}
 
+    def n_stable(self, state: PipelineState) -> PipelineState:
+        """The gate said nothing changed. That is not nothing -- it is
+        evidence the scene is *stable*, which is exactly what the hysteresis
+        rule is waiting for. Without this, a calm scene deadlocks: the gate
+        suppresses every read after the first, so the second agreeing read
+        never arrives and no song ever plays.
+
+        Costs no model call. Reuses the last scene and the last verdict.
+        """
+        if self._last_scene is None:
+            return {**state, "decision": None}
+        BUS.emit("gate", "stable", reason="reusing last read (no model call)")
+        return {**state, "scene": self._last_scene, "verdict": self._last_verdict}
+
     def n_perceive(self, state: PipelineState) -> PipelineState:
         obs = state["obs"]
         feats = audio_features.extract(obs.audio, obs.sample_rate)
         scene = self.perceiver.read(obs.frame, feats, obs.meta or {})
         BUS.emit("scene", scene.mood_label,
+                 video_time=(obs.meta or {}).get("video_time"),
                  setting=scene.setting, activity=scene.activity,
                  vibe=scene.vibe.model_dump(), colors=scene.dominant_colors,
                  confidence=scene.confidence, tempo=scene.tempo_feel.value,
                  meter=scene.meter.value, audio=scene.audio_summary,
                  latency_ms=scene.latency_ms, source=scene.source)
+        self._last_scene = scene
         return {**state, "scene": scene}
 
     def n_antagonize(self, state: PipelineState) -> PipelineState:
@@ -137,6 +155,7 @@ class BadSpotifyGraph:
                      strategy=verdict.strategy, cruelty=round(verdict.cruelty, 3),
                      reasoning=verdict.reasoning, runner_ups=verdict.runner_ups,
                      source=verdict.source)
+            self._last_verdict = verdict
             return {**state, "verdict": verdict}
         except Exception as e:
             BUS.emit("error", "judge failed", error=str(e))
@@ -165,6 +184,8 @@ class BadSpotifyGraph:
             self.player.play(verdict.track, mode=decision.mode.value)
             self.dj.commit(verdict, scene=state.get("scene"))
             BUS.emit("play", f"{verdict.track.title} - {verdict.track.artist}",
+                     video_time=(state.get("obs").meta or {}).get("video_time")
+                     if state.get("obs") is not None else None,
                      track_id=verdict.track.id, uri=verdict.track.uri,
                      genres=verdict.track.genres, tags=verdict.track.tags,
                      mode=decision.mode.value,
@@ -194,6 +215,7 @@ class BadSpotifyGraph:
 
         g = StateGraph(PipelineState)
         g.add_node("gate", self.n_gate)
+        g.add_node("stable", self.n_stable)
         g.add_node("perceive", self.n_perceive)
         g.add_node("antagonize", self.n_antagonize)
         g.add_node("judge", self.n_judge)
@@ -203,8 +225,13 @@ class BadSpotifyGraph:
         g.add_edge(START, "gate")
         g.add_conditional_edges(
             "gate",
-            lambda s: "perceive" if s.get("escalate") else "stop",
-            {"perceive": "perceive", "stop": END},
+            lambda s: "perceive" if s.get("escalate") else "stable",
+            {"perceive": "perceive", "stable": "stable"},
+        )
+        g.add_conditional_edges(
+            "stable",
+            lambda s: "dj" if s.get("scene") is not None else "stop",
+            {"dj": "dj", "stop": END},
         )
         g.add_edge("perceive", "antagonize")
         g.add_edge("antagonize", "judge")
@@ -219,11 +246,14 @@ class BadSpotifyGraph:
 
     def _sequential(self, state: PipelineState) -> PipelineState:
         state = self.n_gate(state)
-        if not state.get("escalate"):
-            return state
-        state = self.n_perceive(state)
-        state = self.n_antagonize(state)
-        state = self.n_judge(state)
+        if state.get("escalate"):
+            state = self.n_perceive(state)
+            state = self.n_antagonize(state)
+            state = self.n_judge(state)
+        else:
+            state = self.n_stable(state)
+            if state.get("scene") is None:
+                return state
         state = self.n_dj(state)
         if state["decision"].action in (DJAction.PLAY, DJAction.FALLBACK):
             state = self.n_play(state)

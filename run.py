@@ -104,7 +104,13 @@ class Runtime:
 def main() -> None:
     ap = argparse.ArgumentParser(description="the agent that gets it wrong on purpose")
     ap.add_argument("--config", default=None)
-    ap.add_argument("--source", choices=["replay", "webcam", "glasses"])
+    ap.add_argument("--source", choices=["replay", "video", "webcam", "glasses"])
+    ap.add_argument("--video", default=None,
+                    help="run against a video file as if it were live")
+    ap.add_argument("--realtime", action="store_true",
+                    help="pace the video at its true speed instead of as fast as possible")
+    ap.add_argument("--record", default=None, metavar="NAME",
+                    help="write the run to data/sessions/NAME.json for the demo site")
     ap.add_argument("--ticks", type=int, default=None, help="stop after N observations")
     ap.add_argument("--cruelty", type=float, default=None)
     ap.add_argument("--no-hud", action="store_true")
@@ -116,8 +122,12 @@ def main() -> None:
 
     cfg = load_config(args.config)
     attach_console(verbose=not args.quiet)
+    if args.video:
+        cfg.setdefault("capture", {}).update(source="video", video_path=args.video)
     if args.source:
         cfg.setdefault("capture", {})["source"] = args.source
+    if args.realtime:
+        cfg.setdefault("capture", {})["realtime"] = True
     if args.cruelty is not None:
         cfg.setdefault("antagonize", {})["cruelty"] = args.cruelty
     if args.no_hud:
@@ -125,18 +135,33 @@ def main() -> None:
     if args.turbo:
         cfg.setdefault("dj", {}).update(min_track_seconds=0, cooldown_seconds=0)
 
+    recorder = None
+    if args.record:
+        from badspotify.session import SessionRecorder
+        recorder = SessionRecorder(
+            name=args.record,
+            source=args.video or cfg.get_path("capture.source", "")).attach()
+
     rt = Runtime(cfg)
     print("\nbackends: " + "  ".join(f"{k}={v}" for k, v in rt.backends().items()))
 
     if cfg.get_path("hud.enabled", True):
         try:
             from badspotify.hud.server import serve_in_thread
-            serve_in_thread(rt, cfg.get_path("hud.host", "127.0.0.1"),
-                            int(cfg.get_path("hud.port", 8420)))
+            host = cfg.get_path("hud.host", "127.0.0.1")
+            port = int(cfg.get_path("hud.port", 8420))
+            serve_in_thread(rt, host, port)
+            print(f"[hud] DJ face:          http://{host}:{port}/dj")
+            print(f"[hud] engineering view: http://{host}:{port}/")
         except Exception as e:
             print(f"[hud] disabled ({e})")
 
     rt.run(ticks=args.ticks)
+
+    if recorder is not None:
+        path = recorder.save()
+        print("\n" + recorder.summary())
+        print(f"\nsession written to {path}")
 
 
 if __name__ == "__main__":

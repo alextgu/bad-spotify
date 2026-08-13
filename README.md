@@ -27,11 +27,29 @@ deliberate — nobody on the team should be blocked on credentials to work on
 their layer. Swap in real backends one at a time via `config.yaml`.
 
 ```bash
-python run.py --source webcam        # real camera + mic
-python run.py --ticks 10 --no-hud    # bounded headless run
-python run.py --cruelty 1.0          # maximum hostility
-pytest tests/ -q                     # 25 tests, each guarding a specific demo failure
+python run.py --video demo/park.mp4              # a recording, treated as live
+python run.py --video demo/park.mp4 --realtime   # ...at its true speed
+python run.py --video demo/park.mp4 --record park  # + write data/sessions/park.json
+python run.py --source webcam                    # real camera + mic
+python run.py --ticks 10 --no-hud                # bounded headless run
+python run.py --cruelty 1.0                      # maximum hostility
+pytest tests/ -q                                 # 30 tests
 ```
+
+Two screens, same server:
+
+| | |
+|---|---|
+| `/dj` | The presentation face. Reacting orb, the spoken line, now-playing, and a compact reasoning ticker. This is what judges see. |
+| `/` | The engineering view. Vibe-gap chart, cruelty dial, scene injection, full event trace. This is what we debug with. |
+
+`--video` is the demo path: we don't have Ray-Bans, so we film something and
+feed the recording in as though it were happening now. Nothing downstream knows
+the difference. Needs `ffmpeg` on PATH for the audio; without it, vision-only.
+
+`--record NAME` writes every decision to `data/sessions/NAME.json` — which song,
+**where in the video it starts**, and why. That file is what the presentation
+site replays, so the site needs no backend and no API keys.
 
 ### Spotify
 

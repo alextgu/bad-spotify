@@ -37,6 +37,23 @@ def create_app(runtime=None):
     async def index():
         return FileResponse(STATIC / "index.html")
 
+    @app.get("/dj")
+    async def dj():
+        """The presentation face. The engineering HUD stays at / -- we want
+        both: judges see the character, we see the wiring."""
+        return FileResponse(STATIC / "dj.html")
+
+    @app.get("/api/session")
+    async def session():
+        """The last recorded run, for the demo site to replay."""
+        from ..session import SESSIONS
+        files = sorted(SESSIONS.glob("*.json")) if SESSIONS.exists() else []
+        if not files:
+            return JSONResponse({"error": "no sessions recorded yet -- run: "
+                                          "python run.py --video clip.mp4 --record name"},
+                                status_code=404)
+        return JSONResponse(json.loads(files[-1].read_text()))
+
     @app.get("/api/state")
     async def state():
         dj = runtime.graph.dj if runtime else None

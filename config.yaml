@@ -3,10 +3,15 @@
 # ---------------------------------------------------------------
 
 capture:
-  source: replay          # replay | webcam | glasses
+  source: replay          # replay | video | webcam | glasses
   frame_interval_s: 5.0
   audio_window_s: 3.0
   replay_dir: data/replay/park_afternoon
+
+  # source: video -- a recording pretending to be live. This is the demo path.
+  video_path:             # or pass --video path/to/clip.mp4
+  realtime: false         # true = pace it at the video's real speed
+  loop: false
 
 gate:
   # Only escalate to the expensive model when the world actually changed.

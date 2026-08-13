@@ -11,7 +11,7 @@ Three states, and the middle one matters most:
 | **Built, unproven** | The code exists and runs on fake input. Nobody has pointed it at the real thing yet. **Assume it's broken until someone checks.** |
 | **Not started** | — |
 
-Last updated: 13 Aug 2026
+Last updated: 13 Aug 2026 (evening)
 
 ---
 
@@ -30,8 +30,9 @@ Last updated: 13 Aug 2026
 | Picking the funniest one | Built, unproven | |
 | The voice | Built, unproven | |
 | The screen | Built, unproven | |
-| Video file as input | Not started | |
-| DJ icon look | Not started | |
+| Video file as input | Built, unproven | |
+| Recording a run for the site | Built, unproven | |
+| DJ icon look | Built, unproven | |
 | Hosted site (presentation format) | Deferred on purpose | |
 | Glasses | Not started — and not needed | |
 
@@ -51,7 +52,7 @@ the single biggest risk to the demo.
   off when the room really changed *and* the current song has had a fair run.
 - **Backup list.** If anything upstream dies, a pre-picked list of always-wrong
   songs plays anyway. It is never silent.
-- **Tests.** 25 of them, each guarding a specific way the demo could break.
+- **Tests.** 30 of them, each guarding a specific way the demo could break.
 
 ## Built, but nobody has run it for real
 
@@ -80,8 +81,25 @@ Never run with a real account.
 *To prove it:* hear it say a line out loud, over music, without lagging.
 
 **5. The screen**
-Built and working locally — thinking-cards, a cruelty dial, and a box where you
-type a situation and watch it run. Not styled the way we now want it (see below).
+Two of them now, on the same server:
+`/dj` is the presentation face — a reacting orb that takes on the room's colours,
+the spoken line in big type, now-playing, and a compact reasoning ticker.
+`/` is the engineering view we already had. Keep both: judges see the character,
+we see the wiring.
+*To prove it:* watch it drive off a real video on the projector.
+
+**6. Video as input**
+Feeds a recording in as though it were live — samples a frame every few seconds,
+pulls the matching audio out with ffmpeg, and reports where in the video it is.
+Tested against a generated clip, never against real footage.
+*To prove it:* run it on an actual video someone filmed.
+*Needs:* ffmpeg installed, otherwise it runs vision-only.
+
+**7. Recording a run**
+`--record NAME` writes every decision to `data/sessions/NAME.json` — which song,
+where in the video it starts, and why. This is what the presentation site will
+read, so the site needs no backend and no keys.
+*To prove it:* record a real clip and check the timings line up with the footage.
 
 ---
 
@@ -94,17 +112,15 @@ same timing, same everything — it just reads frames from a recording instead o
 a camera. This is better than a live camera for presenting: it's repeatable, it
 can't fail on stage, and we can pick footage that produces good jokes.
 
-**Not started.** The input layer was built to be swappable, so this is adding one
-small piece rather than changing anything else.
+**Built.** `python run.py --video clip.mp4`. Needs ffmpeg for the audio.
 
 **The look: a small DJ icon, like Spotify's DJ.** Not a dashboard. A character
 that reacts, with a good voice. The current screen is an engineering view — it's
 useful for us and it's the wrong thing to show a judge.
 
-**Not started.** Worth deciding early whether the thinking-cards stay visible
-alongside the DJ icon. Showing the reasoning is a real differentiator and it's
-half of why the technical execution reads as impressive — losing it entirely
-would cost us.
+**Built, at `/dj`.** The reasoning stayed — as a compact ticker beside the orb
+rather than the full dashboard. Showing it is a real differentiator and half of
+why the technical work reads as serious, so it was worth keeping in a smaller form.
 
 **A hosted site — this is our presentation format, not a product.**
 
@@ -133,6 +149,9 @@ Don't re-open these without a reason.
   it late, once the backend is proven.
 - **13 Aug** — The site names songs rather than playing them; demo videos have
   the music overlaid. No visitor login, no licensing problem.
+- **13 Aug** — Two screens, not one. The DJ face at `/dj` for judges, the
+  engineering view at `/` for us. The reasoning stays visible on both — it's the
+  difference between an agent and a shuffle button.
 - **Earlier** — One question to understand the scene, not one per detail.
 - **Earlier** — Our own song list and scoring; Spotify is only the speaker.
   (Their music-analysis endpoints were shut off to new apps in 2024.)
@@ -150,7 +169,8 @@ Don't re-open these without a reason.
    the deadline; this one either works or it doesn't.
 2. **Point the photo-reader at real photos.** Everything downstream is judged on
    whether this is any good, and right now it's guesswork.
-3. **Video-file input.** Unblocks rehearsing the actual presentation.
+3. **Film a real demo clip and run it.** Everything needed to do this now exists.
+   Whatever comes out of `--record` is the raw material for the site.
 
 ---
 
@@ -160,3 +180,7 @@ Don't re-open these without a reason.
 - Nobody's timed the real thing end to end.
 - Nicheness is agreed as an idea but isn't scored or used anywhere.
 - The genre map is scrapeable but nothing uses it.
+- A calm scene used to deadlock: the change-detector suppressed repeat reads, so
+  the "see it twice before acting" rule was never satisfied and nothing played.
+  Fixed — a quiet tick now counts as evidence the scene is stable. Worth knowing
+  in case something similar shows up elsewhere.

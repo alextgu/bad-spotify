@@ -45,6 +45,9 @@ def build_capture(cfg: dict) -> CaptureSource:
     if source == "webcam":
         from .webcam import WebcamSource
         return WebcamSource(cfg)
+    if source == "video":
+        from .video import VideoSource
+        return VideoSource(cfg)
     if source == "glasses":
         from .glasses import GlassesSource
         return GlassesSource(cfg)
