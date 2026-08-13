@@ -1,22 +1,23 @@
 """Bounds. The unglamorous file that decides whether the demo looks broken.
 
-Without this, a scene read that flickers between two labels switches the
-track every 5 seconds and the whole thing reads as a random shuffle rather
-than an intelligence. Three mechanisms:
+Two questions, not one:
 
-  cooldown    hard floor between any two switches
-  commitment  a track gets to finish making its point (min_track_seconds)
-  hysteresis  N consecutive AGREEING scene reads before we act on a change
+  *Should* we act at all?   -- hysteresis and confidence
+  *How* should we act?      -- queue politely, or cut the music off now?
 
-Plus the fallback ladder. The one unacceptable failure mode is silence:
-if everything upstream breaks, we still play something terrible.
+Queueing is the default because it paces itself and never feels random.
+Interrupting is reserved for the moments that earn it: the scene changed a
+lot, and the current track has already had a fair run. A wrong song that
+lands *while the moment is still happening* is much funnier than one that
+turns up ninety seconds later -- but a system that interrupts constantly
+just reads as broken.
 """
 from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
 
-from ..schemas import DJAction, DJDecision, SceneRead, Verdict
+from ..schemas import DJAction, DJDecision, PlayMode, SceneRead, Verdict, Vibe
 
 
 @dataclass
@@ -24,6 +25,7 @@ class DJState:
     current: Verdict | None = None
     started_at: float = 0.0
     last_switch: float = 0.0
+    last_vibe: Vibe | None = None
     pending_signature: str | None = None
     pending_count: int = 0
     consecutive_failures: int = 0
@@ -37,11 +39,17 @@ class DJController:
         self.cooldown = float(cfg.get("cooldown_seconds", 8))
         self.agreement = int(cfg.get("agreement_reads", 2))
         self.max_failures = int(cfg.get("max_consecutive_failures", 3))
+
+        # How much the world has to change before cutting the music off,
+        # and how long a track is safe from being cut no matter what.
+        self.interrupt_threshold = float(cfg.get("interrupt_threshold", 0.55))
+        self.min_interrupt_seconds = float(cfg.get("min_interrupt_seconds", 15))
+
         self.state = DJState()
 
     # ---------------------------------------------------------------- gates
 
-    def observe(self, scene: SceneRead, now: float | None = None) -> tuple[bool, str]:
+    def observe(self, scene: SceneRead) -> tuple[bool, str]:
         """Hysteresis. Returns (scene_change_confirmed, reason)."""
         sig = scene.signature()
         if self.state.pending_signature == sig:
@@ -57,21 +65,46 @@ class DJController:
                            f"{self.agreement} agreeing reads")
         return True, f"{self.state.pending_count} agreeing reads"
 
-    def may_switch(self, now: float | None = None) -> tuple[bool, str, float]:
-        now = now or time.time()
+    def scene_delta(self, scene: SceneRead) -> float:
+        """How far the world moved since the track we're playing was chosen."""
+        if self.state.last_vibe is None:
+            return 1.0
+        return self.state.last_vibe.distance(scene.vibe)
+
+    def choose_mode(self, scene: SceneRead, now: float) -> tuple[PlayMode, float, str]:
+        """Queue or interrupt? Returns (mode, delta, why)."""
+        delta = self.scene_delta(scene)
+        if self.state.current is None:
+            return PlayMode.INTERRUPT, delta, "nothing playing, start immediately"
+
+        elapsed = now - self.state.started_at
+        if delta < self.interrupt_threshold:
+            return (PlayMode.QUEUE, delta,
+                    f"scene shifted {delta:.2f} (< {self.interrupt_threshold:.2f}), queueing")
+        if elapsed < self.min_interrupt_seconds:
+            return (PlayMode.QUEUE, delta,
+                    f"scene shifted {delta:.2f} but track is only {elapsed:.0f}s old, queueing")
+        return (PlayMode.INTERRUPT, delta,
+                f"scene shifted {delta:.2f} after {elapsed:.0f}s, cutting in")
+
+    def may_act(self, mode: PlayMode, now: float) -> tuple[bool, str, float]:
+        """Queueing is cheap and nearly always allowed. Interrupting is not."""
         if self.state.current is None:
             return True, "nothing playing", 0.0
 
-        since_start = now - self.state.started_at
         since_switch = now - self.state.last_switch
-
         if since_switch < self.cooldown:
-            wait = self.cooldown - since_switch
-            return False, f"cooldown ({wait:.0f}s left)", wait
+            return False, f"cooldown ({self.cooldown - since_switch:.0f}s left)", \
+                   self.cooldown - since_switch
+
+        if mode is PlayMode.QUEUE:
+            return True, "queueing does not disturb the current track", 0.0
+
+        since_start = now - self.state.started_at
         if since_start < self.min_track:
             wait = self.min_track - since_start
             return False, f"committed to current track ({wait:.0f}s left)", wait
-        return True, "eligible", 0.0
+        return True, "eligible to interrupt", 0.0
 
     # -------------------------------------------------------------- decide
 
@@ -79,28 +112,33 @@ class DJController:
                now: float | None = None) -> DJDecision:
         now = now or time.time()
 
-        confirmed, why = self.observe(scene, now)
+        confirmed, why = self.observe(scene)
         if not confirmed:
             return DJDecision(action=DJAction.HOLD, reason=why)
 
-        allowed, gate_reason, wait = self.may_switch(now)
+        mode, delta, mode_why = self.choose_mode(scene, now)
+
+        allowed, gate_reason, wait = self.may_act(mode, now)
         if not allowed:
-            return DJDecision(action=DJAction.HOLD, reason=gate_reason,
-                              seconds_until_eligible=wait)
+            return DJDecision(action=DJAction.HOLD, mode=mode, scene_delta=delta,
+                              reason=gate_reason, seconds_until_eligible=wait)
 
         if verdict is None:
             fb = self.fallback()
-            return DJDecision(action=DJAction.FALLBACK, verdict=fb,
+            return DJDecision(action=DJAction.FALLBACK, verdict=fb, mode=mode,
+                              scene_delta=delta,
                               reason="no verdict upstream; chaos deck engaged")
 
         if (self.state.current is not None
                 and verdict.track.id == self.state.current.track.id):
-            return DJDecision(action=DJAction.HOLD,
+            return DJDecision(action=DJAction.HOLD, mode=mode, scene_delta=delta,
                               reason="judge picked the track already playing")
 
-        return DJDecision(action=DJAction.PLAY, verdict=verdict, reason=why)
+        return DJDecision(action=DJAction.PLAY, verdict=verdict, mode=mode,
+                          scene_delta=delta, reason=f"{why}; {mode_why}")
 
-    def commit(self, verdict: Verdict, now: float | None = None) -> None:
+    def commit(self, verdict: Verdict, scene: SceneRead | None = None,
+               now: float | None = None) -> None:
         now = now or time.time()
         self.state.current = verdict
         self.state.started_at = now
@@ -109,6 +147,8 @@ class DJController:
         self.state.consecutive_failures = 0
         self.state.played_ids.add(verdict.track.id)
         self.state.history.append((now, verdict.track.id))
+        if scene is not None:
+            self.state.last_vibe = scene.vibe
 
     def note_failure(self) -> None:
         self.state.consecutive_failures += 1

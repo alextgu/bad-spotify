@@ -13,9 +13,10 @@ class MockPlayer:
         self.current: Track | None = None
         self.volume = float(self.cfg.get("volume", 0.7))
 
-    def play(self, track: Track) -> None:
+    def play(self, track: Track, mode: str = "interrupt") -> None:
         self.current = track
-        print(f"  [PLAY] {track.title} - {track.artist}  ({', '.join(track.genres)})")
+        verb = "QUEUE" if mode == "queue" else "PLAY"
+        print(f"  [{verb}] {track.title} - {track.artist}  ({', '.join(track.genres)})")
 
     def stop(self) -> None:
         self.current = None

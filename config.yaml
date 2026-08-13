@@ -34,15 +34,29 @@ judge:
   timeout_s: 4.0
 
 dj:
-  min_track_seconds: 25         # commitment: no thrashing
-  cooldown_seconds: 8           # hard floor between any two switches
+  cooldown_seconds: 8           # hard floor between any two actions
   agreement_reads: 2            # hysteresis: N consecutive agreeing scene reads
   max_consecutive_failures: 3
+
+  # Queue or interrupt? Queueing is the default and is nearly always allowed
+  # -- it doesn't disturb what's playing. Cutting the music off has to be
+  # earned: the scene must have moved at least this far, AND the current
+  # track must have had a fair run.
+  interrupt_threshold: 0.55     # how far the world must move (0-2ish)
+  min_interrupt_seconds: 15     # a track is safe from being cut for this long
+  min_track_seconds: 25         # ...and only interruptible after this
 
 player:
   backend: mock           # mock | local | spotify
   local_library: data/library
   volume: 0.7
+
+  # Spotify only. Requires Premium -- the API refuses playback on free accounts.
+  # Run `python scripts/spotify_setup.py` once before using this.
+  play_mode: queue        # default when the DJ has no opinion
+  skip_to_queued: false   # true = queue then immediately skip into it
+  device_name:            # e.g. "Alex's MacBook Pro" -- blank picks the active one
+  market: from_token
 
 voice:
   backend: mock           # mock | elevenlabs

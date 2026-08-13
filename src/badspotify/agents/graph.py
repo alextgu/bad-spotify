@@ -146,6 +146,8 @@ class BadSpotifyGraph:
     def n_dj(self, state: PipelineState) -> PipelineState:
         decision = self.dj.decide(state["scene"], state.get("verdict"))
         BUS.emit("dj", decision.action.value, reason=decision.reason,
+                 mode=decision.mode.value,
+                 scene_delta=round(decision.scene_delta, 3),
                  wait=round(decision.seconds_until_eligible, 1))
         return {**state, "decision": decision}
 
@@ -160,11 +162,12 @@ class BadSpotifyGraph:
             if verdict.quip:
                 self.narrator.say(verdict.quip, duck=self.player)
                 BUS.emit("voice", verdict.quip)
-            self.player.play(verdict.track)
-            self.dj.commit(verdict)
+            self.player.play(verdict.track, mode=decision.mode.value)
+            self.dj.commit(verdict, scene=state.get("scene"))
             BUS.emit("play", f"{verdict.track.title} - {verdict.track.artist}",
                      track_id=verdict.track.id, uri=verdict.track.uri,
                      genres=verdict.track.genres, tags=verdict.track.tags,
+                     mode=decision.mode.value,
                      elapsed_ms=int((time.time() - state.get("t_start", time.time())) * 1000))
         except Exception as e:
             BUS.emit("error", "playback failed", error=str(e))

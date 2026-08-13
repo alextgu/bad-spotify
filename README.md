@@ -30,8 +30,31 @@ their layer. Swap in real backends one at a time via `config.yaml`.
 python run.py --source webcam        # real camera + mic
 python run.py --ticks 10 --no-hud    # bounded headless run
 python run.py --cruelty 1.0          # maximum hostility
-pytest tests/ -q                     # 8 tests, all guard a specific demo failure
+pytest tests/ -q                     # 25 tests, each guarding a specific demo failure
 ```
+
+### Spotify
+
+Needs **Premium** — the Web API refuses playback control on free accounts.
+
+```bash
+# 1. make an app at https://developer.spotify.com/dashboard
+#    add redirect URI: http://127.0.0.1:8888/callback
+# 2. put the client id/secret in .env
+# 3. open Spotify somewhere and press play on anything once
+python scripts/spotify_setup.py
+```
+
+That checks credentials, logs you in, verifies Premium, picks a device,
+resolves every corpus track to a real Spotify URI (cached to
+`data/spotify_uris.json`), reports the ones it couldn't find, and plays a test
+track. Fix the unresolved ones before demo day — the agent falls back if it
+picks one, but you lose the joke you wanted.
+
+The DJ decides per situation whether to **queue** the next song or **interrupt**
+the current one. Queueing is the default; interrupting requires both a large
+scene change and a track that's had a fair run. Tune with `interrupt_threshold`
+and `min_interrupt_seconds` in `config.yaml`.
 
 To go live, copy `.env.example` to `.env`, fill in what you have, and flip the
 matching `backend:` keys in `config.yaml` from `mock` to `gemini` / `elevenlabs`

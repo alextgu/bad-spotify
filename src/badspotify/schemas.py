@@ -122,6 +122,12 @@ class Verdict(BaseModel):
     source: Literal["mock", "gemini", "fallback"] = "mock"
 
 
+class PlayMode(str, Enum):
+    """Queue is polite; interrupt is funny. The DJ picks per situation."""
+    QUEUE = "queue"          # append -- lands after the current track
+    INTERRUPT = "interrupt"  # cut in now -- the moment is still happening
+
+
 class DJAction(str, Enum):
     PLAY = "play"
     HOLD = "hold"           # bounds say no
@@ -132,6 +138,8 @@ class DJAction(str, Enum):
 class DJDecision(BaseModel):
     action: DJAction
     verdict: Optional[Verdict] = None
+    mode: PlayMode = PlayMode.QUEUE
+    scene_delta: float = 0.0
     reason: str = ""
     seconds_until_eligible: float = 0.0
 

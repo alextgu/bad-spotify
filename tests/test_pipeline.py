@@ -100,3 +100,54 @@ def _verdict(tid: str = "sandstorm") -> Verdict:
     corpus = Corpus.load()
     track = corpus.get(tid) or corpus.tracks[0]
     return Verdict(track=track, strategy="test", cruelty=.9, quip="hello")
+
+
+# ---------------------------------------------------------- queue vs interrupt
+
+def test_small_scene_change_queues_instead_of_cutting():
+    """A slight shift should never cut the music off."""
+    from badspotify.schemas import PlayMode
+    dj = DJController({"agreement_reads": 1, "cooldown_seconds": 0,
+                       "min_interrupt_seconds": 15, "interrupt_threshold": 0.55})
+    park = scene_from_text("a sunlit park, people reading on the grass")
+    dj.commit(_verdict(), scene=park, now=time.time() - 60)
+
+    nudged = scene_from_text("a sunlit park, people reading on the grass")
+    nudged.vibe.valence -= 0.05
+    d = dj.decide(nudged, _verdict("mariah"))
+    assert d.action == DJAction.PLAY
+    assert d.mode == PlayMode.QUEUE, f"cut the music off for a {d.scene_delta:.2f} shift"
+
+
+def test_big_scene_change_interrupts_once_the_track_has_had_a_run():
+    from badspotify.schemas import PlayMode
+    dj = DJController({"agreement_reads": 1, "cooldown_seconds": 0,
+                       "min_interrupt_seconds": 15, "interrupt_threshold": 0.55})
+    park = scene_from_text("a sunlit park, people reading on the grass")
+    dj.commit(_verdict(), scene=park, now=time.time() - 60)   # 60s in
+
+    funeral = scene_from_text("a hospital waiting room at 3am")
+    d = dj.decide(funeral, _verdict("mariah"))
+    assert d.action == DJAction.PLAY
+    assert d.mode == PlayMode.INTERRUPT
+    assert d.scene_delta > 0.55
+
+
+def test_big_change_still_queues_if_the_track_just_started():
+    """The world can change all it likes; we don't cut in after two seconds."""
+    from badspotify.schemas import PlayMode
+    dj = DJController({"agreement_reads": 1, "cooldown_seconds": 0,
+                       "min_interrupt_seconds": 15, "interrupt_threshold": 0.55})
+    park = scene_from_text("a sunlit park, people reading on the grass")
+    dj.commit(_verdict(), scene=park, now=time.time() - 2)    # 2s in
+
+    funeral = scene_from_text("a hospital waiting room at 3am")
+    d = dj.decide(funeral, _verdict("mariah"))
+    assert d.mode == PlayMode.QUEUE
+
+
+def test_nothing_playing_starts_immediately():
+    from badspotify.schemas import PlayMode
+    dj = DJController({"agreement_reads": 1})
+    d = dj.decide(scene_from_text("a silent library during exam week"), _verdict())
+    assert d.action == DJAction.PLAY and d.mode == PlayMode.INTERRUPT

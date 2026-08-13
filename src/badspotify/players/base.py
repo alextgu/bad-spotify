@@ -9,7 +9,13 @@ from ..schemas import Track
 class Player(Protocol):
     name: str
 
-    def play(self, track: Track) -> None: ...
+    def play(self, track: Track, mode: str = "interrupt") -> None:
+        """mode: "queue" (append) or "interrupt" (start now).
+
+        The DJ decides which per situation -- see dj/controller.py. Backends
+        that cannot queue should treat "queue" as "interrupt" rather than
+        failing; a slightly-too-eager song beats silence."""
+        ...
     def stop(self) -> None: ...
     def set_volume(self, level: float) -> None: ...
 
