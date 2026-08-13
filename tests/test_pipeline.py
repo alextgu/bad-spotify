@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import sys
 import time
+
+import pytest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -151,3 +153,34 @@ def test_nothing_playing_starts_immediately():
     dj = DJController({"agreement_reads": 1})
     d = dj.decide(scene_from_text("a silent library during exam week"), _verdict())
     assert d.action == DJAction.PLAY and d.mode == PlayMode.INTERRUPT
+
+
+# ------------------------------------------------------- timeouts & retries
+
+def test_a_slow_call_is_abandoned_not_waited_on():
+    """A late answer is worth less than a fast fallback. On stage, a stalled
+    loop reads as the whole project being frozen."""
+    import time as _t
+    from badspotify.resilience import ModelTimeout, call_with_timeout
+    with pytest.raises(ModelTimeout):
+        call_with_timeout(lambda: _t.sleep(5), 0.2, retries=0, label="test")
+
+
+def test_a_flaky_call_is_retried():
+    from badspotify.resilience import call_with_timeout
+    state = {"n": 0}
+
+    def flaky():
+        state["n"] += 1
+        if state["n"] == 1:
+            raise ConnectionError("network blip")
+        return "recovered"
+
+    assert call_with_timeout(flaky, 2.0, retries=1, backoff_s=0.01,
+                             label="test") == "recovered"
+    assert state["n"] == 2
+
+
+def test_a_fast_call_is_unaffected():
+    from badspotify.resilience import call_with_timeout
+    assert call_with_timeout(lambda: 42, 2.0, label="test") == 42

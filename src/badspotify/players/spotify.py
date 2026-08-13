@@ -68,10 +68,10 @@ def explain(exc) -> str:
 class SpotifyPlayer:
     name = "spotify"
 
-    def __init__(self, cfg: dict):
-        import spotipy
-        from spotipy.oauth2 import SpotifyOAuth
-
+    def __init__(self, cfg: dict, client=None):
+        """`client` exists so the logic here can be tested without a Spotify
+        account. Pass a stand-in implementing the handful of spotipy methods
+        we use; leave it None in real use and OAuth runs normally."""
         self.cfg = cfg
         self.volume = float(cfg.get("volume", 0.7))
         self.market = cfg.get("market", "from_token")
@@ -79,26 +79,32 @@ class SpotifyPlayer:
         self.skip_to_queued = bool(cfg.get("skip_to_queued", False))
         self.preferred_device = cfg.get("device_name")
 
-        missing = [k for k in ("SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET")
-                   if not os.environ.get(k)]
-        if missing:
-            raise SpotifyError(
-                f"missing {', '.join(missing)} in the environment. Copy "
-                ".env.example to .env and fill them in from "
-                "https://developer.spotify.com/dashboard")
+        if client is not None:
+            self.sp = client
+        else:
+            import spotipy
+            from spotipy.oauth2 import SpotifyOAuth
 
-        self.sp = spotipy.Spotify(
-            auth_manager=SpotifyOAuth(
-                client_id=os.environ["SPOTIFY_CLIENT_ID"],
-                client_secret=os.environ["SPOTIFY_CLIENT_SECRET"],
-                redirect_uri=os.environ.get("SPOTIFY_REDIRECT_URI",
-                                            "http://127.0.0.1:8888/callback"),
-                scope=SCOPES,
-                cache_path=str(TOKEN_CACHE),
-                open_browser=True,
-            ),
-            requests_timeout=10,
-        )
+            missing = [k for k in ("SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET")
+                       if not os.environ.get(k)]
+            if missing:
+                raise SpotifyError(
+                    f"missing {', '.join(missing)} in the environment. Copy "
+                    ".env.example to .env and fill them in from "
+                    "https://developer.spotify.com/dashboard")
+
+            self.sp = spotipy.Spotify(
+                auth_manager=SpotifyOAuth(
+                    client_id=os.environ["SPOTIFY_CLIENT_ID"],
+                    client_secret=os.environ["SPOTIFY_CLIENT_SECRET"],
+                    redirect_uri=os.environ.get("SPOTIFY_REDIRECT_URI",
+                                                "http://127.0.0.1:8888/callback"),
+                    scope=SCOPES,
+                    cache_path=str(TOKEN_CACHE),
+                    open_browser=True,
+                ),
+                requests_timeout=10,
+            )
         self._uris: dict[str, str] = self._load_cache()
         self.device_id: str | None = None
 

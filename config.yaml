@@ -23,7 +23,8 @@ gate:
 perceive:
   backend: mock           # mock | gemini
   model: gemini-2.5-flash
-  timeout_s: 4.0
+  timeout_s: 4.0          # give up after this and reuse the last read
+  retries: 1              # ...after retrying once
 
 antagonize:
   cruelty: 0.85           # 0 = merely inappropriate, 1 = a war crime
@@ -36,7 +37,8 @@ antagonize:
 judge:
   backend: mock           # mock | gemini
   model: gemini-2.5-flash
-  timeout_s: 4.0
+  timeout_s: 4.0          # give up after this and use the geometric top pick
+  retries: 1
 
 dj:
   cooldown_seconds: 8           # hard floor between any two actions

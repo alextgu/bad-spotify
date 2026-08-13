@@ -16,6 +16,7 @@ from typing import Protocol
 import numpy as np
 
 from ..config import resolve_backend
+from ..resilience import call_with_timeout
 from ..schemas import Meter, SceneRead, TempoFeel, Vibe
 from .audio_features import AudioFeatures, to_vibe_hints
 
@@ -142,6 +143,8 @@ class GeminiPerceiver:
         from google import genai
         self.cfg = cfg
         self.model = cfg.get("model", "gemini-2.5-flash")
+        self.timeout_s = float(cfg.get("timeout_s", 4.0))
+        self.retries = int(cfg.get("retries", 1))
         self.client = genai.Client()
         self._fallback = MockPerceiver()
 
@@ -171,14 +174,19 @@ class GeminiPerceiver:
                 parts.append(types.Part.from_bytes(
                     data=self._encode(frame), mime_type="image/jpeg"))
 
-            resp = self.client.models.generate_content(
-                model=self.model,
-                contents=[types.Content(role="user", parts=parts)],
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=RESPONSE_SCHEMA,
-                    temperature=0.2,
+            resp = call_with_timeout(
+                lambda: self.client.models.generate_content(
+                    model=self.model,
+                    contents=[types.Content(role="user", parts=parts)],
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=RESPONSE_SCHEMA,
+                        temperature=0.2,
+                    ),
                 ),
+                self.timeout_s,
+                retries=self.retries,
+                label="perceive",
             )
             d = json.loads(resp.text)
             return SceneRead(
@@ -200,7 +208,9 @@ class GeminiPerceiver:
                 latency_ms=int((time.time() - t0) * 1000),
             )
         except Exception as e:
-            print(f"[perceive] gemini failed ({e}) -> mock read")
+            # Falling back rather than raising is the whole point: a late or
+            # broken read must not stall the loop.
+            print(f"[perceive] gemini failed ({e}) -> reusing a canned read")
             return self._fallback.read(frame, audio_features, meta)
 
 

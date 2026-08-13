@@ -31,19 +31,40 @@ scene is usually read a few seconds before the song actually lands.
 
 ```
 app/
-  page.tsx         landing — what it is        [skeleton]
+  page.tsx         the launch page             [working]
   demo/page.tsx    the demo ground             [working]
 components/
+  Wordmark         PLACEHOLDER name, set in type
+  Reveal           fade-and-rise on scroll
   MomentCard       one decision, explained     [working]
   Timeline         where each song lands       [working]
   PipelineDiagram  the six steps               [TODO]
 lib/
+  brand.ts         name, tagline, all copy     ← RENAME HERE
   types.ts         the contract with the agent [done]
   session.ts       loading + which moment is live
 public/
   sessions/        recorded runs
   videos/          the footage
 ```
+
+## The name is a placeholder
+
+`lib/brand.ts` holds the name, tagline, and every headline number. **Change
+`brand.name` there and it updates the wordmark, the page title, the metadata,
+and the footer.** Don't hardcode the name anywhere else.
+
+Note: Spotify's developer terms don't allow "Spotify" in a product name, so the
+working title needs replacing before this goes public alongside their API.
+
+## The look
+
+Minimal product launch, played completely straight. One idea per screen, a lot
+of empty space, one accent colour. The product is absurd; the presentation is
+not. That gap is the joke, and it collapses the moment the page starts winking.
+
+**Don't add:** gradient text, a second accent colour, icons on every card, or a
+second call to action. Each of those turns it back into a hackathon page.
 
 ## What's left
 

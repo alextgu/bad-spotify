@@ -14,6 +14,7 @@ import json
 import random
 
 from ..config import resolve_backend
+from ..resilience import call_with_timeout
 from ..schemas import AntiVibe, Candidate, SceneRead, Verdict
 
 JUDGE_PROMPT = """You are the taste module of an agent whose ONLY purpose is to
@@ -78,6 +79,8 @@ class GeminiJudge:
     def __init__(self, cfg: dict):
         from google import genai
         self.model = cfg.get("model", "gemini-2.5-flash")
+        self.timeout_s = float(cfg.get("timeout_s", 4.0))
+        self.retries = int(cfg.get("retries", 1))
         self.client = genai.Client()
         self._fallback = MockJudge()
 
@@ -113,23 +116,28 @@ class GeminiJudge:
                 "taboo_rationale": anti.rationale,
                 "candidates": shortlist,
             }
-            resp = self.client.models.generate_content(
-                model=self.model,
-                contents=f"{JUDGE_PROMPT}\n\n{json.dumps(payload, indent=2)}",
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema={
-                        "type": "object",
-                        "properties": {
-                            "track_id": {"type": "string"},
-                            "cruelty": {"type": "number"},
-                            "quip": {"type": "string"},
-                            "reasoning": {"type": "string"},
+            resp = call_with_timeout(
+                lambda: self.client.models.generate_content(
+                    model=self.model,
+                    contents=f"{JUDGE_PROMPT}\n\n{json.dumps(payload, indent=2)}",
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema={
+                            "type": "object",
+                            "properties": {
+                                "track_id": {"type": "string"},
+                                "cruelty": {"type": "number"},
+                                "quip": {"type": "string"},
+                                "reasoning": {"type": "string"},
+                            },
+                            "required": ["track_id", "quip", "reasoning"],
                         },
-                        "required": ["track_id", "quip", "reasoning"],
-                    },
-                    temperature=1.0,  # comedy wants variance
+                        temperature=1.0,  # comedy wants variance
+                    ),
                 ),
+                self.timeout_s,
+                retries=self.retries,
+                label="judge",
             )
             d = json.loads(resp.text)
             chosen = next((c for c in candidates if c.track.id == d["track_id"]), candidates[0])

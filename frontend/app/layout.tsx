@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { brand } from "@/lib/brand";
 import "./globals.css";
 
+// Reads from lib/brand.ts so renaming the project is one edit, not a hunt.
 export const metadata: Metadata = {
-  title: "bad spotify",
-  description:
-    "A wearable agent whose only feature is playing the worst possible music for the moment.",
+  title: `${brand.name} — ${brand.tagline}`,
+  description: brand.description,
 };
 
 export default function RootLayout({
@@ -12,7 +13,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="grid-bg font-sans antialiased">
+      <body className="font-sans antialiased">
         <div className="relative z-10">{children}</div>
       </body>
     </html>

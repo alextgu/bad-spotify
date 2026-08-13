@@ -33,7 +33,9 @@ Last updated: 13 Aug 2026 (evening)
 | Recording a run for the site | Built, unproven | |
 | Screens — DJ face and engineering view | Built, unproven | |
 | Site — scaffold + demo ground | Built, unproven | |
-| Site — diagram + landing page | Not started | |
+| Site — launch page | Built, unproven | |
+| Site — pipeline diagram | Not started | |
+| Naming and logo | Placeholder in `frontend/lib/brand.ts` | |
 | Glasses | Not started — and not needed | |
 
 "Built, unproven" is not a criticism. Everything was deliberately built to run
@@ -52,7 +54,9 @@ the single biggest risk to the demo.
   off when the room really changed *and* the current song has had a fair run.
 - **Backup list.** If anything upstream dies, a pre-picked list of always-wrong
   songs plays anyway. It is never silent.
-- **Tests.** 30 of them, each guarding a specific way the demo could break.
+- **Tests.** 48 of them, each guarding a specific way the demo could break.
+- **Timeouts on the model calls.** A slow answer is abandoned and retried
+  rather than freezing the loop. A late answer is worth less than a fast fallback.
 
 ## Built, but nobody has run it for real
 
@@ -63,9 +67,11 @@ There's a one-command setup (`python scripts/spotify_setup.py`) that logs in,
 checks the account is Premium, finds a speaker, looks up all 47 songs in advance,
 tells you which ones it couldn't find, and plays a test track.
 *To prove it:* run that script and hear a song come out of a speaker.
-*Known risk:* Spotify search returns karaoke versions, tribute bands, and wrong
-artists with the same song title. There's a filter for that, but it's only been
-tested against made-up search results. **Read the unresolved list when you run it.**
+*Already covered:* 15 tests run the player against a stand-in Spotify — free
+accounts, no devices awake, the named device missing, karaoke results, queue vs
+interrupt, and a device falling asleep mid-call. The logic is sound.
+*Still unknown:* whether real search returns what we expect for our 47 songs.
+**Read the unresolved list when you run it.**
 
 **2. Reading a photo**
 Returns canned answers right now. Never been pointed at a real camera or a real
@@ -95,11 +101,12 @@ Tested against a generated clip, never against real footage.
 *To prove it:* run it on an actual video someone filmed.
 *Needs:* ffmpeg installed, otherwise it runs vision-only.
 
-**7. The site scaffold**
-`frontend/` — Next.js, TypeScript, Tailwind. Builds clean. The demo ground works:
-it reads a recorded run, plays the video, and pops up each decision at the point
-in the footage where the song lands. The landing page and the diagram are
-skeletons with notes left in them.
+**7. The site**
+`frontend/` — Next.js, TypeScript, Tailwind. Builds clean.
+The launch page is done: minimal, deadpan, one idea per screen.
+The demo ground works: it replays a recorded run against the video and pops up
+each decision where the song lands.
+Still missing: the pipeline diagram, and the real name.
 *To prove it:* drop in real footage and a real recording, and walk someone through it.
 
 **8. Recording a run**
@@ -136,10 +143,10 @@ why the technical work reads as serious, so it was worth keeping in a smaller fo
   *where in the video* each one plays
 - Ships with a hardcoded sample video so it always works
 
-**Half built.** `frontend/` exists and the demo area works — it replays a
-recorded run against the video. The diagram and the landing page are still
-skeletons. Don't sink time into polish until the backend has been proven with
-real footage; a beautiful site replaying a bad run helps nobody.
+**Mostly built.** The launch page and the demo area both work. Missing: the
+pipeline diagram, and the real name. Don't sink more time into polish until the
+backend has been proven with real footage — a beautiful site replaying a bad run
+helps nobody.
 
 **Audio on the site:** it names the song and people can look it up themselves.
 For our own demo videos the music is overlaid onto the video. That sidesteps the
@@ -171,6 +178,12 @@ Don't re-open these without a reason.
 - **Earlier** — Hand-picked famous songs over a huge database. The joke needs
   people to recognise the song.
 - **Earlier** — No training our own model. No time, no need.
+- **13 Aug** — Tagline: “The worst music for the best moments. And vice versa.”
+- **13 Aug** — The site looks like a minimal product launch, played straight.
+  The gap between the polish and what's being announced is the joke.
+- **13 Aug** — Name is a placeholder in `frontend/lib/brand.ts` until we pick
+  one. It should play off “DJ”. Note: Spotify's terms forbid “Spotify” in a
+  product name, so the current working title can't ship publicly.
 - **Earlier** — Glasses aren't needed to win.
 
 ---
