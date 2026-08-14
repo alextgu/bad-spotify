@@ -17,9 +17,18 @@ Six steps, over and over, about every five seconds.
 **2. Has anything changed?** Compare against the last look. If the room is
 different — someone walked in, it got loud, the lights changed — carry on to the
 expensive thinking. If it's the same, skip it and reuse what we already worked
-out. Either way we still go to step 6, because "nothing changed" is useful
+out.
+
+Either way we still go to step 6, because "nothing changed" is useful
 information too. It's the difference between *the scene is stable* and *we don't
-know what the scene is*.
+know what the scene is*. Getting that wrong once deadlocked the whole thing on
+calm footage: nothing ever played, because the rule that waits to see a change
+twice never got its second look.
+
+**It doesn't only look on a timer.** With video it also samples the moment the
+picture cuts or the sound spikes — so a five-second rhythm doesn't mean missing
+the door opening at second three. When something like that fires, we already
+know the world changed, so we skip the checking and go straight to thinking.
 
 **3. Understand the moment.** Describe what's happening: where we are, what
 people are doing, how it feels. One description covering everything, produced in
@@ -153,6 +162,11 @@ It's also better than a live camera for presenting: the same video gives the
 same run at every rehearsal, and there's no camera, lighting, or permission to
 fail on stage.
 
+Because it has the whole recording up front, it can watch for the interesting
+moments rather than just checking every few seconds — cuts in the picture,
+spikes in the sound. A live camera can't do that, because it hasn't seen the
+next second yet.
+
 A run can be recorded to a file listing every song, **where in the video it
 starts**, and why. That file is what the site replays.
 
@@ -179,4 +193,5 @@ starts**, and why. That file is what the site replays.
 | What's actually finished, and what to work on | `STATUS.md` |
 | How to run it, and who owns which part | `README.md` |
 | How to add my part without breaking things | `INTEGRATION.md` |
+| A prompt to hand my coding agent before I start | `TEAMMATE_PROMPT.md` |
 | How the site connects to the agent | `frontend/README.md` |

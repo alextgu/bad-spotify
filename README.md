@@ -20,6 +20,7 @@ Silent library during exam week → Darude, *Sandstorm*.
 | **PIPELINE.md** | how it works, in plain language, no code. Start here if you're new |
 | **STATUS.md** | what's actually done, and what's only *built but unproven*. **Update it when you finish something** |
 | **INTEGRATION.md** | how to attach your part without breaking anyone else's. Read before your first change |
+| **TEAMMATE_PROMPT.md** | paste this into your coding agent before you start |
 | **AGENTS.md** | the rules. Every claim must be verifiable by a quoted command |
 | **frontend/README.md** | the site, and the one file that connects it to the agent |
 
