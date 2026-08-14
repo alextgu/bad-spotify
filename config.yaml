@@ -71,6 +71,18 @@ voice:
   duck_to: 0.25           # duck music to this while narrating
   max_quip_chars: 120
 
+  # What it says out loud. Deliberately the SAME sentence every time: a
+  # varying joke in a serious voice stops landing by the third one, but a
+  # flight-announcement cadence keeps working because only the contents are
+  # absurd. Placeholders: {title} {artist} {context} {mood} {quip}
+  # Set to "" to speak the judge's quip instead.
+  line: "Now playing {title} by {artist}, for your {context}."
+
+  # Which ElevenLabs voice. Env ELEVENLABS_VOICE_ID wins over this.
+  # `python scripts/voice_lines.py --list` prints what your account has;
+  # `--audition` renders the same line in several so you can pick by ear.
+  voice_id:
+
 hud:
   enabled: true
   host: 127.0.0.1

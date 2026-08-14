@@ -38,6 +38,7 @@ from ..music import strategies
 from ..music.corpus import Corpus
 from ..music.vibe import build_antivibe
 from ..perceive import audio_features
+from ..voice.lines import DEFAULT_TEMPLATE, announcement
 from ..schemas import DJAction, DJDecision, SceneRead, Verdict
 from .judge import build_judge
 from ..log import notice as print  # stdout is reserved for data
@@ -71,6 +72,10 @@ class BadSpotifyGraph:
         acfg = cfg.section("antagonize")
         self.strategy_names = acfg.get("strategies") or ["genre_antipode"]
         self.per_strategy = int(acfg.get("candidates_per_strategy", 4))
+
+        vcfg = cfg.section("voice")
+        self.voice_line = vcfg.get("line", DEFAULT_TEMPLATE)
+        self.max_line_chars = int(vcfg.get("max_quip_chars", 120))
 
         self._pool = ThreadPoolExecutor(max_workers=4)
         self._last_scene: Optional[SceneRead] = None
@@ -192,9 +197,14 @@ class BadSpotifyGraph:
         if verdict is None:
             return state
         try:
-            if verdict.quip:
-                self.narrator.say(verdict.quip, duck=self.player)
-                BUS.emit("voice", verdict.quip)
+            # What it SAYS is the fixed announcement; what the screens show as
+            # its personality is the judge's quip. Two different lines on
+            # purpose -- see voice/lines.py.
+            spoken = announcement(verdict, state.get("scene"),
+                                  self.voice_line, self.max_line_chars)
+            if spoken:
+                self.narrator.say(spoken, duck=self.player)
+                BUS.emit("voice", spoken, quip=verdict.quip)
             self.player.play(verdict.track, mode=decision.mode.value)
             self.dj.commit(verdict, scene=state.get("scene"))
             BUS.emit("play", f"{verdict.track.title} - {verdict.track.artist}",
