@@ -11,7 +11,10 @@ Three states, and the middle one matters most:
 | **Built, unproven** | The code exists and runs on fake input. Nobody has pointed it at the real thing yet. **Assume it's broken until someone checks.** |
 | **Not started** | — |
 
-Last updated: 13 Aug 2026 (late evening — verification pass)
+Last updated: 14 Aug 2026
+
+`AGENTS.md` (symlinked as `CLAUDE.md`) is the source of truth for *facts and
+rules*. This file is the source of truth for *state*.
 
 ---
 
@@ -25,13 +28,13 @@ Last updated: 13 Aug 2026 (late evening — verification pass)
 | The song list (47 songs) | Done | `build_seed_corpus.py` writes 47; corpus loads in every run |
 | Working out the opposite | Done *on mock scene reads* | park → Drowning Pool, library → Sandstorm, hospital-at-3am → Barbie Girl. Never run on a real photo |
 | Screens — DJ face and engineering view | Done | watched both at 127.0.0.1:8420: orb takes the scene colours, ticker fills, scene injection runs the whole pipeline |
-| Test suite | Done | 65 passed (needs `pip install pytest` — it was missing from requirements, now added) |
+| Test suite | Done | 77 passed (needs `pip install pytest` — it was missing from requirements, now added) |
 | Hosted app — `app.py` (Gradio) | Done, on mocks | four tabs: describe / photo / video / backends. Watched "a toddler's birthday party" return Johnny Cash's *Hurt* in the browser; the video tab produced 5 decisions and a downloadable session JSON |
 | `Engine` — the agent minus the loop | Done | `src/badspotify/service.py`. `describe()`, `look()`, `watch()`. 12 tests |
 | LangGraph | Done, both entry points | `tick()` for the live loop, `decide_from_scene()` for the hosted paths — same nodes, same edges. The hosted path previously bypassed the graph entirely; it doesn't now |
 | Video sampling — `src/videofeed/` | Done, model side deliberately stubbed | new standalone package: cadence + trigger sampling with audio. Verified on a real clip — the cut at 5.0s fired `scene_cut+motion_spike+brightness_shift`, the tone fired `audio_onset`, and `--out` wrote frames, WAVs and a manifest. 17 tests, all against a real mp4 |
 | Clean install | Done | fresh venv, `pip install -r requirements.txt`, corpus, bounded run — no errors |
-| Site — launch page | Done, rebuilt | restructured into six sections (see below); renders clean, `tsc --noEmit` clean |
+| Site — launch page | Done, rebuilt | restructured into eight sections (see below); renders clean, `tsc --noEmit` clean |
 | Site — pipeline diagram | Done | inline SVG, six steps + the change-gate bypass + the two model calls marked |
 | Site — demo ground | Done, on placeholder assets | `/demo` and the new "Try it yourself" section both replay the sample session |
 | Naming | Working title: **bad spotify** | decided 13 Aug to keep the repo name for now. Still cannot ship publicly — Spotify's terms forbid it |
@@ -42,8 +45,8 @@ Last updated: 13 Aug 2026 (late evening — verification pass)
 | The voice | Built, unproven | no `ELEVENLABS_API_KEY` available on 13 Aug |
 | Video file as input | Built, unproven | no real footage filmed yet |
 | Recording a run for the site | Built, unproven | only ever recorded from the synthetic clip |
-| Nicheness | Not started | agreed as an input, still not scored or used |
-| Session memory | Not started | it will repeat a joke on a long run |
+| Recognisability | Done, unvalidated | scored on all 47 tracks and weighted into all three strategies. Whether the hand-assigned values are *right* has never been checked |
+| Session memory | Partly | no repeats within a run (`played_ids`); nothing persists across runs |
 | Camera preview + end-of-session recap | Not started | |
 | Glasses | Not started — and not needed | |
 
@@ -83,7 +86,7 @@ blocked on credentials rather than on code.
   off when the room really changed *and* the current song has had a fair run.
 - **Backup list.** If anything upstream dies, a pre-picked list of always-wrong
   songs plays anyway. It is never silent.
-- **Tests.** 48 of them, each guarding a specific way the demo could break.
+- **Tests.** 77 of them, each guarding a specific way the demo could break.
 - **Timeouts on the model calls.** A slow answer is abandoned and retried
   rather than freezing the loop. A late answer is worth less than a fast fallback.
 
@@ -268,10 +271,21 @@ one of these is still open.
 
 ## Still open
 
-- It'll repeat the same joke if left running a long time. No memory yet.
+- **Corrected 14 Aug — it does not repeat within a run.** This file said "no
+  memory yet" for days and that was wrong: `DJState.played_ids` is handed to
+  every strategy as an exclusion set, and the fallback deck respects it too
+  (`dj/controller.py:32,162,181`). What's actually missing is memory *across*
+  runs — a fresh process starts from a clean slate, so rehearsing twice gives
+  the same jokes.
 - Nobody's timed the real thing end to end. (The mock loop is instant, which
   tells us nothing — the number that matters is the Gemini round trip.)
-- Nicheness is agreed as an idea but isn't scored or used anywhere.
+- **Corrected 14 Aug — recognisability is scored and used.** This file said
+  nicheness "isn't scored or used anywhere". Also wrong: `Track.recognisability`
+  exists, all 47 tracks carry a real hand-assigned value (0.12–0.98, none left
+  at the default), and `_recog_weight()` multiplies the score in all three
+  strategies. What genuinely doesn't exist is a *separate* nicheness axis, and
+  nobody has checked whether those 47 values are any good — which is the part
+  worth doing.
 - **The genre map now works, and that's the problem.**
   `scripts/scrape_everynoise.py` ran clean on 13 Aug: 6291 genres with 2D
   coordinates, pulled off the live page, written to `data/genre_map.json`. So it

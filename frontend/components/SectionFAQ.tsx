@@ -35,7 +35,15 @@ export default function SectionFAQ() {
               className="flex cursor-pointer list-none items-start justify-between gap-6
                          text-lg font-medium tracking-[-0.02em] marker:hidden"
             >
-              {item.q}
+              <span className="flex flex-wrap items-baseline gap-3">
+                {item.q}
+                {item.pending && (
+                  <span className="rounded border border-line-strong px-2 py-0.5
+                                   font-mono text-[11px] font-normal text-ink-muted">
+                    answer pending
+                  </span>
+                )}
+              </span>
               <span
                 aria-hidden
                 className="mt-1 shrink-0 text-ink-muted transition-transform
@@ -44,9 +52,22 @@ export default function SectionFAQ() {
                 +
               </span>
             </summary>
-            <p className="mt-4 max-w-2xl leading-relaxed text-ink-secondary">
-              {item.a}
-            </p>
+
+            {item.pending ? (
+              // Kept visibly unanswered on purpose. A confident placeholder
+              // here would be worse than an honest gap — see FaqItem.pending.
+              <p className="mt-4 max-w-2xl leading-relaxed text-ink-muted">
+                We don’t have a good answer to this yet, and we’d rather say so
+                than invent one. It’s a real question — the system already
+                reads colour out of a scene and maps it toward sound, so what
+                that means for someone who does the same thing involuntarily is
+                worth thinking about properly.
+              </p>
+            ) : (
+              <p className="mt-4 max-w-2xl leading-relaxed text-ink-secondary">
+                {item.a}
+              </p>
+            )}
           </details>
         ))}
       </div>

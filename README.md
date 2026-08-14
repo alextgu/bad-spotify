@@ -24,6 +24,7 @@ of this in public, and it is worth keeping that promise true in the code.
 
 | | |
 |---|---|
+| **AGENTS.md** | **start here if you're an agent.** Verified facts, working commands, hard rules, and an explicit list of what is *not* settled. Symlinked as `CLAUDE.md` |
 | **README.md** | this file — how to run it, how it's built, who owns what |
 | **PIPELINE.md** | how it works, in plain language, no code. Start here if you're new |
 | **STATUS.md** | what's actually done, and what's only *built but unproven*. **Update it when you finish something** |

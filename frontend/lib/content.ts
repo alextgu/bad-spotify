@@ -77,12 +77,12 @@ export const roadmap = [
   },
   {
     title: "Memory, so it never repeats a joke",
-    body: "Right now a long run will reach for the same track twice. Session memory turns the corpus into a set it draws down, and lets a running gag build across a night out.",
+    body: "Within one run it already draws the corpus down and never repeats itself. What it forgets is everything between runs — so the second rehearsal tells the same jokes as the first. Memory that survives a restart would also let a running gag build across a night out.",
     state: "next",
   },
   {
-    title: "Nicheness as a scored axis",
-    body: "Obscure isn't automatically funnier — the joke dies if nobody recognises the song. Scoring recognisability lets it reach for a deep cut deliberately rather than by accident.",
+    title: "Checking the recognisability scores",
+    body: "Obscure isn't automatically funnier — the joke dies if nobody recognises the song, so every track already carries a recognisability score that weights all three strategies. Those 47 numbers were assigned by hand and never tested against an actual room, which is the part that would make them worth having.",
     state: "next",
   },
   {
@@ -106,7 +106,19 @@ export const roadmap = [
  * joke; this is the part that has to be straight, and a judge or a journalist
  * reading only this section should come away with the right idea.
  */
-export const faq = [
+export interface FaqItem {
+  q: string;
+  a: string;
+  /**
+   * A question we have decided to keep and have not answered yet. It renders
+   * as openly unanswered rather than quietly disappearing — a real question
+   * with a visible "not yet" is worth more than a confident guess, and it
+   * stops anyone from shipping a placeholder that reads like an answer.
+   */
+  pending?: boolean;
+}
+
+export const faq: FaqItem[] = [
   {
     q: "What does “the worst possible song” actually mean?",
     a: "Musically opposite, and nothing else. Every scene and every track is scored on five mood axes — valence, arousal, density, brightness, organicness — and the target is that scene's reflection through the middle of the space. Calm and bright becomes loud and dark. That is the entire definition of “worst” here.",
@@ -139,7 +151,12 @@ export const faq = [
     q: "Can I ask it to play something?",
     a: "No. That is the one feature it does not have.",
   },
-] as const;
+  {
+    q: "What if I have synesthesia?",
+    a: "",
+    pending: true,
+  },
+];
 
 /** Section 6 — the close. */
 export const theAsk = {
