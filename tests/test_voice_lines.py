@@ -188,7 +188,7 @@ def test_the_site_and_the_renderer_agree_on_every_line():
     # file: "/audio/intro.mp3", ... text: "..."
     pairs = re.findall(
         r'file:\s*"/audio/([\w-]+)\.mp3",\s*\n\s*text:\s*"((?:[^"\\]|\\.)*)"',
-        ts.read_text(),
+        ts.read_text(encoding='utf-8'),
     )
     assert pairs, "couldn't parse VOICE_LINES out of audio.ts"
 

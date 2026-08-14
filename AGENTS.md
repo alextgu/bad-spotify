@@ -47,7 +47,7 @@ Plus one README beside each part that ships on its own: `frontend/`,
 Every one of these was run on 14 Aug 2026 and did what it says.
 
 ```bash
-# tests — 83 pass
+# tests — 109 pass
 source .venv/bin/activate && python -m pytest tests/ -q
 
 # the agent, bounded and headless (park -> Drowning Pool, library -> Sandstorm)
@@ -75,7 +75,7 @@ cd frontend && npx tsc --noEmit && npm run build
 `pytest` and `gradio` are in `requirements.txt`. `ffmpeg` on PATH is needed for
 video audio; without it the sampler runs vision-only rather than failing.
 
-### Test inventory (83, verified by `--collect-only`)
+### Test inventory (109, verified by `--collect-only`)
 
 | File | Count | Guards |
 |---|---|---|
@@ -86,6 +86,7 @@ video audio; without it the sampler runs vision-only rather than failing.
 | `tests/test_service.py` | 12 | `Engine`: describe / look / watch, no speakers by default, no bus leak |
 | `tests/test_video_and_session.py` | 7 | video-as-live and the recorded session format |
 | `tests/test_local_video_app.py` | 4 | local perception, upload validation, and sampled analysis |
+| `tests/test_voice_lines.py` | 26 | voice-line selection, startup behavior, renderer/site agreement |
 
 ---
 
@@ -195,7 +196,7 @@ picks between them.
 Before you say you're done:
 
 ```bash
-pytest tests/ -q                      # all 83, not just yours
+pytest tests/ -q                      # all 109, not just yours
 python run.py --ticks 6 --no-hud      # the loop still runs on mocks
 ```
 
