@@ -34,7 +34,7 @@ Last updated: 14 Aug 2026
 | Screens — DJ face and engineering view | Built, unproven | |
 | Site — scaffold + demo ground | Built, unproven | |
 | Site — launch page | Built, unproven | |
-| Site — pipeline diagram | Not started | |
+| Site — pipeline diagram | Done — watched it render at 1440px and at a 360px container; six steps, the gate's skip-back edge, and the three-strategy fan-out all draw. Inline SVG, no dependency. `tsc --noEmit` and `next build` pass | |
 | Local video upload and mood timeline | Built, unproven | |
 | Video sampler (`src/videofeed/`) | Done — 17 tests, incl. a real generated clip | |
 | Engine (`service.py`) — one decision, no loop | Built, unproven | |
@@ -136,7 +136,7 @@ Tested against a generated clip, never against real footage.
 The launch page is done: minimal, deadpan, one idea per screen.
 The demo ground works: it replays a recorded run against the video and pops up
 each decision where the song lands.
-Still missing: the pipeline diagram, and the real name.
+Still missing: the real name.
 *To prove it:* drop in real footage and a real recording, and walk someone through it.
 
 **8. Recording a run**
@@ -173,8 +173,8 @@ why the technical work reads as serious, so it was worth keeping in a smaller fo
   *where in the video* each one plays
 - Ships with a hardcoded sample video so it always works
 
-**Mostly built.** The launch page and the demo area both work. Missing: the
-pipeline diagram, and the real name. Don't sink more time into polish until the
+**Mostly built.** The launch page and the demo area both work, and the loop
+diagram is drawn. Missing: the real name. Don't sink more time into polish until the
 backend has been proven with real footage — a beautiful site replaying a bad run
 helps nobody.
 
