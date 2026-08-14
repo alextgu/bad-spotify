@@ -1,3 +1,4 @@
+import SectionHeading from "@/components/SectionHeading";
 import PipelineDiagram from "@/components/PipelineDiagram";
 import ProductRotator from "@/components/ProductRotator";
 import { capabilities, stack } from "@/lib/content";
@@ -19,9 +20,12 @@ export default function SectionProduct() {
         <ProductRotator />
 
         <div>
-          <h2 className="text-heading font-semibold">
-            An agent with one feature.
-          </h2>
+          <SectionHeading
+          index={2}
+          label="THE PRODUCT"
+          lead="An agent with"
+          trail="one feature."
+        />
           <p className="mt-5 text-ink-secondary">
             It rides on camera glasses, watches the moment you are in, works out
             exactly what that moment sounds like — and plays the opposite. It

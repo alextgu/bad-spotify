@@ -1,3 +1,4 @@
+import SectionHeading from "@/components/SectionHeading";
 import BlurFade from "@/components/BlurFade";
 import HeroVideoDialog from "@/components/HeroVideoDialog";
 import { FILM } from "@/lib/clips";
@@ -30,7 +31,12 @@ export default function SectionFilm() {
     >
       <div className="mx-auto w-full max-w-content">
         <BlurFade>
-          <h2 className="text-heading">Watch it ruin a moment.</h2>
+          <SectionHeading
+          index={1}
+          label="THE FILM"
+          lead="Watch it ruin"
+          trail="a moment."
+        />
         </BlurFade>
 
         <BlurFade delay={0.08}>

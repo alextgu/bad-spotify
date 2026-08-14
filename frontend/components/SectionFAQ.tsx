@@ -1,3 +1,4 @@
+import SectionHeading from "@/components/SectionHeading";
 import { faq } from "@/lib/content";
 
 /**
@@ -18,9 +19,12 @@ import { faq } from "@/lib/content";
 export default function SectionFAQ() {
   return (
     <section id="faq" className="section-page mx-auto flex max-w-measure flex-col justify-center px-6 py-section-sm md:py-section">
-      <h2 className="text-heading font-semibold">
-        Questions.
-      </h2>
+      <SectionHeading
+          index={8}
+          label="QUESTIONS"
+          lead="The part that"
+          trail="isn’t a joke."
+        />
       <p className="mt-heading-sub max-w-measure-sub text-ink-muted">
         The part of the page that isn’t a joke.
       </p>

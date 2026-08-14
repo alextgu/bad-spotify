@@ -1,3 +1,4 @@
+import SectionHeading from "@/components/SectionHeading";
 import { stack } from "@/lib/content";
 import { steps } from "@/lib/brand";
 
@@ -13,12 +14,17 @@ import { steps } from "@/lib/brand";
 export default function SectionBuild() {
   return (
     <section id="build" className="section-page section-tall mx-auto max-w-content px-6 py-section-sm md:py-section">
-      <h2 className="text-heading font-semibold">
-        How a moment gets ruined.
-      </h2>
-      <p className="mt-heading-sub max-w-measure text-ink-muted">
-        Six steps, about every five seconds, for as long as you leave it on.
-      </p>
+      <div className="grid gap-heading-sub md:grid-cols-2 md:gap-20">
+        <SectionHeading
+          index={3}
+          label="THE LOOP"
+          lead="How a moment"
+          trail="gets ruined."
+        />
+        <p className="max-w-measure text-body text-ink-muted md:self-end">
+          Six steps, about every five seconds, for as long as you leave it on.
+        </p>
+      </div>
 
       <ol className="mt-sub-content grid gap-x-12 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
         {steps.map((s) => (

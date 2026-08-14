@@ -1,5 +1,6 @@
 "use client";
 
+import SectionHeading from "@/components/SectionHeading";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MomentCard from "@/components/MomentCard";
 import { CLIPS, type Clip } from "@/lib/clips";
@@ -170,9 +171,12 @@ export default function SectionTryIt() {
 
   return (
     <section id="try" className="section-page mx-auto max-w-content px-6 py-section-sm md:py-section">
-      <h2 className="text-heading font-semibold">
-        Try it yourself.
-      </h2>
+      <SectionHeading
+          index={4}
+          label="TRY IT"
+          lead="Try it"
+          trail="yourself."
+        />
       <p className="mt-heading-sub max-w-measure-sub text-ink-muted">
         Pick a clip, or bring your own. Every decision on this page came out of
         the real agent — nothing here is re-enacted in the browser.

@@ -1,3 +1,4 @@
+import SectionHeading from "@/components/SectionHeading";
 import { learned } from "@/lib/content";
 
 /**
@@ -13,12 +14,20 @@ import { learned } from "@/lib/content";
 export default function SectionLearned() {
   return (
     <section id="learned" className="section-page section-tall mx-auto max-w-content px-6 py-section-sm md:py-section">
-      <h2 className="text-heading font-semibold">
-        What we got wrong first.
-      </h2>
-      <p className="mt-heading-sub max-w-measure text-ink-muted">
-        Four things we believed at the start and had to give up on.
-      </p>
+      {/* Headline left, body right. The heading gets the width it needs and
+          the explanation sits beside it rather than under it, which stops the
+          section opening with two stacked blocks of text. */}
+      <div className="grid gap-heading-sub md:grid-cols-2 md:gap-20">
+        <SectionHeading
+          index={6}
+          label="WHAT WE GOT WRONG"
+          lead="What we got"
+          trail="wrong first."
+        />
+        <p className="max-w-measure text-body text-ink-muted md:self-end">
+          Four things we believed at the start and had to give up on.
+        </p>
+      </div>
 
       <div className="mt-sub-content space-y-14">
         {learned.map((l, i) => (

@@ -1,3 +1,4 @@
+import SectionHeading from "@/components/SectionHeading";
 import { roadmap, theAsk } from "@/lib/content";
 
 /**
@@ -11,9 +12,12 @@ import { roadmap, theAsk } from "@/lib/content";
 export default function SectionNext() {
   return (
     <section id="next" className="section-page mx-auto max-w-content px-6 py-section-sm md:py-section">
-      <h2 className="text-heading font-semibold">
-        What’s next.
-      </h2>
+      <SectionHeading
+          index={7}
+          label="WHAT'S NEXT"
+          lead="What’s"
+          trail="next."
+        />
 
       <div className="mt-sub-content space-y-10">
         {roadmap.map((r) => (

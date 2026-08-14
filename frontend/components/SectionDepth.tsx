@@ -1,5 +1,6 @@
 "use client";
 
+import SectionHeading from "@/components/SectionHeading";
 import { useEffect, useRef, useState } from "react";
 import BlurFade from "@/components/BlurFade";
 import { depth } from "@/lib/content";
@@ -55,7 +56,12 @@ export default function SectionDepth() {
       className="section-page mx-auto max-w-content px-6 py-section-sm md:py-section"
     >
       <BlurFade>
-        <h2 className="text-heading">A useless product, built properly.</h2>
+        <SectionHeading
+          index={5}
+          label="THE DECISIONS"
+          lead="A useless product,"
+          trail="built properly."
+        />
       </BlurFade>
       <BlurFade delay={0.08}>
         <p className="mt-heading-sub max-w-measure-sub text-body text-ink-muted">
