@@ -87,7 +87,13 @@ voice:
   # Which ElevenLabs voice. Env ELEVENLABS_VOICE_ID wins over this.
   # `python scripts/voice_lines.py --list` prints what your account has;
   # `--audition` renders the same line in several so you can pick by ear.
-  voice_id:
+  #
+  # Nelson. Chosen 14 Aug — NOT yet heard saying one of our lines, because no
+  # ELEVENLABS_API_KEY has existed on any machine that ran this. Before the
+  # demo, run --audition and confirm it sounds like it MEANS the line: the
+  # agent is sincerely pleased with its choice, and any irony in the delivery
+  # kills the character.
+  voice_id: 6OzrBCQf8cjERkYgzSg8
 
 hud:
   enabled: true

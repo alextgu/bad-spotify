@@ -38,7 +38,7 @@ class ElevenLabsNarrator:
         # `python scripts/voice_lines.py --list`, not from memory.
         self.voice_id = (os.environ.get("ELEVENLABS_VOICE_ID")
                          or cfg.get("voice_id")
-                         or "JBFqnCBsd6RMkjVDRZzb")
+                         or "6OzrBCQf8cjERkYgzSg8")   # Nelson
         self.client = ElevenLabs(api_key=os.environ["ELEVENLABS_API_KEY"])
         self._fallback = MockNarrator(cfg)
 

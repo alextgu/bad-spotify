@@ -28,7 +28,7 @@ Last updated: 14 Aug 2026
 | Working out the opposite | Built, unproven | |
 | The song list (47 songs) | Built, unproven | |
 | Picking the funniest one | Built, unproven | |
-| The voice | Built, unproven | |
+| The voice | Built, unproven | Voice chosen 14 Aug: Nelson (`6OzrBCQf8cjERkYgzSg8`), in `config.yaml`. **Nobody has heard it say one of our lines** — no `ELEVENLABS_API_KEY` yet. `python scripts/voice_lines.py --audition` settles it in two minutes |
 | Video file as input | Built, unproven — now sampled by `videofeed` | |
 | Recording a run for the site | Built, unproven | |
 | Screens — DJ face and engineering view | Built, unproven | |

@@ -1,163 +1,76 @@
-import Link from "next/link";
-import Reveal from "@/components/Reveal";
+import SectionAd from "@/components/SectionAd";
+import SectionBuild from "@/components/SectionBuild";
+import SectionDepth from "@/components/SectionDepth";
+import SectionFilm from "@/components/SectionFilm";
+import SectionLearned from "@/components/SectionLearned";
+import SectionNext from "@/components/SectionNext";
+import SectionProduct from "@/components/SectionProduct";
+import SectionTryIt from "@/components/SectionTryIt";
 import Wordmark from "@/components/Wordmark";
-import { brand, specs, steps } from "@/lib/brand";
+import { brand } from "@/lib/brand";
 
-
+/**
+ * The launch page. Seven sections, no navbar.
+ *
+ * Each one answers a Devpost field without ever using its heading — the copy
+ * satisfies the form when pasted in, but the page reads as a product launch
+ * rather than a report. "Challenges we ran into" as a headline breaks the
+ * deadpan instantly; "A useless product, built properly" says the same thing
+ * and stays in character.
+ *
+ *   1  SectionAd       Inspiration
+ *   2  SectionProduct  What it does          (+ SectionTryIt — poke it yourself)
+ *   3  SectionBuild    How we built it
+ *   4  SectionDepth    Challenges we ran into
+ *   5  SectionFilm     Accomplishments we're proud of
+ *   6  SectionLearned  What we learned
+ *   7  SectionNext     What's next
+ *
+ * The film gets a screen to itself, and it sits AFTER the two sections that
+ * explain the machinery. That ordering is deliberate and it is the one most
+ * hackathon pages get backwards: a demo video shown first is a claim, and a
+ * demo video shown after the explanation is proof. By the time it plays, a
+ * judge already knows what should have happened — so watching it not happen
+ * is the payoff rather than the setup.
+ *
+ * Seven is the ceiling, not a target. Every extra screen costs pacing, and
+ * this layout only works because each one holds a single idea. If something
+ * new has to go in, something already here comes out.
+ *
+ * Cut on purpose: SectionLogo and SectionFAQ. Both are good, neither survives
+ * the seven-section budget — the FAQ's best answer (why the cruelty dial was
+ * removed) now lives in SectionLearned, where it was always stronger.
+ */
 export default function Home() {
   return (
     <>
-      <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06]
-                      bg-plane/70 backdrop-blur-xl">
-        <div className="mx-auto flex h-12 max-w-5xl items-center px-6">
-          <Wordmark size="nav" />
-          <div className="flex-1" />
-          <Link
-            href="/demo"
-            className="text-sm text-ink-secondary transition hover:text-white"
-          >
-            Watch it work
-          </Link>
-        </div>
-      </nav>
-      <section className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-        <Reveal>
-          <p className="mb-6 text-sm tracking-[0.2em] text-ink-muted uppercase">
-            {brand.eyebrow}
-          </p>
-        </Reveal>
+      {/* No navbar. One product, one page — a nav would only offer to take
+          you away from the single thing we want you to read. */}
+      <header className="fixed left-0 top-0 z-50 p-6">
+        <Wordmark size="nav" />
+      </header>
 
-        <Reveal delay={120}>
-          <h1>
-            <Wordmark />
-          </h1>
-        </Reveal>
+      <main>
+        <SectionAd />
 
-        <Reveal delay={260}>
-          <p className="mt-10 max-w-xl text-[clamp(1.25rem,2.6vw,1.75rem)]
-                        leading-snug tracking-[-0.02em] text-ink-secondary">
-            {brand.tagline}
-            <br />
-            <span className="text-ink-muted">{brand.taglineSecond}</span>
-          </p>
-        </Reveal>
+        {/* "Try it yourself" sits with "what it does", not with the film.
+            Reading a capability and immediately poking it is one thought;
+            splitting them makes the reader wait for permission. */}
+        <SectionProduct />
+        <SectionTryIt />
 
-        <Reveal delay={420}>
-          <Link
-            href="/demo"
-            className="mt-14 inline-flex items-center gap-2 rounded-full border
-                       border-white/15 px-7 py-3 text-sm text-white transition
-                       hover:border-white/40 hover:bg-white/[0.04]"
-          >
-            Watch it work
-            <span aria-hidden>→</span>
-          </Link>
-        </Reveal>
-      </section>
-      <section className="flex min-h-[85vh] items-center justify-center px-6">
-        <div className="space-y-3 text-center">
-          {brand.creed.map((line, i) => (
-            <Reveal key={line} delay={i * 220}>
-              <p
-                className={`text-[clamp(1.75rem,5.5vw,4rem)] font-medium leading-[1.1]
-                            tracking-[-0.035em] ${
-                              i === brand.creed.length - 1
-                                ? "text-white"
-                                : "text-ink-muted"
-                            }`}
-              >
-                {line}
-              </p>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-      <section className="mx-auto max-w-5xl px-6 py-40">
-        <Reveal>
-          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold
-                         tracking-[-0.035em]">
-            How it ruins a moment.
-          </h2>
-          <p className="mt-4 max-w-md text-ink-muted">
-            Six steps, about every five seconds, for as long as you leave it on.
-          </p>
-        </Reveal>
+        <SectionBuild />
+        <SectionDepth />
 
-        <div className="mt-20 grid gap-x-12 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-          {steps.map((s, i) => (
-            <Reveal key={s.n} delay={(i % 3) * 120}>
-              <div className="border-t border-white/10 pt-5">
-                <p className="font-mono text-xs text-ink-muted">{s.n}</p>
-                <h3 className="mt-3 text-xl font-medium tracking-[-0.02em]">
-                  {s.title}
-                </h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-ink-secondary">
-                  {s.body}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-      <section className="mx-auto max-w-3xl px-6 py-40 text-center">
-        <Reveal>
-          <p className="text-[clamp(1.4rem,3.4vw,2.25rem)] font-medium
-                        leading-[1.35] tracking-[-0.03em]">
-            Anything can compute an opposite. Almost nothing knows that the
-            opposite of a sunlit park is{" "}
-            <span className="text-target">funeral doom</span> — or that a
-            Christmas song in August is worse than either.
-          </p>
-        </Reveal>
-        <Reveal delay={200}>
-          <p className="mx-auto mt-8 max-w-lg text-ink-muted">
-            So the maths makes a shortlist, and taste picks the winner. Neither
-            one works alone.
-          </p>
-        </Reveal>
-      </section>
-      <section className="mx-auto max-w-5xl px-6 pb-40">
-        <div className="grid grid-cols-2 gap-y-14 border-y border-white/10 py-16
-                        lg:grid-cols-4">
-          {specs.map((s, i) => (
-            <Reveal key={s.label} delay={i * 100}>
-              <div className="px-2 text-center">
-                <p className="text-[clamp(2rem,5vw,3.25rem)] font-semibold
-                              tracking-[-0.04em]">
-                  {s.value}
-                </p>
-                <p className="mt-2 text-sm leading-snug text-ink-muted">
-                  {s.label}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-      <section className="flex min-h-[70vh] flex-col items-center justify-center
-                          px-6 text-center">
-        <Reveal>
-          <h2 className="text-[clamp(2rem,6vw,4.5rem)] font-semibold
-                         leading-[1.05] tracking-[-0.04em]">
-            See it read a room.
-            <br />
-            <span className="text-ink-muted">Then watch it ignore one.</span>
-          </h2>
-        </Reveal>
-        <Reveal delay={200}>
-          <Link
-            href="/demo"
-            className="mt-12 inline-flex items-center gap-2 rounded-full bg-white
-                       px-8 py-3.5 text-sm font-medium text-plane transition
-                       hover:bg-white/90"
-          >
-            Watch it work
-            <span aria-hidden>→</span>
-          </Link>
-        </Reveal>
-      </section>
+        {/* The film, alone on a screen. Nothing above or beside it — this is
+            the one moment the page stops arguing and just shows you. */}
+        <SectionFilm />
 
-      <footer className="border-t border-white/[0.06] px-6 py-10 text-center">
+        <SectionLearned />
+        <SectionNext />
+      </main>
+
+      <footer className="border-t border-line px-6 py-10 text-center">
         <p className="text-xs text-ink-muted">
           {brand.name} — {brand.description}
         </p>
