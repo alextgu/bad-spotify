@@ -47,7 +47,7 @@ python run.py --video clip.mp4 --record demo1   # + write data/sessions/demo1.js
 python run.py --source webcam                   # real camera + mic
 python run.py --ticks 10 --no-hud               # bounded headless run
 python run.py --cruelty 1.0                     # maximum hostility
-pytest tests/ -q                                # 30 tests
+pytest tests/ -q                                # 48 tests
 ```
 
 ### Two screens, one server
@@ -95,6 +95,20 @@ bands, and different artists with the same song title — there's a filter for
 that (`players/spotify_match.py`, 13 tests) but reality gets a vote. Fix
 mismatches before demo day: correct the title in `scripts/build_seed_corpus.py`,
 or paste a URI straight into the cache file.
+
+### Sampling a video on its own
+
+`src/videofeed/` is a standalone package: a video in, model-ready segments out.
+Fixed cadence **plus** event triggers (scene cut, audio onset, motion, light
+changes), with the audio window attached to each sample. It imports nothing from
+this project, and the model side is a documented stub rather than a guess.
+
+```bash
+PYTHONPATH=src python -m videofeed clip.mp4 --interval 5 \
+    --triggers scene-cut,audio-onset --out runs/demo1
+```
+
+Full docs: `src/videofeed/README.md`.
 
 ### The site
 
@@ -186,6 +200,7 @@ still happening. The DJ decides per moment — it isn't a setting.
 | `src/badspotify/voice/` | ElevenLabs narrator |
 | `src/badspotify/hud/` | FastAPI + websocket; `dj.html` and `index.html` |
 | `src/badspotify/session.py` | records a run to JSON for the site |
+| `src/videofeed/` | **standalone**: samples a video on a cadence *and* on triggers (cuts, onsets, motion), attaches the audio, hands segments to whatever you plug in. Imports nothing from `badspotify` — see its own README |
 | `frontend/` | **the presentation site** (Next.js, separate from the agent) |
 | `scripts/` | corpus builder, Spotify setup, every-noise scraper |
 
@@ -247,8 +262,11 @@ and the streaming is a swappable backend.
 **Every Noise at Once.** `scripts/scrape_everynoise.py` pulls ~6000 genres with
 2D coordinates out of the genre map's inline CSS — a free offline genre
 embedding. The site's data is frozen (its maintainer left Spotify), which is
-fine: we need stable geometry, not fresh charts. **Unverified against the live
-page — run it and check the count before relying on it.**
+fine: we need stable geometry, not fresh charts. **Verified 13 Aug 2026: 6291
+genres off the live page.** But its raw opposites are unusable as-is — it says
+the opposite of death metal is `funk bh, cartoon, kikuyu pop`, which is
+geometrically right and comedically dead. Nothing consumes it until there's a
+recognisability filter in front of it. See `STATUS.md`.
 
 **Twelve Labs.** Indexing is asynchronous and won't serve a five-second loop. If
 we use it, it belongs at the *end*: index the session afterwards and close with
@@ -279,7 +297,7 @@ the site are how the agent's mind is made legible).
 
 | Criterion | Where it's answered |
 |---|---|
-| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 30 tests guarding specific live-demo failures |
+| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 48 tests guarding specific live-demo failures |
 | UX & intuition | A DJ character with a reacting orb, onboarding, one honest control, and a site that walks judges through the reasoning |
 | Creativity | Geometric opposition *plus* a cultural judge; three competing theories of wrongness rather than one similarity score |
 | Originality | An assistant that is deliberately useless. The failure mode and the feature are the same thing, which is why it holds up live |

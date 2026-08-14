@@ -64,14 +64,8 @@ class Runtime:
                  tempo=scene.tempo_feel.value, meter=scene.meter.value,
                  audio=scene.audio_summary, source="injected", latency_ms=0)
 
-        state = self.graph.n_antagonize({"scene": scene})
+        state = self.graph.n_antagonize({"scene": scene, "force": True})
         state = self.graph.n_judge(state)
-
-        self.graph.dj.state.pending_signature = scene.signature()
-        self.graph.dj.state.pending_count = self.graph.dj.agreement
-        self.graph.dj.state.started_at = 0.0
-        self.graph.dj.state.last_switch = 0.0
-
         state = self.graph.n_dj(state)
         if state["decision"].action in (DJAction.PLAY, DJAction.FALLBACK):
             self.graph.n_play(state)

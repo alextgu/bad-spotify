@@ -109,19 +109,31 @@ class DJController:
     # -------------------------------------------------------------- decide
 
     def decide(self, scene: SceneRead, verdict: Verdict | None,
-               now: float | None = None) -> DJDecision:
+               now: float | None = None, force: bool = False) -> DJDecision:
+        """`force` is the stage button: a human pressing it is not thrashing.
+
+        It skips hysteresis and the timing bounds, but nothing else -- the
+        fallback ladder below still runs if the verdict is missing.
+        """
         now = now or time.time()
 
         confirmed, why = self.observe(scene)
-        if not confirmed:
+        if force:
+            why = "forced (scene injection)"
+        elif not confirmed:
             return DJDecision(action=DJAction.HOLD, reason=why)
 
-        mode, delta, mode_why = self.choose_mode(scene, now)
+        if force:
+            # Cut in: the point of the button is that the change lands now.
+            mode, delta, mode_why = (PlayMode.INTERRUPT, self.scene_delta(scene),
+                                     "bounds bypassed, cutting in")
+        else:
+            mode, delta, mode_why = self.choose_mode(scene, now)
 
-        allowed, gate_reason, wait = self.may_act(mode, now)
-        if not allowed:
-            return DJDecision(action=DJAction.HOLD, mode=mode, scene_delta=delta,
-                              reason=gate_reason, seconds_until_eligible=wait)
+            allowed, gate_reason, wait = self.may_act(mode, now)
+            if not allowed:
+                return DJDecision(action=DJAction.HOLD, mode=mode, scene_delta=delta,
+                                  reason=gate_reason, seconds_until_eligible=wait)
 
         if verdict is None:
             fb = self.fallback()

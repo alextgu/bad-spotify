@@ -23,6 +23,9 @@ spotipy>=2.23                # playback control only (audio-features is dead)
 requests>=2.31
 beautifulsoup4>=4.12         # everynoise genre-map scrape
 
+# --- tests ---
+pytest>=8.0                  # `pytest tests/ -q` is in the README; ship the dep
+
 # --- hud ---
 fastapi>=0.110
 uvicorn[standard]>=0.29

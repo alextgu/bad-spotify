@@ -52,6 +52,7 @@ class PipelineState(TypedDict, total=False):
     verdict: Optional[Verdict]
     decision: Optional[DJDecision]
     t_start: float
+    force: bool          # stage button: bypass the DJ's timing bounds
 
 
 class BadSpotifyGraph:
@@ -163,7 +164,8 @@ class BadSpotifyGraph:
             return {**state, "verdict": None}
 
     def n_dj(self, state: PipelineState) -> PipelineState:
-        decision = self.dj.decide(state["scene"], state.get("verdict"))
+        decision = self.dj.decide(state["scene"], state.get("verdict"),
+                                  force=bool(state.get("force")))
         BUS.emit("dj", decision.action.value, reason=decision.reason,
                  mode=decision.mode.value,
                  scene_delta=round(decision.scene_delta, 3),
