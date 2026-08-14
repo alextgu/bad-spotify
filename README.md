@@ -96,6 +96,38 @@ that (`players/spotify_match.py`, 13 tests) but reality gets a vote. Fix
 mismatches before demo day: correct the title in `scripts/build_seed_corpus.py`,
 or paste a URI straight into the cache file.
 
+### Hosting it (Gradio)
+
+```bash
+python app.py                  # http://127.0.0.1:7860
+python app.py --share          # public link, for a demo
+python app.py --play           # let it actually drive Spotify (off by default)
+```
+
+Four tabs: **describe a scene** (types → the whole pipeline, no camera, no keys,
+cannot fail), **a photo** (one frame → one decision — the same `Engine.look()`
+call a Ray-Ban companion app makes), **a video** (sampled by `videofeed` on a
+cadence *and* on cuts and bangs, exports the session JSON the site replays), and
+**what's actually running** (which backends are real and which are stand-ins).
+
+Nothing plays out loud unless you pass `--play`: a hosted page should not seize
+the host machine's speakers, and the project's decision was to *name* songs
+rather than play them at an audience.
+
+It sits on `src/badspotify/service.py` — `Engine`, the agent minus the live
+loop:
+
+```python
+from badspotify.service import Engine
+engine = Engine()
+engine.describe("a hospital waiting room at 3am")   # one decision
+engine.look(frame, audio)                           # one decision  <- the glasses call
+engine.watch("clip.mp4")                            # a whole session, site-ready
+```
+
+Every one of those runs through the same compiled LangGraph as `run.py`, just
+entered at a different node — see below.
+
 ### Sampling a video on its own
 
 `src/videofeed/` is a standalone package: a video in, model-ready segments out.
@@ -162,6 +194,24 @@ waiting for. (Skipping the DJ on quiet ticks is what caused the deadlock
 described at the bottom of this file.)
 
 ### Four decisions worth defending
+
+### LangGraph, and where it's actually used
+
+The graph is compiled in `agents/graph.py` and there are **two entry points into
+the same nodes**:
+
+| entry | who uses it | starts at |
+|---|---|---|
+| `graph.tick(obs)` | `run.py`, the live loop | the change gate — it has to decide whether the world moved before spending a model call |
+| `graph.decide_from_scene(state)` | `service.Engine` → the Gradio app, and any glasses companion app | `antagonize` — the scene is already known, because someone typed it, took a photo, or a sampler picked the moment out |
+
+Same nodes, same edges, same conditional play/stop. Not two pipelines: if they
+ever disagree, that's the bug. Without langgraph installed both fall back to a
+sequential executor with identical semantics, so the repo is never un-runnable.
+
+LangGraph earns its keep at the decision layer — explicit state, conditional
+edges, and somewhere to hang retries and timeouts. It is deliberately *not* used
+to fan out the perception fields; those belong in one call.
 
 **One perception call, not one agent per field.** Mood, tempo, meter and colour
 all derive from the same frame. Four agents would buy 4× the cost, 4× the

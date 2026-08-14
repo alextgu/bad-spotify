@@ -119,7 +119,9 @@ class DJController:
 
         confirmed, why = self.observe(scene)
         if force:
-            why = "forced (scene injection)"
+            # The stage button, a single photo, a moment a sampler picked out:
+            # all deliberate, none of them thrashing.
+            why = "forced (deliberate sample)"
         elif not confirmed:
             return DJDecision(action=DJAction.HOLD, reason=why)
 

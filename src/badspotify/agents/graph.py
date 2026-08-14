@@ -76,6 +76,8 @@ class BadSpotifyGraph:
         self._last_scene: Optional[SceneRead] = None
         self._last_verdict: Optional[Verdict] = None
         self._compiled = self._compile()
+        # Compiled lazily: only the hosted paths (service.Engine) enter here.
+        self._from_scene = None
 
     # ------------------------------------------------------------- nodes --
 
@@ -245,6 +247,63 @@ class BadSpotifyGraph:
         )
         g.add_edge("play", END)
         return g.compile()
+
+    def _compile_from_scene(self):
+        """The same graph, entered when the scene is already known.
+
+        `tick()` starts at the change gate, which is right for a continuous
+        loop. Anything holding a scene already -- a typed description, a single
+        frame from a companion app, a moment a sampler decided was worth
+        looking at -- starts here instead, at antagonize.
+
+        It is a second entry point into the same nodes, not a second pipeline.
+        If these ever disagree, that's the bug.
+        """
+        try:
+            from langgraph.graph import END, START, StateGraph
+        except Exception:
+            return None
+
+        g = StateGraph(PipelineState)
+        g.add_node("antagonize", self.n_antagonize)
+        g.add_node("judge", self.n_judge)
+        g.add_node("dj", self.n_dj)
+        g.add_node("play", self.n_play)
+
+        g.add_edge(START, "antagonize")
+        g.add_edge("antagonize", "judge")
+        g.add_edge("judge", "dj")
+        g.add_conditional_edges(
+            "dj",
+            lambda s: ("play" if s["decision"].action in (DJAction.PLAY, DJAction.FALLBACK)
+                       else "stop"),
+            {"play": "play", "stop": END},
+        )
+        g.add_edge("play", END)
+        return g.compile()
+
+    def decide_from_scene(self, state: PipelineState) -> PipelineState:
+        """Run scene -> antagonize -> judge -> dj -> play. Needs `state["scene"]`.
+
+        Used by `service.Engine`, which is what the Gradio app and any glasses
+        companion app sit on. Falls back to the sequential path with identical
+        semantics if langgraph isn't installed.
+        """
+        if state.get("scene") is None:
+            raise ValueError("decide_from_scene() needs a scene in the state")
+        if self._from_scene is None:
+            self._from_scene = self._compile_from_scene()
+        if self._from_scene is not None:
+            return self._from_scene.invoke(state)
+        return self._sequential_from_scene(state)
+
+    def _sequential_from_scene(self, state: PipelineState) -> PipelineState:
+        state = self.n_antagonize(state)
+        state = self.n_judge(state)
+        state = self.n_dj(state)
+        if state["decision"].action in (DJAction.PLAY, DJAction.FALLBACK):
+            state = self.n_play(state)
+        return state
 
     def _sequential(self, state: PipelineState) -> PipelineState:
         state = self.n_gate(state)

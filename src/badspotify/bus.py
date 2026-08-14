@@ -18,6 +18,13 @@ class EventBus:
     def subscribe(self, fn: Callable[[PipelineEvent], None]) -> None:
         self._subs.append(fn)
 
+    def unsubscribe(self, fn: Callable[[PipelineEvent], None]) -> None:
+        """Same reason as drop_queue: anything that subscribes per request --
+        a session recorder in a web handler, say -- has to be able to let go,
+        or every request leaves a listener behind that emit() keeps calling."""
+        if fn in self._subs:
+            self._subs.remove(fn)
+
     def drop_queue(self, q: asyncio.Queue) -> None:
         """Unregister a disconnected subscriber. Without this, every HUD
         refresh leaks a queue that emit() keeps filling forever."""

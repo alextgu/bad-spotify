@@ -26,6 +26,9 @@ Last updated: 13 Aug 2026 (late evening — verification pass)
 | Working out the opposite | Done *on mock scene reads* | park → Drowning Pool, library → Sandstorm, hospital-at-3am → Barbie Girl. Never run on a real photo |
 | Screens — DJ face and engineering view | Done | watched both at 127.0.0.1:8420: orb takes the scene colours, ticker fills, scene injection runs the whole pipeline |
 | Test suite | Done | 65 passed (needs `pip install pytest` — it was missing from requirements, now added) |
+| Hosted app — `app.py` (Gradio) | Done, on mocks | four tabs: describe / photo / video / backends. Watched "a toddler's birthday party" return Johnny Cash's *Hurt* in the browser; the video tab produced 5 decisions and a downloadable session JSON |
+| `Engine` — the agent minus the loop | Done | `src/badspotify/service.py`. `describe()`, `look()`, `watch()`. 12 tests |
+| LangGraph | Done, both entry points | `tick()` for the live loop, `decide_from_scene()` for the hosted paths — same nodes, same edges. The hosted path previously bypassed the graph entirely; it doesn't now |
 | Video sampling — `src/videofeed/` | Done, model side deliberately stubbed | new standalone package: cadence + trigger sampling with audio. Verified on a real clip — the cut at 5.0s fired `scene_cut+motion_spike+brightness_shift`, the tone fired `audio_onset`, and `--out` wrote frames, WAVs and a manifest. 17 tests, all against a real mp4 |
 | Clean install | Done | fresh venv, `pip install -r requirements.txt`, corpus, bounded run — no errors |
 | Site — launch page | Done, rebuilt | restructured into six sections (see below); renders clean, `tsc --noEmit` clean |
