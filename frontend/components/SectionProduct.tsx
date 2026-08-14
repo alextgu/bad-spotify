@@ -14,7 +14,7 @@ import { capabilities, stack } from "@/lib/content";
  */
 export default function SectionProduct() {
   return (
-    <section id="product" className="mx-auto max-w-6xl px-6 py-32">
+    <section id="product" className="section-page mx-auto max-w-6xl px-6 py-32">
       <div className="grid items-center gap-12 lg:grid-cols-2">
         <ProductRotator />
 
@@ -34,7 +34,7 @@ export default function SectionProduct() {
       {/* --------------------------------------------------- what it does -- */}
       <ol className="mt-24 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         {capabilities.map((c, i) => (
-          <li key={c.title} className="border-t border-white/10 pt-5">
+          <li key={c.title} className="border-t border-line pt-5">
             <p className="font-mono text-xs text-ink-muted">
               {String(i + 1).padStart(2, "0")}
             </p>
@@ -64,7 +64,7 @@ export default function SectionProduct() {
         <h3 className="text-xl font-medium tracking-[-0.02em]">Behind it</h3>
         <dl className="mt-8 grid gap-x-12 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {stack.map((s) => (
-            <div key={s.name} className="border-t border-white/10 pt-4">
+            <div key={s.name} className="border-t border-line pt-4">
               <dt className="font-medium">{s.name}</dt>
               <dd className="mt-1.5 text-sm leading-relaxed text-ink-muted">{s.role}</dd>
             </div>

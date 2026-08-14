@@ -115,7 +115,9 @@ class Verdict(BaseModel):
     """The judge's pick. Distance gives defensibility; the LLM gives the punchline."""
     track: Track
     strategy: str
-    cruelty: float = Field(0.0, ge=0, le=1)
+    mismatch: float = Field(0.0, ge=0, le=1)
+    """How far this pick sits from the scene, on the mood axes. Reported,
+    never set by a user -- it is a measurement, not a setting."""
     quip: str = ""
     reasoning: str = ""
     runner_ups: list[str] = Field(default_factory=list)

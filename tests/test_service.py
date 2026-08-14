@@ -85,12 +85,14 @@ def test_it_runs_through_the_compiled_graph(engine):
     assert engine.graph._from_scene is not None or engine.graph._compiled is None
 
 
-def test_cruelty_is_clamped(engine):
-    engine.cruelty = 5.0
-    assert engine.cruelty == 1.0
-    engine.cruelty = -2.0
-    assert engine.cruelty == 0.0
-    engine.cruelty = 0.85
+def test_there_is_no_cruelty_dial(engine):
+    """Removed on purpose: this reads mood and inverts mood, and a knob
+    labelled "how far past inappropriate to go" described something else."""
+    assert not hasattr(engine, "cruelty")
+    assert not hasattr(engine.graph, "cruelty")
+
+    d = engine.describe("a sunlit park, people reading on the grass")
+    assert 0.0 <= d.chosen["mismatch"] <= 1.0, "mismatch is measured, not set"
 
 
 def test_look_takes_a_bare_frame(engine):

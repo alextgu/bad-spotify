@@ -58,6 +58,29 @@ guardrails below.
 
 ---
 
+## What "worst" means here
+
+**Musically opposite in mood.** That is the whole definition. Five axes —
+happy/bleak, still/frantic, sparse/dense, dark/bright, synthetic/human — and the
+opposite is the reflection of the scene through the middle of that space.
+
+It does not mean offensive, and the system has no way to be: it knows nothing
+about anyone's race, sex, religion, politics or identity, and never tries to
+infer them. It reads the mood of a place and picks a mismatched track from a
+hand-picked list of 47 well-known songs.
+
+There is no dial. A "how far to go" setting existed briefly and was removed —
+a partial inversion is a worse joke, and the control described a product this
+isn't. What the screens report as *mismatch* is a measurement of the pick, not
+a setting anyone turned.
+
+**The same machinery would find the *best* song.** Search near the scene instead
+of at its reflection, and ask the judge which candidate fits rather than which
+one ruins it. Nothing else changes — which is the point: the hard part was never
+the sign.
+
+---
+
 ## How it decides what's "worst"
 
 Two things, and it needs both.
@@ -120,7 +143,7 @@ takes on the colours of the room, says its line, and shows what's playing and
 whether it queued the song or cut in. Beside it, a running list of its reasoning.
 
 **The engineering view** — what we use while building. The same information in
-much more detail, plus a cruelty dial and a box where you type a situation
+much more detail, plus a box where you type a situation
 ("a hospital waiting room at 3am") and watch the whole thing run without a
 camera.
 

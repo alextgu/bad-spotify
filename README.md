@@ -10,6 +10,14 @@ Sunlit park with people reading → Drowning Pool, *Bodies*.
 Toddler's birthday party → Johnny Cash, *Hurt*.
 Silent library during exam week → Darude, *Sandstorm*.
 
+**"Worst" means musically opposite in mood, and nothing else.** Every scene and
+every track is scored on five mood axes — valence, arousal, density, brightness,
+organicness — and the target is that scene reflected through the middle of the
+space. The system has no notion of anyone's race, sex, religion, politics or
+identity, and never tries to work them out. There is no "how far to go" dial and
+there should not be one: the opposite is the opposite. The site's FAQ says all
+of this in public, and it is worth keeping that promise true in the code.
+
 ---
 
 ## Which doc do I want?
@@ -46,8 +54,7 @@ python run.py --video clip.mp4 --realtime       # ...at its true speed
 python run.py --video clip.mp4 --record demo1   # + write data/sessions/demo1.json
 python run.py --source webcam                   # real camera + mic
 python run.py --ticks 10 --no-hud               # bounded headless run
-python run.py --cruelty 1.0                     # maximum hostility
-pytest tests/ -q                                # 48 tests
+pytest tests/ -q                                # 77 tests
 ```
 
 ### Two screens, one server
@@ -55,7 +62,7 @@ pytest tests/ -q                                # 48 tests
 | | |
 |---|---|
 | `/dj` | **The presentation face.** An orb that takes on the room's colours, the spoken line in big type, now-playing with a queued/cut-in badge, and a compact reasoning ticker. This is what judges see. |
-| `/` | **The engineering view.** Vibe-gap chart, cruelty dial, scene injection, full event trace. This is what we debug with. |
+| `/` | **The engineering view.** Vibe-gap chart, scene injection, full event trace. This is what we debug with. |
 
 Keep both. The reasoning being visible is what separates this from a shuffle
 button, and it's most of why the technical work reads as serious.
@@ -347,7 +354,7 @@ the site are how the agent's mind is made legible).
 
 | Criterion | Where it's answered |
 |---|---|
-| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 48 tests guarding specific live-demo failures |
+| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 77 tests guarding specific live-demo failures |
 | UX & intuition | A DJ character with a reacting orb, onboarding, one honest control, and a site that walks judges through the reasoning |
 | Creativity | Geometric opposition *plus* a cultural judge; three competing theories of wrongness rather than one similarity score |
 | Originality | An assistant that is deliberately useless. The failure mode and the feature are the same thing, which is why it holds up live |

@@ -27,7 +27,8 @@ perceive:
   retries: 1              # ...after retrying once
 
 antagonize:
-  cruelty: 0.85           # 0 = merely inappropriate, 1 = a war crime
+  # No dial here on purpose. The opposite is the opposite -- see
+  # music/vibe.py. These axes are musical mood and nothing else.
   strategies:             # these fan out in parallel
     - genre_antipode
     - tempo_clash

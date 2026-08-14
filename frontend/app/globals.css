@@ -2,11 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+/* ------------------------------------------------------------------ theme --
+   Every colour on the site is one of these tokens, and the tokens are the only
+   place a colour is written down. That's what makes a redesign an edit here
+   rather than a hunt through twenty components.
+
+   Default is the clean white showcase. `data-theme="dark"` on <html> flips the
+   whole thing back -- the agent's own screens (/dj, /) are dark and stay dark,
+   and the demo replay reads better on dark, so both have to keep working.
+
+   THIS IS THE FRAMEWORK, NOT THE DESIGN. The values below are placeholders
+   that hold together; the visual pass replaces them.                        */
+
+:root {
+  color-scheme: light;
+
+  --plane: #ffffff;          /* the page itself */
+  --surface-1: #f7f7f5;      /* cards, panels */
+  --surface-2: #efefec;      /* one step in */
+
+  --ink-primary: #0b0b0c;
+  --ink-secondary: #43454a;
+  --ink-muted: #85878e;
+
+  --line: #e4e4e0;           /* hairlines */
+  --line-strong: #cfcfca;    /* borders that need to be seen */
+
+  --scene: #1c6ef2;          /* what the world IS */
+  --target: #d95926;         /* what we're about to do about it */
+  --critical: #d03b3b;
+  --good: #0ca30c;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --plane: #0d0d0d;
+  --surface-1: #1a1a19;
+  --surface-2: #212120;
+
+  --ink-primary: #ffffff;
+  --ink-secondary: #c3c2b7;
+  --ink-muted: #898781;
+
+  --line: #2c2c2a;
+  --line-strong: #3d3d3a;
+
+  --scene: #3987e5;
+  --target: #d95926;
+}
 
 body {
-  background: #0d0d0d;
-  color: #ffffff;
+  background: var(--plane);
+  color: var(--ink-primary);
 }
 
 /* Faint engineering grid, same as the agent's own screens. */
@@ -15,24 +63,21 @@ body {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(#2c2c2a 1px, transparent 1px),
-    linear-gradient(90deg, #2c2c2a 1px, transparent 1px);
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
   background-size: 64px 64px;
-  opacity: 0.35;
+  opacity: 0.6;
   pointer-events: none;
   z-index: 0;
 }
 
-/* The launch page is deliberately plain: no grid, no texture, nothing to
-   look at except the words. Restraint is what makes it read as a product
-   rather than a hackathon page. The demo page keeps the grid. */
 html { scroll-behavior: smooth; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
 
-::selection { background: #d95926; color: #fff; }
+::selection { background: var(--target); color: #fff; }
 
 /* ---------------------------------------------------------------- rig ---
    The rotating product in section 2. Deliberately plain for now -- the UI
@@ -133,4 +178,86 @@ html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   .rig { animation: none; transform: rotateX(-8deg) rotateY(-24deg); }
   .rig-camera-pulse { animation: none; opacity: 0; }
+}
+
+/* ------------------------------------------------------------------ orb ---
+   Section 2's mark: a core that breathes, with rings rippling outward as if
+   it is listening. Framework only -- the derp lives in the face, and the face
+   is a placeholder. Pure CSS so there is no dependency to fail on stage. */
+.orb-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 260px;
+  height: 260px;
+}
+
+.orb-core {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #ffffff 0%, var(--scene) 58%, #0b3f96 100%);
+  box-shadow: 0 18px 60px -18px rgba(28, 110, 242, 0.55);
+  animation: orb-breathe 4.5s ease-in-out infinite;
+}
+
+/* [face] -- the one place allowed to be a bit stupid. */
+.orb-eye {
+  position: absolute;
+  top: 46%;
+  width: 13px;
+  height: 17px;
+  border-radius: 50%;
+  background: #0b0b0c;
+  animation: orb-blink 6s infinite;
+}
+.orb-eye-l { left: 30%; }
+.orb-eye-r { left: 56%; top: 49%; }   /* deliberately not level */
+
+.orb-ripple {
+  position: absolute;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  border: 1.5px solid var(--scene);
+  opacity: 0;
+  animation: orb-ripple 4.5s ease-out infinite;
+}
+.orb-ripple-2 { animation-delay: 1.5s; }
+.orb-ripple-3 { animation-delay: 3s; }
+
+@keyframes orb-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.045); }
+}
+
+@keyframes orb-ripple {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes orb-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95%           { transform: scaleY(0.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-core, .orb-ripple, .orb-eye { animation: none; }
+  .orb-ripple { opacity: 0.25; }
+}
+
+/* -------------------------------------------------------------- sections ---
+   Every section is at least one screen tall. That is the framework the page
+   transitions will hang off: one section, one "page", so a transition has a
+   clean unit to work on.
+
+   `min-height` and not `height` on purpose -- the try-it and depth sections
+   are legitimately taller than a screen, and clipping them to 100vh would
+   hide content. Scroll snapping is deliberately NOT on yet: mandatory snap
+   fights sections that overflow, and that is a decision for the design pass
+   rather than the scaffold. */
+.section-page {
+  min-height: 100svh;
+  scroll-margin-top: 3rem;   /* clears the fixed nav when jumping to an anchor */
 }

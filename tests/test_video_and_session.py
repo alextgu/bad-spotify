@@ -36,7 +36,7 @@ def test_recorder_builds_a_moment_from_the_event_stream():
              target_genres=["funeral doom"])
     BUS.emit("candidates", "genre_antipode", picks=[{"title": "Bodies"}])
     BUS.emit("verdict", "Bodies", artist="Drowning Pool", quip="You looked comfortable.",
-             strategy="genre_antipode", cruelty=0.9, reasoning="maximally wrong")
+             strategy="genre_antipode", mismatch=0.9, reasoning="maximally wrong")
     BUS.emit("play", "Bodies - Drowning Pool", video_time=8.0, mode="interrupt",
              track_id="bodies", genres=["nu metal"])
 

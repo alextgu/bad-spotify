@@ -22,9 +22,9 @@ export default function Timeline({
 
   return (
     <div className="mt-4">
-      <div className="relative h-10 rounded-lg border border-white/10 bg-surface-1">
+      <div className="relative h-10 rounded-lg border border-line bg-surface-1">
         <div
-          className="absolute top-0 h-full w-px bg-white/60"
+          className="absolute top-0 h-full w-px bg-ink-primary/60"
           style={{ left: `${(current / duration) * 100}%` }}
         />
         {session.moments.map((m, i) => {

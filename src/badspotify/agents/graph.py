@@ -68,7 +68,6 @@ class BadSpotifyGraph:
         self.corpus = Corpus.load()
 
         acfg = cfg.section("antagonize")
-        self.cruelty = float(acfg.get("cruelty", 0.85))
         self.strategy_names = acfg.get("strategies") or ["genre_antipode"]
         self.per_strategy = int(acfg.get("candidates_per_strategy", 4))
 
@@ -118,7 +117,7 @@ class BadSpotifyGraph:
 
     def n_antagonize(self, state: PipelineState) -> PipelineState:
         scene = state["scene"]
-        anti = build_antivibe(scene, self.cruelty)
+        anti = build_antivibe(scene)
         BUS.emit("antivibe", anti.rationale,
                  target=anti.target.model_dump(),
                  target_genres=anti.target_genres[:8],
@@ -155,7 +154,7 @@ class BadSpotifyGraph:
             verdict = self.judge.judge(state["scene"], state["anti"], candidates)
             BUS.emit("verdict", verdict.track.title,
                      artist=verdict.track.artist, quip=verdict.quip,
-                     strategy=verdict.strategy, cruelty=round(verdict.cruelty, 3),
+                     strategy=verdict.strategy, mismatch=round(verdict.mismatch, 3),
                      reasoning=verdict.reasoning, runner_ups=verdict.runner_ups,
                      source=verdict.source)
             self._last_verdict = verdict

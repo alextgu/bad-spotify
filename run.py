@@ -106,7 +106,6 @@ def main() -> None:
     ap.add_argument("--record", default=None, metavar="NAME",
                     help="write the run to data/sessions/NAME.json for the demo site")
     ap.add_argument("--ticks", type=int, default=None, help="stop after N observations")
-    ap.add_argument("--cruelty", type=float, default=None)
     ap.add_argument("--no-hud", action="store_true")
     ap.add_argument("--quiet", action="store_true", help="only verdicts and errors")
     ap.add_argument("--turbo", action="store_true",
@@ -122,8 +121,6 @@ def main() -> None:
         cfg.setdefault("capture", {})["source"] = args.source
     if args.realtime:
         cfg.setdefault("capture", {})["realtime"] = True
-    if args.cruelty is not None:
-        cfg.setdefault("antagonize", {})["cruelty"] = args.cruelty
     if args.no_hud:
         cfg.setdefault("hud", {})["enabled"] = False
     if args.turbo:

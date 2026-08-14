@@ -169,7 +169,7 @@ export default function SectionTryIt() {
   // ----------------------------------------------------------------------
 
   return (
-    <section id="try" className="mx-auto max-w-6xl px-6 py-32">
+    <section id="try" className="section-page mx-auto max-w-6xl px-6 py-32">
       <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.035em]">
         Try it yourself.
       </h2>
@@ -186,8 +186,8 @@ export default function SectionTryIt() {
             onClick={() => setSource({ kind: "preset", clip: c })}
             className={`rounded-full border px-4 py-2 text-sm transition ${
               source.kind === "preset" && source.clip.id === c.id
-                ? "border-white/50 text-white"
-                : "border-white/15 text-ink-muted hover:border-white/30"
+                ? "border-ink-primary text-ink-primary"
+                : "border-line-strong text-ink-muted hover:border-ink-muted"
             }`}
           >
             {c.label}
@@ -195,8 +195,8 @@ export default function SectionTryIt() {
           </button>
         ))}
 
-        <label className="cursor-pointer rounded-full border border-dashed border-white/20
-                          px-4 py-2 text-sm text-ink-muted transition hover:border-white/40">
+        <label className="cursor-pointer rounded-full border border-dashed border-line-strong
+                          px-4 py-2 text-sm text-ink-muted transition hover:border-ink-muted">
           Upload your own
           <input
             type="file"
@@ -231,7 +231,7 @@ export default function SectionTryIt() {
             playsInline
             preload="auto"
             crossOrigin="anonymous"
-            className="w-full rounded-xl border border-white/10 bg-surface-1"
+            className="w-full rounded-xl border border-line bg-surface-1"
             onTimeUpdate={(e) => {
               // Follow playback: keep the card in step with the footage.
               const t = e.currentTarget.currentTime;
@@ -278,8 +278,8 @@ export default function SectionTryIt() {
               <button
                 onClick={captureFrames}
                 disabled={capturing}
-                className="rounded-full border border-white/15 px-4 py-2 text-sm
-                           text-ink-secondary transition hover:border-white/40
+                className="rounded-full border border-line-strong px-4 py-2 text-sm
+                           text-ink-secondary transition hover:border-ink-muted
                            disabled:opacity-40"
               >
                 {capturing ? "grabbing frames…" : "Grab the frames it judged"}
@@ -298,7 +298,7 @@ export default function SectionTryIt() {
                       key={i}
                       onClick={() => seekTo(i)}
                       className={`shrink-0 overflow-hidden rounded-lg border ${
-                        i === index ? "border-target" : "border-white/10"
+                        i === index ? "border-target" : "border-line"
                       }`}
                     >
                       {src ? (
@@ -324,7 +324,7 @@ export default function SectionTryIt() {
           ) : source.kind === "upload" ? (
             <UploadNextSteps name={source.name} onSession={onSessionPicked} />
           ) : (
-            <p className="rounded-xl border border-white/10 bg-surface-1 p-5 text-sm text-ink-muted">
+            <p className="rounded-xl border border-line bg-surface-1 p-5 text-sm text-ink-muted">
               Press play. Cards appear as the agent makes decisions.
             </p>
           )}
@@ -347,7 +347,7 @@ function UploadNextSteps({
 }) {
   const stem = name.replace(/\.[^.]+$/, "") || "myclip";
   return (
-    <div className="rounded-xl border border-white/10 bg-surface-1 p-5">
+    <div className="rounded-xl border border-line bg-surface-1 p-5">
       <p className="text-xs uppercase tracking-widest text-ink-muted">
         Your clip, not yet watched
       </p>
@@ -362,8 +362,8 @@ function UploadNextSteps({
         Then drop <span className="font-mono text-xs">data/sessions/{stem}.json</span> here:
       </p>
       <label className="mt-3 inline-block cursor-pointer rounded-full border border-dashed
-                        border-white/20 px-4 py-2 text-sm text-ink-muted
-                        transition hover:border-white/40">
+                        border-line-strong px-4 py-2 text-sm text-ink-muted
+                        transition hover:border-ink-muted">
         Load session file
         <input
           type="file"

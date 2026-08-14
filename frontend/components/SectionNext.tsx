@@ -10,17 +10,17 @@ import { roadmap, theAsk } from "@/lib/content";
  */
 export default function SectionNext() {
   return (
-    <section id="next" className="mx-auto max-w-5xl px-6 py-32">
+    <section id="next" className="section-page mx-auto max-w-5xl px-6 py-32">
       <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.035em]">
         What’s next.
       </h2>
 
       <div className="mt-14 space-y-10">
         {roadmap.map((r) => (
-          <article key={r.title} className="border-t border-white/10 pt-6">
+          <article key={r.title} className="border-t border-line pt-6">
             <div className="flex flex-wrap items-baseline gap-3">
               <h3 className="text-xl font-medium tracking-[-0.02em]">{r.title}</h3>
-              <span className="rounded border border-white/15 px-2 py-0.5 font-mono text-[11px] text-ink-muted">
+              <span className="rounded border border-line-strong px-2 py-0.5 font-mono text-[11px] text-ink-muted">
                 {r.state}
               </span>
             </div>
@@ -30,7 +30,7 @@ export default function SectionNext() {
       </div>
 
       {/* ---------------------------------------------------- the close -- */}
-      <div className="mt-24 border-t border-white/10 pt-16">
+      <div className="mt-24 border-t border-line pt-16">
         <h3 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-semibold tracking-[-0.035em]">
           {theAsk.heading}
         </h3>

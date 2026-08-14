@@ -109,7 +109,6 @@ class Engine:
         self,
         config_path: str | Path | None = None,
         *,
-        cruelty: Optional[float] = None,
         player: Optional[str] = None,
         voice: Optional[str] = None,
         respect_bounds: bool = False,
@@ -131,18 +130,8 @@ class Engine:
         self.narrator = build_narrator(self.cfg.section("voice"))
         self.graph = BadSpotifyGraph(self.cfg, self.perceiver, self.player,
                                      self.narrator)
-        if cruelty is not None:
-            self.cruelty = cruelty
 
     # ------------------------------------------------------------ settings --
-
-    @property
-    def cruelty(self) -> float:
-        return float(self.graph.cruelty)
-
-    @cruelty.setter
-    def cruelty(self, value: float) -> None:
-        self.graph.cruelty = max(0.0, min(1.0, float(value)))
 
     def backends(self) -> dict:
         """What is actually wired up right now, after any downgrade to mock."""
@@ -324,7 +313,7 @@ class Engine:
                 "artist": verdict.track.artist,
                 "quip": verdict.quip,
                 "strategy": verdict.strategy,
-                "cruelty": round(verdict.cruelty, 3),
+                "mismatch": round(verdict.mismatch, 3),
                 "why": verdict.reasoning,
                 "genres": list(verdict.track.genres),
                 "tags": list(verdict.track.tags),

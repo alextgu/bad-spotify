@@ -186,7 +186,7 @@ class DJController:
             deck = corpus.tracks
         track = deck[len(self.state.history) % len(deck)]
         return Verdict(
-            track=track, strategy="chaos_deck", cruelty=0.8,
+            track=track, strategy="chaos_deck", mismatch=0.8,
             quip="Something has gone wrong. This is unrelated.",
             reasoning="fallback ladder engaged; silence is the only real bug",
             source="fallback",

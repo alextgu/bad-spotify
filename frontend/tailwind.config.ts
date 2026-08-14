@@ -6,15 +6,22 @@ export default {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      // Every colour resolves to a CSS variable defined in app/globals.css.
+      // Nothing here is a literal, so a redesign is one file, and the dark
+      // agent screens keep working via [data-theme="dark"].
       colors: {
-        plane: "#0d0d0d",
-        surface: { 1: "#1a1a19", 2: "#212120" },
-        ink: { primary: "#ffffff", secondary: "#c3c2b7", muted: "#898781" },
-        line: "#2c2c2a",
-        scene: "#3987e5",   // what the world IS
-        target: "#d95926",  // what we're about to do about it
-        critical: "#d03b3b",
-        good: "#0ca30c",
+        plane: "var(--plane)",
+        surface: { 1: "var(--surface-1)", 2: "var(--surface-2)" },
+        ink: {
+          primary: "var(--ink-primary)",
+          secondary: "var(--ink-secondary)",
+          muted: "var(--ink-muted)",
+        },
+        line: { DEFAULT: "var(--line)", strong: "var(--line-strong)" },
+        scene: "var(--scene)",    // what the world IS
+        target: "var(--target)",  // what we're about to do about it
+        critical: "var(--critical)",
+        good: "var(--good)",
       },
       fontFamily: {
         sans: ["system-ui", "-apple-system", "Segoe UI", "sans-serif"],

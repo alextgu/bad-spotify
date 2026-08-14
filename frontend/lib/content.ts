@@ -92,6 +92,55 @@ export const roadmap = [
   },
 ] as const;
 
+/**
+ * The FAQ.
+ *
+ * This section exists to answer the question the product invites and then
+ * settles it plainly: what "worst" means here, and what it does not mean.
+ * It means *musically opposite in mood*. It does not mean offensive, and the
+ * system has no notion of anyone's race, sex, religion, politics or identity —
+ * it reads five mood axes off a scene and picks a track from a hand-picked
+ * list of 47.
+ *
+ * Keep these answers short, literal and unfunny. The rest of the page is the
+ * joke; this is the part that has to be straight, and a judge or a journalist
+ * reading only this section should come away with the right idea.
+ */
+export const faq = [
+  {
+    q: "What does “the worst possible song” actually mean?",
+    a: "Musically opposite, and nothing else. Every scene and every track is scored on five mood axes — valence, arousal, density, brightness, organicness — and the target is that scene's reflection through the middle of the space. Calm and bright becomes loud and dark. That is the entire definition of “worst” here.",
+  },
+  {
+    q: "Is it trying to be offensive?",
+    a: "No, and it has no way to be. It knows nothing about anyone's race, sex, religion, politics or identity, and it never tries to work them out. It reads the mood of a moment and picks a musical mismatch from a fixed list of 47 well-known songs, which is the whole reason the list is hand-picked rather than scraped.",
+  },
+  {
+    q: "There used to be a “cruelty” dial. Where did it go?",
+    a: "Removed. It only ever scaled how far the mood reflection went — but a control labelled that way described a product this isn't, and a half-inverted mood is a worse joke anyway. There is now no setting at all: the opposite is the opposite. What you see reported as “mismatch” is a measurement of the pick, not a knob anyone turned.",
+  },
+  {
+    q: "Could it find the best song instead of the worst?",
+    a: "Yes — and that's the same machinery with one sign flipped. Instead of reflecting the scene's mood through the centre of the space, you search near it: the shortlist becomes the closest tracks rather than the furthest, and the judge is asked which one fits rather than which one ruins it. Everything else — the sampling, the scene read, the strategies, the reasoning shown on screen — is unchanged. It's the obvious next build, and the reason the joke works is that the hard part was never the sign.",
+  },
+  {
+    q: "Does it play music at me on this page?",
+    a: "No. This site names songs and shows the reasoning; nothing plays. The agent itself can drive Spotify playback, which needs Premium — their API refuses playback control on free accounts.",
+  },
+  {
+    q: "What happens to the video I upload?",
+    a: "The demo page never uploads anything: your clip is read in your own browser and the agent has to be run locally to make decisions about it. When you do run it, frames are sent to the scene-reading model and nothing is stored except the session file you choose to export.",
+  },
+  {
+    q: "Does it recognise faces or people?",
+    a: "No. There is no face recognition, no identification and no attempt at either. It describes a scene — where it is, what is happening, how it feels — and that description is all the rest of the system ever sees.",
+  },
+  {
+    q: "Can I ask it to play something?",
+    a: "No. That is the one feature it does not have.",
+  },
+] as const;
+
 /** Section 6 — the close. */
 export const theAsk = {
   heading: "We didn’t have the glasses.",

@@ -20,17 +20,18 @@ from dataclasses import dataclass
 from ..schemas import VIBE_DIMS, AntiVibe, Meter, SceneRead, TempoFeel, Vibe
 
 
-def reflect(v: Vibe, cruelty: float = 1.0) -> Vibe:
-    """Reflect through the centre of the cube, scaled by cruelty.
+def reflect(v: Vibe) -> Vibe:
+    """Reflect through the centre of the cube: the opposite on every axis.
 
-    cruelty=0 -> the scene's own vibe (a normal, helpful, boring assistant)
-    cruelty=1 -> the exact opposite on every axis
+    These axes are *musical mood* -- valence, arousal, density, brightness,
+    organicness -- and nothing else. There is no dial on this. A partial
+    reflection is just a less funny answer, and a knob labelled "how far to
+    go" invites a reading of this system that isn't what it does.
     """
-    c = max(0.0, min(1.0, cruelty))
     out = {}
     for dim in VIBE_DIMS:
         x = getattr(v, dim)
-        out[dim] = max(0.0, min(1.0, x + c * (1.0 - 2.0 * x)))
+        out[dim] = max(0.0, min(1.0, 1.0 - x))
     return Vibe(**out)
 
 
@@ -118,9 +119,9 @@ def contextual_taboo(scene: SceneRead, now: _dt.date | None = None) -> tuple[lis
     return boost, ban, "; ".join(reasons) or "no specific taboo, pure geometry"
 
 
-def build_antivibe(scene: SceneRead, cruelty: float = 0.85,
+def build_antivibe(scene: SceneRead,
                    strategy: str = "genre_antipode") -> AntiVibe:
-    target = reflect(scene.vibe, cruelty)
+    target = reflect(scene.vibe)
     axis, dev = dominant_axis(scene.vibe)
     if dev > 0.25:
         target = sharpen(target, axis)
@@ -133,7 +134,7 @@ def build_antivibe(scene: SceneRead, cruelty: float = 0.85,
         strategy=strategy,
         rationale=(
             f"scene reads {scene.mood_label} (dominant axis '{axis}', "
-            f"deviation {dev:.2f}); cruelty {cruelty:.2f}; {why}"
+            f"deviation {dev:.2f}); {why}"
         ),
     )
 

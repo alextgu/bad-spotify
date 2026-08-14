@@ -168,7 +168,7 @@
   table.data th { color: var(--muted); font-weight: 600; }
   table.data td:first-child, table.data th:first-child { text-align: left; color: var(--text-secondary); }
 
-  /* ------------------------------------------------------- cruelty ----- */
+  /* --------------------------------------------------- meters, etc ----- */
   .hero { display: flex; align-items: baseline; gap: 10px; margin: 2px 0 10px; }
   .hero .val { font-size: 40px; font-weight: 650; letter-spacing: -0.03em; line-height: 1; }
   .hero .unit { color: var(--muted); font-size: 13px; }
@@ -338,19 +338,6 @@
             <tbody id="table-body"></tbody>
           </table>
         </div>
-      </section>
-
-      <section class="card">
-        <h2>Cruelty</h2>
-        <p class="sub">How far past “inappropriate” it is allowed to go.</p>
-        <div class="hero">
-          <span class="val" id="cruelty-val">0.85</span>
-          <span class="unit">of 1.00</span>
-        </div>
-        <div class="meter"><i id="cruelty-bar" style="width:85%"></i></div>
-        <input type="range" id="cruelty" min="0" max="1" step="0.05" value="0.85"
-               aria-label="Cruelty level">
-        <div class="rangelabels"><span>mildly wrong</span><span>a war crime</span></div>
       </section>
 
       <section class="card">
@@ -547,19 +534,10 @@ function connect() {
   ws.onmessage = (m) => { try { onEvent(JSON.parse(m.data)); } catch (e) {} };
 }
 
-/* ---------------------------------------------------------- controls -- */
-const slider = document.getElementById("cruelty");
-slider.addEventListener("input", () => {
-  const v = parseFloat(slider.value);
-  document.getElementById("cruelty-val").textContent = v.toFixed(2);
-  document.getElementById("cruelty-bar").style.width = (v * 100) + "%";
-});
-slider.addEventListener("change", () => {
-  fetch("/api/cruelty", {
-    method: "POST", headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({value: parseFloat(slider.value)}),
-  }).catch(() => {});
-});
+/* ---------------------------------------------------------- controls --
+   There is no dial. The agent has one behaviour: read the mood, invert the
+   mood. A knob labelled "how far to go" was removed on purpose -- it invited
+   a reading of this system that isn't what it does. */
 
 const PRESETS = [
   "a sunlit park, people reading on the grass",
@@ -597,8 +575,8 @@ const OB = [
    "It watches what is happening around you and plays the single worst possible soundtrack for it. That is the entire feature set. It will speak to you, but only to announce what it has done."],
   ["It reads the room, then betrays it.",
    "One vision pass turns a frame and three seconds of audio into five numbers. The agent reflects those numbers through the middle of the vibe space and hunts for whatever sits at the other end."],
-  ["You control exactly one thing.",
-   "The cruelty dial. Everything else is its decision, and it will not take requests. Press a scene chip below to watch it think."],
+  ["You control nothing.",
+   "Every choice is its own, it will not take requests, and there is no dial to soften it. It reads the mood of a moment and plays the musical opposite — nothing more. Press a scene chip below to watch it think."],
 ];
 let obStep = 0;
 const overlay = document.getElementById("onboarding");
@@ -626,10 +604,6 @@ fetch("/api/state").then(r => r.json()).then(s => {
   const b = s.backends || {};
   document.getElementById("backends").textContent =
     Object.entries(b).map(([k, v]) => `${k}:${v}`).join("  ") || "mock";
-  if (typeof s.cruelty === "number") {
-    slider.value = s.cruelty;
-    slider.dispatchEvent(new Event("input"));
-  }
 }).catch(() => {});
 </script>
 </body>

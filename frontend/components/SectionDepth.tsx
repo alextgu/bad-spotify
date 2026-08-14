@@ -12,7 +12,7 @@ import { depth } from "@/lib/content";
  */
 export default function SectionDepth() {
   return (
-    <section id="how" className="mx-auto max-w-5xl px-6 py-32">
+    <section id="how" className="section-page mx-auto max-w-5xl px-6 py-32">
       <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.035em]">
         A useless product, built properly.
       </h2>
@@ -23,7 +23,7 @@ export default function SectionDepth() {
 
       <div className="mt-16 space-y-14">
         {depth.map((d, i) => (
-          <article key={d.heading} className="grid gap-4 border-t border-white/10 pt-6 md:grid-cols-[auto_1fr] md:gap-10">
+          <article key={d.heading} className="grid gap-4 border-t border-line pt-6 md:grid-cols-[auto_1fr] md:gap-10">
             <p className="font-mono text-xs text-ink-muted md:pt-1.5">
               {String(i + 1).padStart(2, "0")}
             </p>

@@ -5,7 +5,6 @@ display, so everything the agent perceives and decides has to be legible
 somewhere, and that somewhere is a screen the audience can watch.
 
 Also hosts the two endpoints that make a live demo survivable:
-  POST /api/cruelty  -- turn the dial mid-run and hear the behaviour change
   POST /api/inject   -- type a scene, run the whole pipeline on it, no camera
 """
 #
@@ -58,7 +57,6 @@ def create_app(runtime=None):
     async def state():
         dj = runtime.graph.dj if runtime else None
         return JSONResponse({
-            "cruelty": runtime.graph.cruelty if runtime else 0.85,
             "strategies": runtime.graph.strategy_names if runtime else [],
             "corpus_size": len(runtime.graph.corpus) if runtime else 0,
             "playing": (
@@ -66,21 +64,13 @@ def create_app(runtime=None):
                     "title": dj.state.current.track.title,
                     "artist": dj.state.current.track.artist,
                     "quip": dj.state.current.quip,
-                    "cruelty": dj.state.current.cruelty,
+                    "mismatch": dj.state.current.mismatch,
                 }
                 if dj and dj.state.current else None
             ),
             "backends": runtime.backends() if runtime else {},
             "history": [e.model_dump() for e in list(BUS.history)[-60:]],
         })
-
-    @app.post("/api/cruelty")
-    async def set_cruelty(payload: dict):
-        value = float(payload.get("value", 0.85))
-        if runtime:
-            runtime.graph.cruelty = max(0.0, min(1.0, value))
-        BUS.emit("dj", f"cruelty set to {value:.2f}", cruelty=value)
-        return {"ok": True, "cruelty": value}
 
     @app.post("/api/inject")
     async def inject(payload: dict):

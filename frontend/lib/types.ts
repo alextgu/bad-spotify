@@ -50,7 +50,12 @@ export interface Chosen {
   artist: string | null;
   quip: string | null;      // what it says out loud
   strategy: string | null;  // which theory of wrongness won
-  cruelty: number | null;
+  /**
+   * How far this pick sits from the scene on the mood axes, 0..1.
+   * A measurement, not a setting — there is no dial anywhere in this system.
+   * (Older session files called this `cruelty`; that knob is gone.)
+   */
+  mismatch: number | null;
   why: string | null;
   runner_ups: string[];
 }

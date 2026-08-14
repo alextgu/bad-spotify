@@ -15,7 +15,7 @@ export default function SectionFilm() {
   const clip = CLIPS[0];
 
   return (
-    <section id="film" className="mx-auto max-w-5xl px-6 py-32">
+    <section id="film" className="section-page mx-auto flex max-w-5xl flex-col justify-center px-6 py-32">
       <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.035em]">
         Watch it ruin a moment.
       </h2>
@@ -25,7 +25,7 @@ export default function SectionFilm() {
       </p>
 
       <video
-        className="mt-10 w-full rounded-xl border border-white/10 bg-surface-1"
+        className="mt-10 w-full rounded-xl border border-line bg-surface-1"
         controls
         playsInline
         preload="metadata"

@@ -33,7 +33,7 @@ def _fmt(ev: PipelineEvent) -> str | None:
         return f"{DIM}strategy  {ev.label:<15} {picks}{RESET}"
     if ev.kind == "verdict":
         return (f"{ORANGE}verdict{RESET}   {BOLD}{ev.label}{RESET} — {d.get('artist','')}\n"
-                f"{DIM}          via {d.get('strategy')} · cruelty {d.get('cruelty',0):.2f} · "
+                f"{DIM}          via {d.get('strategy')} · mismatch {d.get('mismatch',0):.2f} · "
                 f"{d.get('reasoning','')[:80]}{RESET}")
     if ev.kind == "dj":
         return f"{DIM}dj        {ev.label:<8} {d.get('reason','')}{RESET}"

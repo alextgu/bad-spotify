@@ -38,7 +38,7 @@ Deadpan, smug, under 15 words, never explains the joke. It is not sorry.
 Good: "You looked comfortable." / "This is a funeral now."
 Bad: "Ha ha, I'm playing the opposite of what you'd want!"
 
-Return JSON: {"track_id", "cruelty" (0-1), "quip", "reasoning"}"""
+Return JSON: {"track_id", "mismatch" (0-1), "quip", "reasoning"}"""
 
 _MOCK_QUIPS = [
     "You looked comfortable.",
@@ -65,7 +65,7 @@ class MockJudge:
         return Verdict(
             track=top.track,
             strategy=top.strategy,
-            cruelty=min(1.0, top.raw_distance),
+            mismatch=min(1.0, top.raw_distance),
             quip=self._rng.choice(_MOCK_QUIPS),
             reasoning=f"highest wrongness score via {top.strategy}: {top.notes}",
             runner_ups=[c.track.title for c in candidates[1:4]],
@@ -126,7 +126,7 @@ class GeminiJudge:
                             "type": "object",
                             "properties": {
                                 "track_id": {"type": "string"},
-                                "cruelty": {"type": "number"},
+                                "mismatch": {"type": "number"},
                                 "quip": {"type": "string"},
                                 "reasoning": {"type": "string"},
                             },
@@ -144,7 +144,7 @@ class GeminiJudge:
             return Verdict(
                 track=chosen.track,
                 strategy=chosen.strategy,
-                cruelty=float(d.get("cruelty", chosen.raw_distance)),
+                mismatch=min(1.0, float(d.get("mismatch", chosen.raw_distance))),
                 quip=d["quip"],
                 reasoning=d["reasoning"],
                 runner_ups=[c.track.title for c in candidates[:4] if c.track.id != chosen.track.id],

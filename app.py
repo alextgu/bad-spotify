@@ -97,7 +97,7 @@ def decision_markdown(d: Decision) -> str:
 **So it wants** {', '.join((d.opposite.get('looking_for') or [])[:6])}
 
 **So it plays** {d.chosen['title']}, {cut} — via `{d.chosen.get('strategy')}`
-cruelty {d.chosen.get('cruelty')} · {d.chosen.get('why')}
+mismatch {d.chosen.get('mismatch')} · {d.chosen.get('why')}
 
 **It also considered**
 {considered or '- (nothing else scored)'}
@@ -121,21 +121,19 @@ def backends_markdown() -> str:
 # ----------------------------------------------------------------- handlers --
 
 
-def on_describe(text: str, cruelty: float):
+def on_describe(text: str):
     if not (text or "").strip():
         return "Type a situation first — or click one of the examples.", {}
     eng = engine()
-    eng.cruelty = cruelty
     d = eng.describe(text)
     return decision_markdown(d), d.to_dict()
 
 
-def on_photo(image, cruelty: float):
+def on_photo(image):
     """One frame in. The same call the glasses companion app will make."""
     if image is None:
         return "Upload a photo, or take one with the camera.", {}
     eng = engine()
-    eng.cruelty = cruelty
 
     # Gradio hands over RGB; everything downstream is OpenCV's BGR.
     frame = image[:, :, ::-1].copy() if getattr(image, "ndim", 0) == 3 else image
@@ -143,7 +141,7 @@ def on_photo(image, cruelty: float):
     return decision_markdown(d), d.to_dict()
 
 
-def on_video(video_path, interval, triggers, max_segments, cruelty,
+def on_video(video_path, interval, triggers, max_segments,
              progress=gr.Progress()):
     """Walk a clip and decide about every sampled moment.
 
@@ -156,7 +154,6 @@ def on_video(video_path, interval, triggers, max_segments, cruelty,
         return
 
     eng = engine()
-    eng.cruelty = cruelty
     eng.reset()
 
     rows: list[list] = []
@@ -207,11 +204,6 @@ def build_ui() -> gr.Blocks:
             "reasoning, which is the part worth looking at."
         )
 
-        cruelty = gr.Slider(
-            0.0, 1.0, value=0.85, step=0.05, label="cruelty",
-            info="how far past “inappropriate” it is allowed to go",
-        )
-
         # 1 --------------------------------------------------------------
         with gr.Tab("Describe a scene"):
             gr.Markdown(
@@ -230,8 +222,8 @@ def build_ui() -> gr.Blocks:
             with gr.Accordion("the full decision, as JSON", open=False):
                 scene_json = gr.JSON()
 
-            scene_go.click(on_describe, [scene_in, cruelty], [scene_out, scene_json])
-            scene_in.submit(on_describe, [scene_in, cruelty], [scene_out, scene_json])
+            scene_go.click(on_describe, [scene_in], [scene_out, scene_json])
+            scene_in.submit(on_describe, [scene_in], [scene_out, scene_json])
 
         # 2 --------------------------------------------------------------
         with gr.Tab("A photo"):
@@ -253,7 +245,7 @@ def build_ui() -> gr.Blocks:
             with gr.Accordion("the full decision, as JSON", open=False):
                 photo_json = gr.JSON()
 
-            photo_go.click(on_photo, [photo_in, cruelty], [photo_out, photo_json])
+            photo_go.click(on_photo, [photo_in], [photo_out, photo_json])
 
         # 3 --------------------------------------------------------------
         with gr.Tab("A video"):
@@ -290,7 +282,7 @@ def build_ui() -> gr.Blocks:
 
             video_go.click(
                 on_video,
-                [video_in, interval, triggers, max_segments, cruelty],
+                [video_in, interval, triggers, max_segments],
                 [video_status, video_table, video_file],
             )
 

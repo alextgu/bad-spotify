@@ -23,20 +23,26 @@ from badspotify.schemas import DJAction, Vibe, Verdict     # noqa: E402
 
 def test_reflection_is_actually_opposite():
     v = Vibe(valence=.9, arousal=.1, density=.2, brightness=.95, organicness=.8)
-    r = reflect(v, 1.0)
+    r = reflect(v)
     assert abs(r.valence - .1) < 1e-6
     assert abs(r.arousal - .9) < 1e-6
     assert v.distance(r) > 1.0
 
 
-def test_cruelty_zero_is_a_normal_assistant():
+def test_reflection_has_no_dial():
+    """There is no "how far to go" setting, and there should not be one:
+    the axes are musical mood, and a partial reflection is just a worse joke."""
+    import inspect
+
+    assert list(inspect.signature(reflect).parameters) == ["v"]
     v = Vibe(valence=.9, arousal=.2)
-    assert reflect(v, 0.0).as_tuple() == v.as_tuple()
+    back = reflect(reflect(v))                              # its own inverse
+    assert all(abs(a - b) < 1e-9 for a, b in zip(back.as_tuple(), v.as_tuple()))
 
 
 def test_peaceful_park_gets_something_awful():
     scene = scene_from_text("a sunlit park, people reading on the grass")
-    anti = build_antivibe(scene, 0.85)
+    anti = build_antivibe(scene)
     corpus = Corpus.load()
     cands = generate(scene, anti, corpus,
                      ["genre_antipode", "tempo_clash", "lyrical_irony"])
@@ -59,7 +65,7 @@ def test_every_preset_scene_produces_candidates():
     ]
     for p in presets:
         scene = scene_from_text(p)
-        anti = build_antivibe(scene, 0.85)
+        anti = build_antivibe(scene)
         cands = generate(scene, anti, corpus,
                          ["genre_antipode", "tempo_clash", "lyrical_irony"])
         assert cands, f"no candidates for {p!r}"
@@ -101,7 +107,7 @@ def test_fallback_never_returns_silence():
 def _verdict(tid: str = "sandstorm") -> Verdict:
     corpus = Corpus.load()
     track = corpus.get(tid) or corpus.tracks[0]
-    return Verdict(track=track, strategy="test", cruelty=.9, quip="hello")
+    return Verdict(track=track, strategy="test", mismatch=.9, quip="hello")
 
 
 # ---------------------------------------------------------- queue vs interrupt

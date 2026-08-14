@@ -77,7 +77,7 @@ class SessionRecorder:
                 "artist": d.get("artist"),
                 "quip": d.get("quip"),
                 "strategy": d.get("strategy"),
-                "cruelty": d.get("cruelty"),
+                "mismatch": d.get("mismatch"),
                 "why": d.get("reasoning"),
                 "runner_ups": d.get("runner_ups", []),
             }
