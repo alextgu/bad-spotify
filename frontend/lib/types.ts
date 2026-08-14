@@ -64,6 +64,7 @@ export interface Played {
   mode: "queue" | "interrupt" | null;
   track_id: string | null;
   genres: string[];
+  crossfade_seconds?: number;
   latency_ms: number | null;
 }
 

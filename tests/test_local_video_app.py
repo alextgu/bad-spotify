@@ -16,6 +16,7 @@ from badspotify.perceive.scene import (  #noqa: E402
     HuggingFacePerceiver,
     MOOD_PROFILES,
     SCENE_LABELS,
+    scene_from_text,
 )
 
 
@@ -28,6 +29,22 @@ class FakeClassifier:
             {"label": label, "score": score}
             for label, score in scores.items()
         ]
+
+
+class SequencePerceiver:
+    backend = "mock"
+
+    def __init__(self, scenes):
+        self.scenes = scenes
+        self.index = 0
+
+    def reset(self):
+        self.index = 0
+
+    def read(self, frame, audio_features, meta):
+        scene = self.scenes[min(self.index, len(self.scenes) - 1)]
+        self.index += 1
+        return scene
 
 
 def test_local_classifier_builds_a_complete_scene_read():
@@ -88,6 +105,8 @@ def test_video_analyzer_samples_every_five_seconds(tmp_path):
         pytest.skip("the local OpenCV build has no MP4 encoder")
     for index in range(11):
         frame = np.full((48, 64, 3), index * 20, dtype=np.uint8)
+        if index > 0:
+            frame[:, 32:, :] = min(255, index * 20 + 40)
         writer.write(frame)
     writer.release()
 
@@ -104,7 +123,21 @@ def test_video_analyzer_samples_every_five_seconds(tmp_path):
     result = VideoAnalyzer(cfg).analyze(video_path, "sample.mp4")
 
     assert result["sample_interval_s"] == 5.0
-    assert result["moment_count"] == 3
-    assert [moment["video_time"] for moment in result["moments"]] == [0.0, 5.0, 10.0]
+    assert result["moment_count"] == 1
+    assert [moment["video_time"] for moment in result["moments"]] == [5.0]
     assert all(moment["scene"]["mood"] for moment in result["moments"])
     assert all(moment["chosen"]["title"] for moment in result["moments"])
+    assert all(moment["played"]["mode"] is None for moment in result["moments"])
+    assert result["moments"][0]["played"]["crossfade_seconds"] == 0.0
+
+    scenes = [
+        scene_from_text("quiet funeral"),
+        scene_from_text("birthday party"),
+    ]
+    changed = VideoAnalyzer(cfg, perceiver=SequencePerceiver(scenes)).analyze(
+        video_path,
+        "sample.mp4",
+    )
+
+    assert changed["moment_count"] == 2
+    assert changed["moments"][1]["played"]["crossfade_seconds"] == 2.0

@@ -40,11 +40,15 @@ def test_reflection_has_no_dial():
 def test_peaceful_park_gets_something_awful():
     scene = scene_from_text("a sunlit park, people reading on the grass")
     anti = build_antivibe(scene)
+    assert 'death metal' in anti.target_genres
+    assert 'wrong-season' not in anti.target_genres
     corpus = Corpus.load()
     cands = generate(scene, anti, corpus,
                      ["genre_antipode", "tempo_clash", "lyrical_irony"])
     assert cands, "no candidates generated"
     top = cands[0].track
+    theme = set(anti.target_genres)
+    assert theme & (set(top.tags) | set(top.genres))
     #The selected track should feel unpleasant for a calm scene
     assert top.vibe.distance(scene.vibe) > 0.5, f"{top.title} is too appropriate"
 

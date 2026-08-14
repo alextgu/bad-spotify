@@ -21,8 +21,9 @@ gate:
   force_escalate_after_s: 45     # never go fully blind
 
 perceive:
-  backend: mock           # mock | gemini
-  model: gemini-2.5-flash
+  backend: huggingface    #Choose huggingface, mock, or gemini
+  model: openai/clip-vit-base-patch32
+  device: -1              #Negative one uses the CPU
   timeout_s: 4.0          # give up after this and reuse the last read
   retries: 1              # ...after retrying once
 
@@ -40,6 +41,10 @@ judge:
   model: gemini-2.5-flash
   timeout_s: 4.0          # give up after this and use the geometric top pick
   retries: 1
+
+analysis:
+  mood_change_threshold: 0.35   #Vibe distance needed for a new mood
+  crossfade_seconds: 2.0        #Transition time after a mood change
 
 dj:
   cooldown_seconds: 8           # hard floor between any two actions

@@ -14,6 +14,7 @@ export default function Timeline({
 }) {
   const times = session.moments.map(momentTime);
   const duration = Math.max(...times, current, 1) * 1.05;
+  const hasPlaybackModes = session.moments.some((m) => m.played?.mode != null);
 
   return (
     <div className="mt-4">
@@ -42,12 +43,20 @@ export default function Timeline({
         })}
       </div>
       <div className="mt-2 flex gap-4 text-xs text-ink-muted">
-        <span className="flex items-center gap-1.5">
-          <i className="h-2 w-2 rounded-full bg-scene" /> queued
-        </span>
-        <span className="flex items-center gap-1.5">
-          <i className="h-2 w-2 rounded-full bg-target" /> cut in
-        </span>
+        {hasPlaybackModes ? (
+          <>
+            <span className="flex items-center gap-1.5">
+              <i className="h-2 w-2 rounded-full bg-scene" /> queued
+            </span>
+            <span className="flex items-center gap-1.5">
+              <i className="h-2 w-2 rounded-full bg-target" /> cut in
+            </span>
+          </>
+        ) : (
+          <span className="flex items-center gap-1.5">
+            <i className="h-2 w-2 rounded-full bg-scene" /> song choice
+          </span>
+        )}
         <span className="ml-auto font-mono">
           {stamp(current)} · {session.moment_count} decisions
         </span>

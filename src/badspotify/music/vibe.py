@@ -104,7 +104,7 @@ def contextual_taboo(scene: SceneRead, now: _dt.date | None = None) -> tuple[lis
 
     #Treats Christmas music as inappropriate outside December
     today = now or _dt.date.today()
-    if today.month not in (12,):
+    if not boost and today.month not in (12,):
         boost.append("wrong-season")
         reasons.append("christmas music outside december")
 

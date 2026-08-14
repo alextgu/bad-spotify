@@ -83,9 +83,10 @@ aren't declared on the TypedDict.
 
 **The local video upload path is built.** FastAPI accepts a bounded temporary
 video, samples it through the current video source, and returns a mood and music
-timeline to `/demo`. Four focused tests pass, all 83 project tests pass, and the
-frontend type check and production build pass. It has not been tried with real
-user footage yet.
+timeline to `/demo`. Stable mood samples keep the current song choice. A new
+choice needs a different mood and enough vibe distance, and carries a two-second
+crossfade marker. Four focused tests pass, all 83 project tests pass, and the
+frontend type check and production build pass. It has been tried with rain footage.
 
 ## Built, but nobody has run it for real
 

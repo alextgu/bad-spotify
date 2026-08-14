@@ -107,7 +107,7 @@ python -m videofeed   the sampler alone. Imports nothing from badspotify.
 | `src/badspotify/players/` | `mock`, `local`, `spotify`, `spotify_match` |
 | `src/badspotify/voice/` | `narrator` (mock + ElevenLabs) |
 | `src/badspotify/hud/` | FastAPI: `/`, `/dj`, `/api/session`, `/api/state`, `/api/inject`, `/api/analyze-video`, `/ws` |
-| `src/badspotify/analysis.py` | local uploaded video analysis with no playback side effects |
+| `src/badspotify/analysis.py` | uploaded video analysis with stable mood segments and no playback side effects |
 | `src/badspotify/service.py` | `Engine`: `describe()`, `look()`, `watch()` — no loop |
 | `src/badspotify/session.py` | records a run to the JSON the site replays |
 | `src/videofeed/` | standalone sampler: cadence + triggers, audio window, handoff stub |

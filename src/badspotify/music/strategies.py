@@ -102,6 +102,15 @@ def generate(scene: SceneRead, anti: AntiVibe, corpus: Corpus,
         except Exception as e:
             print(f"[strategy] {name} failed: {e}")
 
+    #Keeps the final choices aligned with the displayed music theme
+    theme = set(anti.target_genres)
+    themed = [
+        candidate for candidate in out
+        if theme & (set(candidate.track.tags) | set(candidate.track.genres))
+    ]
+    if themed:
+        out = themed
+
     #Keeps the strongest candidate entry for each track
     best: dict[str, Candidate] = {}
     for c in out:
