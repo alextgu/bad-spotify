@@ -14,18 +14,113 @@ Silent library during exam week → Darude, *Sandstorm*.
 
 ## Which doc do I want?
 
+Three documents, one job each. **Don't add a fourth** — we had eight and they
+drifted apart within a day.
+
 | | |
 |---|---|
-| **README.md** | this file — how to run it, how it's built, who owns what |
-| **PIPELINE.md** | how it works, in plain language, no code. Start here if you're new |
+| **README.md** | this file — what it does, how to run it, how it's built |
+| **AGENTS.md** | the rules, the seams you plug into, the traps. Read before your first change. Symlinked as `CLAUDE.md`, so agents get it automatically |
 | **STATUS.md** | what's actually done, and what's only *built but unproven*. **Update it when you finish something** |
-| **INTEGRATION.md** | how to attach your part without breaking anyone else's. Read before your first change |
-| **TEAMMATE_PROMPT.md** | paste this into your coding agent before you start |
-| **AGENTS.md** | the rules. Every claim must be verifiable by a quoted command |
-| **frontend/README.md** | the site, and the one file that connects it to the agent |
 
-Each file has one job. PIPELINE never says what's finished; STATUS never explains
-how anything works. That's what stops them drifting apart.
+Plus one README beside each part that ships on its own: `frontend/`,
+`src/videofeed/`, `scripts/io/`.
+
+README never says what's finished; STATUS never explains how anything works.
+That's what stops them drifting apart.
+
+---
+
+## How it works, in plain language
+
+Six steps, over and over, about every five seconds.
+
+**1. Look.** Take a picture and listen to the last few seconds of sound.
+
+**2. Has anything changed?** Compare against the last look. If the room is
+different — someone walked in, it got loud, the lights changed — carry on to the
+expensive thinking. If it's the same, skip it and reuse what we already worked
+out.
+
+Either way we still go to step 6, because "nothing changed" is useful
+information too. It's the difference between *the scene is stable* and *we don't
+know what the scene is*. Getting that wrong once deadlocked the whole thing on
+calm footage: nothing ever played, because the rule that waits to see a change
+twice never got its second look.
+
+**It doesn't only look on a timer.** With video it also samples the moment the
+picture cuts or the sound spikes — so a five-second rhythm doesn't mean missing
+the door opening at second three. When something like that fires, we already
+know the world changed, so we skip the checking and go straight to thinking.
+
+**3. Understand the moment.** Describe what's happening: where we are, what
+people are doing, how it feels. One description covering everything, in one go.
+
+**4. Flip it.** Work out the opposite of that feeling. This is the whole point.
+
+**5. Pick the song.** Three different ideas of "worst" each propose candidates.
+Then one final choice picks the funniest, and writes a line to say out loud.
+
+**6. Queue it, or cut in.** Usually it lines the song up to play next. But if the
+room changed a lot *and* the current song has already had a fair run, it cuts in
+immediately — wrong music is much funnier while the moment is still happening.
+
+### What it notices
+
+All of this comes back in **one answer**, not one question per row. Asking
+separately would cost more, take longer, and give more chances to fail.
+
+| | What it means |
+|---|---|
+| Mood | Happy, tense, sad, calm |
+| Speed | Fast or slow — pace, drums, how much is going on |
+| Steady or not | A regular beat versus something loose, like jazz |
+| Instruments and sounds | What a genre is made of |
+| Colour | What colours are in the scene, and what they'd sound like |
+| Recognisability | Scored per track, and it weights every strategy — the joke dies if nobody knows the song |
+| Weather | **TEMPORARY** — would be looked up, not seen |
+
+It also says how sure it is. Below 0.35 confidence, nothing happens.
+
+### There is no "how wrong should it be" setting
+
+It always fully flips the mood. There used to be a dial and it was removed: it
+described something the system doesn't do. This reads a mood and inverts a mood,
+and there's no meaningful halfway.
+
+What we *do* have is a **measurement**. After it picks, we work out how far apart
+the moment and the music turned out to be — `mismatch`, 0 to 1 — and show it.
+A result, not a request. A test asserts the dial can't come back.
+
+### What "worst" means, and what it doesn't
+
+**Musically opposite in mood, and nothing else.** Five axes: valence, arousal,
+density, brightness, organicness. The system has no notion of anyone's race,
+sex, religion, politics or identity, and must never acquire one.
+
+It takes two things to be funny, and it needs both:
+
+**The maths.** Every moment and every song is scored on the same qualities.
+"Opposite" is flipping every score. Fast, free, explainable on one slide.
+
+**The taste.** The maths alone gives boring answers — usually some obscure noise
+record nobody has heard of. A genuinely funny choice has to be *specific* and
+*recognised*: funeral music at a birthday party, a Christmas song in August.
+Only something that understands culture spots that.
+
+So the maths makes a shortlist and taste picks the winner. Never one alone.
+
+### How it's stopped from going haywire
+
+- Lining up the next song is cheap. Cutting one off has to be earned: the room
+  must have genuinely changed **and** the current song must have had a fair run.
+- A song is safe from being cut for its first stretch, whatever happens.
+- It has to see the same change twice before acting.
+- If it isn't sure what it's looking at, it does nothing.
+- If any part breaks, a backup list of always-wrong songs plays anyway.
+
+**The rule: it is never silent.** Silence is the only actual bug. Playing the
+wrong thing is the product working correctly.
 
 ---
 
