@@ -6,7 +6,7 @@ export default function MomentCard({ moment }: { moment: Moment }) {
   const accent = scene?.colors?.[0] ?? "#3987e5";
 
   return (
-    <article className="rounded-xl border border-white/10 bg-surface-1 p-5">
+    <article className="rounded-xl border border-subtle bg-surface-1 p-5">
       <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-ink-muted">
         <span
           className="h-2.5 w-2.5 rounded-full"
@@ -15,10 +15,10 @@ export default function MomentCard({ moment }: { moment: Moment }) {
         {stamp(played?.at_video_time ?? moment.video_time)}
         {played?.mode && (
           <span
-            className={`ml-auto rounded border px-2 py-0.5 text-[10px] ${
+            className={`ml-auto rounded border px-2 py-0.5 text-caption ${
               played.mode === "interrupt"
                 ? "border-target text-target"
-                : "border-white/15 text-ink-muted"
+                : "border-strong text-ink-muted"
             }`}
           >
             {played.mode === "interrupt" ? "cut in" : "queued"}
@@ -50,7 +50,7 @@ export default function MomentCard({ moment }: { moment: Moment }) {
       )}
 
       {chosen && (
-        <div className="mt-5 border-t border-white/10 pt-4">
+        <div className="mt-5 border-t border-subtle pt-4">
           <p className="text-xs uppercase tracking-widest text-ink-muted">
             So it plays
           </p>

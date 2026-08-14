@@ -25,7 +25,7 @@ export default function PlaceholderBanner() {
   return (
     <div
       role="status"
-      className="fixed bottom-4 left-1/2 z-[100] w-[min(92vw,44rem)] -translate-x-1/2
+      className="fixed bottom-4 left-1/2 z-[100] w-banner -translate-x-1/2
                  rounded-lg border border-target bg-plane/95 px-4 py-3
                  font-mono text-xs text-target shadow-xl backdrop-blur"
     >

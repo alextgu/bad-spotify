@@ -52,31 +52,37 @@ export default function HeroVideoDialog({
         whileHover={{ scale: 1.012 }}
         transition={{ duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
         className={`group relative block w-full overflow-hidden rounded-xl border
-                    border-line bg-surface-1 ${className}`}
+                    border-subtle bg-surface-1 ${className}`}
         style={{ aspectRatio: "16 / 9" }}
       >
         {poster ? (
           <img src={poster} alt="" className="h-full w-full object-cover" />
         ) : (
-          <div className="h-full w-full bg-gradient-to-br from-[#1d2a3a] to-[#3a2418]" />
+          <div className="h-full w-full bg-surface-1" />
         )}
 
-        <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_30%,rgba(0,0,0,0.5))]" />
+        <span className="poster-vignette pointer-events-none absolute inset-0" />
 
-        {/* The ring is the only always-on motion on the page. It reads as
-            "this is playable" without a label. */}
-        <span className="pointer-events-none absolute left-1/2 top-1/2 h-[76px] w-[76px]
-                         -translate-x-1/2 -translate-y-1/2 rounded-full border
-                         border-white/60 motion-safe:animate-ping" />
-        <span className="pointer-events-none absolute left-1/2 top-1/2 grid h-[76px] w-[76px]
-                         -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full
-                         bg-white/95 shadow-2xl transition group-hover:bg-white">
-          <span className="ml-1.5 border-y-[12px] border-l-[20px] border-y-transparent border-l-plane" />
+        {/* The centring transform lives on the wrapper and the animation on
+            the child, because `animate-ping` sets `transform: scale(2)` --
+            which silently replaces the -translate-x/y and pushes the ring
+            down-right of the button it's supposed to be concentric with. */}
+        <span className="pointer-events-none absolute left-1/2 top-1/2 h-play w-play
+                         -translate-x-1/2 -translate-y-1/2">
+          <span className="absolute inset-0 rounded-full border border-white/60
+                           motion-safe:animate-ping" />
+          <span className="absolute inset-0 grid place-items-center rounded-full
+                           bg-white/95 transition duration-interaction ease-brand
+                           group-hover:bg-white">
+            <svg viewBox="0 0 24 24" aria-hidden className="h-6 w-6 translate-x-px fill-plane">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </span>
         </span>
 
         {caption && (
           <span className="pointer-events-none absolute bottom-5 left-5 text-left">
-            <span className="block text-lg font-semibold tracking-[-0.01em] text-white">
+            <span className="block text-lg font-semibold text-white">
               {caption}
             </span>
             {subcaption && (
@@ -101,7 +107,7 @@ export default function HeroVideoDialog({
             <button
               onClick={() => setOpen(false)}
               aria-label="Close"
-              className="absolute right-7 top-6 text-2xl text-ink-muted transition hover:text-white"
+              className="absolute right-7 top-6 text-2xl text-ink-muted transition duration-interaction ease-brand hover:text-white"
             >
               ✕
             </button>
@@ -111,7 +117,7 @@ export default function HeroVideoDialog({
               exit={{ opacity: 0, scale: 0.97 }}
               transition={{ duration: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-5xl overflow-hidden rounded-xl border border-line bg-black"
+              className="w-full max-w-5xl overflow-hidden rounded-xl border border-subtle bg-black"
             >
               <video
                 className="aspect-video w-full"

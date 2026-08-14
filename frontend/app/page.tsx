@@ -80,7 +80,7 @@ export default function Home() {
           footage is in — see lib/clips.ts. */}
       <PlaceholderBanner />
 
-      <footer className="border-t border-line px-6 py-10 text-center">
+      <footer className="border-t border-subtle px-6 py-10 text-center">
         <p className="text-xs text-ink-muted">
           {brand.name} — {brand.description}
         </p>

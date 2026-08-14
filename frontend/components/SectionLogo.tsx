@@ -78,7 +78,7 @@ export default function SectionLogo() {
         aria-label={
           speaking ? "Stop the DJ talking" : `Hear the DJ say: ${line.text}`
         }
-        className="orb-stage rounded-full transition hover:scale-[1.02]
+        className="orb-stage rounded-full transition duration-interaction ease-brand hover:scale-[1.02]
                    focus-visible:outline focus-visible:outline-2
                    focus-visible:outline-offset-8 focus-visible:outline-scene"
       >
@@ -103,12 +103,12 @@ export default function SectionLogo() {
         }}
       />
 
-      <p className="mt-8 font-mono text-xs uppercase tracking-[0.2em] text-ink-muted">
+      <p className="mt-8 font-mono text-xs uppercase tracking-eyebrow text-ink-muted">
         {speaking ? "speaking" : "click it"}
       </p>
 
       {/* [caption] */}
-      <p className="mt-8 max-w-lg text-[clamp(1.25rem,2.6vw,1.75rem)] leading-snug tracking-[-0.02em]">
+      <p className="mt-8 max-w-lg text-subheading leading-snug">
         {showText ? `“${line.text}”` : "“I’ve read the room. This is what it needs.”"}
       </p>
 

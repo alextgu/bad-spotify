@@ -169,11 +169,11 @@ export default function SectionTryIt() {
   // ----------------------------------------------------------------------
 
   return (
-    <section id="try" className="section-page mx-auto max-w-6xl px-6 py-32">
-      <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.035em]">
+    <section id="try" className="section-page mx-auto max-w-content px-6 py-section-sm md:py-section">
+      <h2 className="text-heading font-semibold">
         Try it yourself.
       </h2>
-      <p className="mt-4 max-w-xl text-ink-muted">
+      <p className="mt-heading-sub max-w-measure-sub text-ink-muted">
         Pick a clip, or bring your own. Every decision on this page came out of
         the real agent — nothing here is re-enacted in the browser.
       </p>
@@ -184,10 +184,10 @@ export default function SectionTryIt() {
           <button
             key={c.id}
             onClick={() => setSource({ kind: "preset", clip: c })}
-            className={`rounded-full border px-4 py-2 text-sm transition ${
+            className={`rounded-full border px-4 py-2 text-sm transition duration-interaction ease-brand ${
               source.kind === "preset" && source.clip.id === c.id
                 ? "border-ink-primary text-ink-primary"
-                : "border-line-strong text-ink-muted hover:border-ink-muted"
+                : "border-strong text-ink-muted hover:border-ink-muted"
             }`}
           >
             {c.label}
@@ -195,8 +195,8 @@ export default function SectionTryIt() {
           </button>
         ))}
 
-        <label className="cursor-pointer rounded-full border border-dashed border-line-strong
-                          px-4 py-2 text-sm text-ink-muted transition hover:border-ink-muted">
+        <label className="cursor-pointer rounded-full border border-dashed border-strong
+                          px-4 py-2 text-caption text-ink-muted transition duration-interaction ease-brand hover:border-ink-muted">
           Upload your own
           <input
             type="file"
@@ -212,7 +212,7 @@ export default function SectionTryIt() {
       </div>
 
       {source.kind === "preset" && (
-        <p className="mt-3 max-w-2xl text-sm text-ink-muted">{source.clip.blurb}</p>
+        <p className="mt-3 max-w-measure text-caption text-ink-muted">{source.clip.blurb}</p>
       )}
 
       {error && (
@@ -231,7 +231,7 @@ export default function SectionTryIt() {
             playsInline
             preload="auto"
             crossOrigin="anonymous"
-            className="w-full rounded-xl border border-line bg-surface-1"
+            className="w-full rounded-xl border border-subtle bg-surface-1"
             onTimeUpdate={(e) => {
               // Follow playback: keep the card in step with the footage.
               const t = e.currentTarget.currentTime;
@@ -263,9 +263,9 @@ export default function SectionTryIt() {
                 value={index}
                 onChange={(e) => seekTo(Number(e.target.value))}
                 aria-label="step through each decision the agent made"
-                className="mt-2 w-full accent-[#d95926]"
+                className="mt-2 w-full accent-target"
               />
-              <p className="mt-2 text-sm text-ink-muted">
+              <p className="mt-2 text-caption text-ink-muted">
                 Each stop is one decision: the frame it was looking at, what it
                 thought the moment was, and the song it chose to ruin it with.
               </p>
@@ -278,14 +278,14 @@ export default function SectionTryIt() {
               <button
                 onClick={captureFrames}
                 disabled={capturing}
-                className="rounded-full border border-line-strong px-4 py-2 text-sm
-                           text-ink-secondary transition hover:border-ink-muted
+                className="rounded-full border border-strong px-4 py-2 text-sm
+                           text-ink-secondary transition duration-interaction ease-brand hover:border-ink-muted
                            disabled:opacity-40"
               >
                 {capturing ? "grabbing frames…" : "Grab the frames it judged"}
               </button>
               {frames.length > 0 && frames.every((f) => f === null) && (
-                <p className="mt-3 text-sm text-ink-muted">
+                <p className="mt-3 text-caption text-ink-muted">
                   Couldn’t read frames out of this clip — the decisions below
                   are unaffected. (Browsers refuse to decode some codecs;
                   H.264 is the safe bet.)
@@ -298,7 +298,7 @@ export default function SectionTryIt() {
                       key={i}
                       onClick={() => seekTo(i)}
                       className={`shrink-0 overflow-hidden rounded-lg border ${
-                        i === index ? "border-target" : "border-line"
+                        i === index ? "border-target" : "border-subtle"
                       }`}
                     >
                       {src ? (
@@ -324,7 +324,7 @@ export default function SectionTryIt() {
           ) : source.kind === "upload" ? (
             <UploadNextSteps name={source.name} onSession={onSessionPicked} />
           ) : (
-            <p className="rounded-xl border border-line bg-surface-1 p-5 text-sm text-ink-muted">
+            <p className="rounded-xl border border-subtle bg-surface-1 p-5 text-caption text-ink-muted">
               Press play. Cards appear as the agent makes decisions.
             </p>
           )}
@@ -347,7 +347,7 @@ function UploadNextSteps({
 }) {
   const stem = name.replace(/\.[^.]+$/, "") || "myclip";
   return (
-    <div className="rounded-xl border border-line bg-surface-1 p-5">
+    <div className="rounded-xl border border-subtle bg-surface-1 p-5">
       <p className="text-xs uppercase tracking-widest text-ink-muted">
         Your clip, not yet watched
       </p>
@@ -362,8 +362,8 @@ function UploadNextSteps({
         Then drop <span className="font-mono text-xs">data/sessions/{stem}.json</span> here:
       </p>
       <label className="mt-3 inline-block cursor-pointer rounded-full border border-dashed
-                        border-line-strong px-4 py-2 text-sm text-ink-muted
-                        transition hover:border-ink-muted">
+                        border-strong px-4 py-2 text-caption text-ink-muted
+                        transition duration-interaction ease-brand hover:border-ink-muted">
         Load session file
         <input
           type="file"

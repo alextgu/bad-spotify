@@ -1,3 +1,5 @@
+import BlurFade from "@/components/BlurFade";
+import HeroVideoDialog from "@/components/HeroVideoDialog";
 import { FILM } from "@/lib/clips";
 
 /**
@@ -9,7 +11,10 @@ import { FILM } from "@/lib/clips";
  * persuaded to. The explaining starts on the next screen, once they have
  * something to attach it to.
  *
- * Full-bleed on purpose: this is the only section that isn't argument.
+ * The player is a poster that expands, not a bare `<video controls>`. Browser
+ * chrome and a grey rectangle at the most important point on the page is one
+ * of the loudest tells that a page wasn't designed — and a still gives the
+ * caption somewhere to land before anyone presses play.
  *
  * TODO(team): this currently points at the placeholder clip. Swap in the real
  * demo film — with the music overlaid onto the footage, which is the decision
@@ -21,33 +26,32 @@ export default function SectionFilm() {
   return (
     <section
       id="film"
-      className="flex min-h-screen flex-col justify-center px-6 py-32"
+      className="flex min-h-screen flex-col justify-center px-6 py-section-sm md:py-section"
     >
-      <div className="mx-auto w-full max-w-5xl">
-        <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.035em]">
-          Watch it ruin a moment.
-        </h2>
-        <p className="mt-4 max-w-xl text-ink-muted">
-          One run, start to finish, with what it played overlaid. Everything you
-          hear was chosen by the agent while the footage was happening.
-        </p>
+      <div className="mx-auto w-full max-w-content">
+        <BlurFade>
+          <h2 className="text-heading">Watch it ruin a moment.</h2>
+        </BlurFade>
 
-        <video
-          className="mt-10 w-full rounded-xl border border-line bg-surface-1"
-          controls
-          playsInline
-          preload="metadata"
-          src={clip.video}
-        />
-
-        {/* Shown honestly rather than hidden. One flag in lib/clips.ts drives
-            this, the picker's note, and the dev banner — delete it there and
-            all three disappear together. */}
-        {clip.placeholder && (
-          <p className="mt-4 text-sm text-target">
-            Placeholder footage — the real film hasn’t been shot yet.
+        <BlurFade delay={0.08}>
+          <p className="mt-heading-sub max-w-measure-sub text-body text-ink-muted">
+            One run, start to finish, with what it played overlaid. Everything
+            you hear was chosen by the agent while the footage was happening.
           </p>
-        )}
+        </BlurFade>
+
+        <BlurFade delay={0.16}>
+          <HeroVideoDialog
+            className="mt-sub-content"
+            src={clip.video}
+            caption="One run, uninterrupted."
+            subcaption={
+              clip.placeholder
+                ? "Placeholder footage — the real film hasn’t been shot yet"
+                : "Press play"
+            }
+          />
+        </BlurFade>
       </div>
     </section>
   );

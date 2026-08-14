@@ -17,7 +17,7 @@ export default function Timeline({
 
   return (
     <div className="mt-4">
-      <div className="relative h-10 rounded-lg border border-white/10 bg-surface-1">
+      <div className="relative h-10 rounded-lg border border-subtle bg-surface-1">
         <div
           className="absolute top-0 h-full w-px bg-white/60"
           style={{ left: `${(current / duration) * 100}%` }}
@@ -32,7 +32,7 @@ export default function Timeline({
               title={`${stamp(t)} — ${m.chosen?.title ?? "?"}`}
               aria-label={`Jump to ${stamp(t)}, ${m.chosen?.title ?? "unknown"}`}
               className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2
-                         rounded-full ring-2 ring-surface-1 transition hover:scale-150"
+                         rounded-full ring-2 ring-surface-1 transition duration-interaction ease-brand hover:scale-150"
               style={{
                 left: `${(t / duration) * 100}%`,
                 background: isInterrupt ? "#d95926" : "#3987e5",

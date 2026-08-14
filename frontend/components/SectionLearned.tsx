@@ -12,26 +12,26 @@ import { learned } from "@/lib/content";
  */
 export default function SectionLearned() {
   return (
-    <section id="learned" className="section-page section-tall mx-auto max-w-5xl px-6 py-32">
-      <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.035em]">
+    <section id="learned" className="section-page section-tall mx-auto max-w-content px-6 py-section-sm md:py-section">
+      <h2 className="text-heading font-semibold">
         What we got wrong first.
       </h2>
-      <p className="mt-4 max-w-2xl text-ink-muted">
+      <p className="mt-heading-sub max-w-measure text-ink-muted">
         Four things we believed at the start and had to give up on.
       </p>
 
-      <div className="mt-16 space-y-14">
+      <div className="mt-sub-content space-y-14">
         {learned.map((l, i) => (
           <article
             key={l.heading}
-            className="grid gap-4 border-t border-line pt-6 md:grid-cols-[auto_1fr] md:gap-10"
+            className="grid gap-4 border-t border-subtle pt-6 md:grid-cols-[auto_1fr] md:gap-10"
           >
             <p className="font-mono text-xs text-ink-muted md:pt-1.5">
               {String(i + 1).padStart(2, "0")}
             </p>
             <div>
-              <h3 className="text-xl font-medium tracking-[-0.02em]">{l.heading}</h3>
-              <p className="mt-3 max-w-3xl leading-relaxed text-ink-secondary">
+              <h3 className="text-xl font-medium">{l.heading}</h3>
+              <p className="mt-3 max-w-measure text-body text-ink-secondary">
                 {l.body}
               </p>
             </div>
