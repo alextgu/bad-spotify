@@ -154,3 +154,49 @@ def test_every_demo_scene_produces_a_speakable_line(text):
     after = line.split("for your ", 1)[1]
     assert not after.lower().startswith(("a ", "an ", "the "))
     assert len(line) < 120
+
+
+# --------------------------------------------------- the site's copy of them --
+
+
+def _load_render_script():
+    """scripts/ isn't a package, so load it by path."""
+    import importlib.util
+
+    path = Path(__file__).resolve().parents[1] / "scripts" / "voice_lines.py"
+    spec = importlib.util.spec_from_file_location("voice_lines", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_the_site_and_the_renderer_agree_on_every_line():
+    """The words live in two places and nothing enforces that but this.
+
+    `scripts/voice_lines.py` renders the mp3s; `frontend/lib/audio.ts` holds
+    the text the page shows when the audio hasn't loaded. If they drift, the
+    page captions one thing while the voice says another, and nobody notices
+    until it's on a projector.
+    """
+    import re
+
+    ts = (Path(__file__).resolve().parents[1]
+          / "frontend" / "lib" / "audio.ts")
+    if not ts.exists():
+        pytest.skip("frontend not checked out")
+
+    # file: "/audio/intro.mp3", ... text: "..."
+    pairs = re.findall(
+        r'file:\s*"/audio/([\w-]+)\.mp3",\s*\n\s*text:\s*"((?:[^"\\]|\\.)*)"',
+        ts.read_text(),
+    )
+    assert pairs, "couldn't parse VOICE_LINES out of audio.ts"
+
+    site = {name: text.replace('\\"', '"') for name, text in pairs}
+    script = _load_render_script().LINES
+
+    assert set(site) == set(script), (
+        f"site has {sorted(site)}, renderer has {sorted(script)}")
+    for name, text in script.items():
+        assert site[name] == text, (
+            f"{name}: renderer says {text!r}, site says {site[name]!r}")

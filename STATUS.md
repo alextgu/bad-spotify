@@ -28,7 +28,7 @@ Last updated: 14 Aug 2026
 | Working out the opposite | Built, unproven | |
 | The song list (47 songs) | Built, unproven | |
 | Picking the funniest one | Built, unproven | |
-| The voice | Built, unproven | Voice chosen 14 Aug: Nelson (`6OzrBCQf8cjERkYgzSg8`), in `config.yaml`. **Nobody has heard it say one of our lines** — no `ELEVENLABS_API_KEY` yet. `python scripts/voice_lines.py --audition` settles it in two minutes |
+| The voice | Voice chosen and heard; pipeline still unproven | Nelson (`6OzrBCQf8cjERkYgzSg8`), in `config.yaml` — listened to and approved 14 Aug. What's still unproven is *our* path to him: nothing has run `narrator.say()` against the real API, so latency, ducking and the mid-song interruption are all untested. Key is coming |
 | Video file as input | Built, unproven — now sampled by `videofeed` | |
 | Recording a run for the site | Built, unproven | |
 | Screens — DJ face and engineering view | Built, unproven | |
