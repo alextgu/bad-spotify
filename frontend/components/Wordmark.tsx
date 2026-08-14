@@ -10,8 +10,8 @@ export default function Wordmark({
 }) {
   const styles =
     size === "hero"
-      ? "text-[clamp(3rem,11vw,8.5rem)] leading-[0.92] tracking-[-0.045em]"
-      : "text-base tracking-[-0.02em]";
+      ? "text-display"
+      : "text-base";
 
   return (
     <span className={`font-semibold ${styles} ${className}`}>{brand.name}</span>

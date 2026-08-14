@@ -1,42 +1,64 @@
-import { CLIPS } from "@/lib/clips";
+import SectionHeading from "@/components/SectionHeading";
+import BlurFade from "@/components/BlurFade";
+import HeroVideoDialog from "@/components/HeroVideoDialog";
+import { FILM } from "@/lib/clips";
 
 /**
- * Section 3 — the film.
+ * Section 2 — the film. A screen to itself, immediately after the pitch.
  *
- * One uninterrupted watch-it-happen. No cards, no annotation, no controls
- * beyond play: the next section is where it gets explained. Judges should see
- * the joke land before they see the machinery.
+ * One uninterrupted watch-it-happen. No cards, no annotation, nothing beside
+ * it, and nothing explained yet. An ad that explains before it shows has
+ * already lost the reader — nobody watches a product film because they were
+ * persuaded to. The explaining starts on the next screen, once they have
+ * something to attach it to.
+ *
+ * The player is a poster that expands, not a bare `<video controls>`. Browser
+ * chrome and a grey rectangle at the most important point on the page is one
+ * of the loudest tells that a page wasn't designed — and a still gives the
+ * caption somewhere to land before anyone presses play.
  *
  * TODO(team): this currently points at the placeholder clip. Swap in the real
  * demo film — with the music overlaid onto the footage, which is the decision
  * that sidesteps licensing and live playback entirely.
  */
 export default function SectionFilm() {
-  const clip = CLIPS[0];
+  const clip = FILM;
 
   return (
-    <section id="film" className="section-page mx-auto flex max-w-5xl flex-col justify-center px-6 py-32">
-      <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.035em]">
-        Watch it ruin a moment.
-      </h2>
-      <p className="mt-4 max-w-xl text-ink-muted">
-        One run, start to finish, with what it played overlaid. Everything you
-        hear was chosen by the agent while the footage was happening.
-      </p>
+    <section
+      id="film"
+      className="flex min-h-screen flex-col justify-center px-6 py-section-sm md:py-section"
+    >
+      <div className="mx-auto w-full max-w-content">
+        <BlurFade>
+          <SectionHeading
+          index={1}
+          label="THE FILM"
+          lead="Watch it ruin"
+          trail="a moment."
+        />
+        </BlurFade>
 
-      <video
-        className="mt-10 w-full rounded-xl border border-line bg-surface-1"
-        controls
-        playsInline
-        preload="metadata"
-        src={clip.video}
-      />
+        <BlurFade delay={0.08}>
+          <p className="mt-heading-sub max-w-measure-sub text-body text-ink-muted">
+            One run, start to finish, with what it played overlaid. Everything
+            you hear was chosen by the agent while the footage was happening.
+          </p>
+        </BlurFade>
 
-      {clip.placeholder && (
-        <p className="mt-4 text-sm text-target">
-          Placeholder footage — the real film hasn’t been shot yet.
-        </p>
-      )}
+        <BlurFade delay={0.16}>
+          <HeroVideoDialog
+            className="mt-sub-content"
+            src={clip.video}
+            caption="One run, uninterrupted."
+            subcaption={
+              clip.placeholder
+                ? "Placeholder footage — the real film hasn’t been shot yet"
+                : "Press play"
+            }
+          />
+        </BlurFade>
+      </div>
     </section>
   );
 }

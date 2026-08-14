@@ -40,3 +40,9 @@ data/sessions/
 *.wav
 *.mp4
 *.mp3
+
+# ...except the agent's recorded voice lines. The site ships them, so they
+# have to be in the repo. Without this negation `voice_lines.py --render`
+# writes three files, git ignores all three without a word, and the deployed
+# page is silent with nothing anywhere to explain why.
+!frontend/public/audio/*.mp3

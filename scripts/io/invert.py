@@ -13,7 +13,7 @@ will actually recognise, and pinning it to a single genre throws that away.
 
 Two things combine here: flipping every vibe score through the middle (the
 maths), and a hand-written table of what would be tasteless in which setting
-(the culture). Neither is enough alone -- see PIPELINE.md.
+(the culture). Neither is enough alone -- see README.md.
 """
 from __future__ import annotations
 

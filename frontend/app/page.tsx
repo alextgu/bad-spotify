@@ -1,163 +1,86 @@
-import Link from "next/link";
-import Reveal from "@/components/Reveal";
+import SectionAd from "@/components/SectionAd";
+import SectionBuild from "@/components/SectionBuild";
+import SectionDepth from "@/components/SectionDepth";
+import SectionFAQ from "@/components/SectionFAQ";
+import SectionFilm from "@/components/SectionFilm";
+import SectionLearned from "@/components/SectionLearned";
+import SectionNext from "@/components/SectionNext";
+import SectionProduct from "@/components/SectionProduct";
+import PlaceholderBanner from "@/components/PlaceholderBanner";
+import SectionTryIt from "@/components/SectionTryIt";
 import Wordmark from "@/components/Wordmark";
-import { brand, specs, steps } from "@/lib/brand";
+import { brand } from "@/lib/brand";
 
-
+/**
+ * The launch page. Seven sections, no navbar.
+ *
+ * Ordered the way a product page is ordered, not the way a submission form is.
+ * Every Devpost field is still answered — inspiration, what it does, how we
+ * built it, challenges, accomplishments, what we learned, what's next — but
+ * the page never uses those headings. "Challenges we ran into" as a headline
+ * breaks the deadpan instantly; "A useless product, built properly" says the
+ * same thing and stays in character.
+ *
+ *   1  Ad          the pitch                      → Inspiration
+ *   2  Film        watch it happen                → the hook
+ *   3  Product     what it actually does          → What it does
+ *   4  Build+TryIt how, in detail, and proof      → How we built it / Accomplishments
+ *   5  Depth+Learn what was hard, what we changed → Challenges / What we learned
+ *   6  Next        the ask                        → What's next
+ *   7  FAQ         the awkward questions
+ *
+ * The film sits at 2, before anything is explained. That is the opposite of
+ * how a technical writeup should be ordered — there, a video is proof and
+ * belongs after the argument. Here it is the hook, and an ad that explains
+ * before it shows has already lost the reader. Nobody watches a product film
+ * because they were persuaded to.
+ *
+ * Seven is a ceiling, not a target. This layout only works because each screen
+ * holds one idea, so if something new goes in, something here comes out.
+ */
 export default function Home() {
   return (
     <>
-      <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06]
-                      bg-plane/70 backdrop-blur-xl">
-        <div className="mx-auto flex h-12 max-w-5xl items-center px-6">
-          <Wordmark size="nav" />
-          <div className="flex-1" />
-          <Link
-            href="/demo"
-            className="text-sm text-ink-secondary transition hover:text-white"
-          >
-            Watch it work
-          </Link>
-        </div>
-      </nav>
-      <section className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-        <Reveal>
-          <p className="mb-6 text-sm tracking-[0.2em] text-ink-muted uppercase">
-            {brand.eyebrow}
-          </p>
-        </Reveal>
+      {/* No navbar. One product, one page — navigation would only offer to
+          take you away from the single thing we want you to read. */}
+      <header className="fixed left-0 top-0 z-50 p-6">
+        <Wordmark size="nav" />
+      </header>
 
-        <Reveal delay={120}>
-          <h1>
-            <Wordmark />
-          </h1>
-        </Reveal>
+      <main>
+        {/* 1 — the pitch. */}
+        <SectionAd />
 
-        <Reveal delay={260}>
-          <p className="mt-10 max-w-xl text-[clamp(1.25rem,2.6vw,1.75rem)]
-                        leading-snug tracking-[-0.02em] text-ink-secondary">
-            {brand.tagline}
-            <br />
-            <span className="text-ink-muted">{brand.taglineSecond}</span>
-          </p>
-        </Reveal>
+        {/* 2 — the hook. Show it before explaining a thing. */}
+        <SectionFilm />
 
-        <Reveal delay={420}>
-          <Link
-            href="/demo"
-            className="mt-14 inline-flex items-center gap-2 rounded-full border
-                       border-white/15 px-7 py-3 text-sm text-white transition
-                       hover:border-white/40 hover:bg-white/[0.04]"
-          >
-            Watch it work
-            <span aria-hidden>→</span>
-          </Link>
-        </Reveal>
-      </section>
-      <section className="flex min-h-[85vh] items-center justify-center px-6">
-        <div className="space-y-3 text-center">
-          {brand.creed.map((line, i) => (
-            <Reveal key={line} delay={i * 220}>
-              <p
-                className={`text-[clamp(1.75rem,5.5vw,4rem)] font-medium leading-[1.1]
-                            tracking-[-0.035em] ${
-                              i === brand.creed.length - 1
-                                ? "text-white"
-                                : "text-ink-muted"
-                            }`}
-              >
-                {line}
-              </p>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-      <section className="mx-auto max-w-5xl px-6 py-40">
-        <Reveal>
-          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold
-                         tracking-[-0.035em]">
-            How it ruins a moment.
-          </h2>
-          <p className="mt-4 max-w-md text-ink-muted">
-            Six steps, about every five seconds, for as long as you leave it on.
-          </p>
-        </Reveal>
+        {/* 3 — now that they've seen it, what it is. */}
+        <SectionProduct />
 
-        <div className="mt-20 grid gap-x-12 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-          {steps.map((s, i) => (
-            <Reveal key={s.n} delay={(i % 3) * 120}>
-              <div className="border-t border-white/10 pt-5">
-                <p className="font-mono text-xs text-ink-muted">{s.n}</p>
-                <h3 className="mt-3 text-xl font-medium tracking-[-0.02em]">
-                  {s.title}
-                </h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-ink-secondary">
-                  {s.body}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-      <section className="mx-auto max-w-3xl px-6 py-40 text-center">
-        <Reveal>
-          <p className="text-[clamp(1.4rem,3.4vw,2.25rem)] font-medium
-                        leading-[1.35] tracking-[-0.03em]">
-            Anything can compute an opposite. Almost nothing knows that the
-            opposite of a sunlit park is{" "}
-            <span className="text-target">funeral doom</span> — or that a
-            Christmas song in August is worse than either.
-          </p>
-        </Reveal>
-        <Reveal delay={200}>
-          <p className="mx-auto mt-8 max-w-lg text-ink-muted">
-            So the maths makes a shortlist, and taste picks the winner. Neither
-            one works alone.
-          </p>
-        </Reveal>
-      </section>
-      <section className="mx-auto max-w-5xl px-6 pb-40">
-        <div className="grid grid-cols-2 gap-y-14 border-y border-white/10 py-16
-                        lg:grid-cols-4">
-          {specs.map((s, i) => (
-            <Reveal key={s.label} delay={i * 100}>
-              <div className="px-2 text-center">
-                <p className="text-[clamp(2rem,5vw,3.25rem)] font-semibold
-                              tracking-[-0.04em]">
-                  {s.value}
-                </p>
-                <p className="mt-2 text-sm leading-snug text-ink-muted">
-                  {s.label}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-      <section className="flex min-h-[70vh] flex-col items-center justify-center
-                          px-6 text-center">
-        <Reveal>
-          <h2 className="text-[clamp(2rem,6vw,4.5rem)] font-semibold
-                         leading-[1.05] tracking-[-0.04em]">
-            See it read a room.
-            <br />
-            <span className="text-ink-muted">Then watch it ignore one.</span>
-          </h2>
-        </Reveal>
-        <Reveal delay={200}>
-          <Link
-            href="/demo"
-            className="mt-12 inline-flex items-center gap-2 rounded-full bg-white
-                       px-8 py-3.5 text-sm font-medium text-plane transition
-                       hover:bg-white/90"
-          >
-            Watch it work
-            <span aria-hidden>→</span>
-          </Link>
-        </Reveal>
-      </section>
+        {/* 4 — how, in detail, and then the part they can poke. Letting them
+            run it themselves is the accomplishment; saying so would be worth
+            much less than handing it over. */}
+        <SectionBuild />
+        <SectionTryIt />
 
-      <footer className="border-t border-white/[0.06] px-6 py-10 text-center">
+        {/* 5 — what was hard, and what we got wrong. Kept adjacent on purpose:
+            one is decisions we'd defend, the other is decisions we reversed. A
+            page with only the first reads as marketing. */}
+        <SectionDepth />
+        <SectionLearned />
+
+        {/* 6 — the ask. */}
+        <SectionNext />
+
+        {/* 7 — the questions a sceptical judge is already forming. */}
+        <SectionFAQ />
+      </main>
+
+      {/* Dev-only. Renders nothing in production, and nothing once the real
+          footage is in — see lib/clips.ts. */}
+      <PlaceholderBanner />
+
+      <footer className="border-t border-subtle px-6 py-10 text-center">
         <p className="text-xs text-ink-muted">
           {brand.name} — {brand.description}
         </p>

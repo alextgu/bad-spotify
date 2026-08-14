@@ -1,78 +1,100 @@
 /**
  * Section 1 — the advertisement.
  *
- * FRAMEWORK ONLY. Not designed yet.
+ * A full-bleed product advertisement, played completely straight. The gap
+ * between how seriously the ad takes itself and what it is actually
+ * advertising is the entire joke, so this must never wink. No comic type, no
+ * emoji, no "lol".
  *
- * The brief: a full-bleed product advertisement, played completely straight —
- * high-tech, clean white, premium. The gap between how seriously the ad takes
- * itself and what it is actually advertising is the entire joke, so this must
- * never wink. No comic type, no emoji, no "lol".
+ * **This is the only centred section on the page.** A hero earns centring
+ * because there is one object and one sentence; everything below it is
+ * argument, and centred argument is the most common tell of an amateur page.
+ * If you are tempted to centre something further down, don't.
  *
- * Slots this reserves, so the visual pass has somewhere to land:
+ * Slots:
  *
- *   [hero image]  the product shot. Full-bleed, edge to edge, one object.
- *   [headline]    six words at most.
- *   [subhead]     one sentence.
+ *   [hero image]  the product shot. One object, nothing else in frame.
+ *   [headline]    six words at most, `display`.
+ *   [subhead]     one sentence, `subheading`, never wider than 45ch.
  *   [actions]     one primary, one secondary. Never three.
- *   [fine print]  the legal-looking line at the bottom that reads as a real
- *                 ad and is where the joke is allowed to be.
+ *   [fine print]  the legal-looking line that reads as a real ad, and is the
+ *                 one place the joke is allowed to be.
  *
- * Drop the real photograph at `/public/ad/hero.jpg` and swap the placeholder
- * block for an <Image>.
+ * The accent appears exactly once here — the rule on the palette in the
+ * headline. Drop the real photograph at `/public/ad/hero.jpg` and swap the
+ * placeholder block for an <Image>.
  */
+import BlurFade from "@/components/BlurFade";
 import { brand } from "@/lib/brand";
 
 export default function SectionAd() {
   return (
     <section
       id="ad"
-      className="section-page relative flex flex-col items-center justify-center px-6 pt-20 text-center"
+      className="section-page relative flex flex-col items-center justify-center
+                 px-6 py-section-sm text-center md:py-section"
     >
-      {/* [hero image] — placeholder. Replace with the product photograph. */}
-      <div
-        className="mb-14 flex h-[38vh] w-full max-w-4xl items-center justify-center
-                   rounded-2xl border border-dashed border-line-strong bg-surface-1"
-        aria-hidden
-      >
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-muted">
-          hero image — the product shot goes here
-        </p>
+      <div className="w-full max-w-content">
+        {/* [hero image] — placeholder. Replace with the product photograph. */}
+        <BlurFade>
+          <div
+            className="mx-auto flex h-hero-slot w-full items-center justify-center
+                       rounded-2xl border border-dashed border-subtle bg-surface-1"
+            aria-hidden
+          >
+            <p className="font-mono text-caption uppercase tracking-eyebrow text-ink-muted">
+              hero image — the product shot goes here
+            </p>
+          </div>
+        </BlurFade>
+
+        {/* [headline] — the one accent on this screen */}
+        <BlurFade delay={0.08}>
+          <h1 className="mx-auto mt-sub-content max-w-measure text-display">
+            {brand.tagline}
+          </h1>
+        </BlurFade>
+
+        {/* [subhead] */}
+        <BlurFade delay={0.16}>
+          <p className="mx-auto mt-heading-sub max-w-measure-sub text-subheading text-ink-secondary">
+            {brand.description}
+          </p>
+        </BlurFade>
+
+        {/* [actions] */}
+        <BlurFade delay={0.24}>
+          <div className="mt-sub-content flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="#film"
+              className="inline-flex items-center gap-2 rounded-full bg-ink-primary px-8 py-3.5
+                         text-caption font-medium text-plane transition
+                         duration-interaction ease-brand hover:opacity-90"
+            >
+              Watch it work
+              <span aria-hidden>→</span>
+            </a>
+            <a
+              href="#try"
+              className="inline-flex items-center gap-2 rounded-full border border-subtle
+                         px-8 py-3.5 text-caption transition duration-interaction
+                         ease-brand hover:border-strong"
+            >
+              Try it yourself
+            </a>
+          </div>
+        </BlurFade>
+
+        {/* [fine print] */}
+        <BlurFade delay={0.32}>
+          <p className="mx-auto mt-sub-content max-w-measure-sub text-caption text-ink-muted">
+            {brand.name} does not take requests, accept feedback, or improve
+            with use. Song selection is{" "}
+            <span className="text-target">final</span>. Not available in any
+            store.
+          </p>
+        </BlurFade>
       </div>
-
-      {/* [headline] */}
-      <h1 className="max-w-4xl text-[clamp(2.5rem,7vw,5.5rem)] font-semibold leading-[1.02] tracking-[-0.045em]">
-        {brand.tagline}
-      </h1>
-
-      {/* [subhead] */}
-      <p className="mt-6 max-w-xl text-[clamp(1.05rem,2vw,1.35rem)] leading-snug text-ink-secondary">
-        {brand.description}
-      </p>
-
-      {/* [actions] */}
-      <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
-        <a
-          href="#logo"
-          className="inline-flex items-center gap-2 rounded-full bg-ink-primary px-8 py-3.5
-                     text-sm font-medium text-plane transition hover:opacity-90"
-        >
-          Meet it
-          <span aria-hidden>→</span>
-        </a>
-        <a
-          href="#try"
-          className="inline-flex items-center gap-2 rounded-full border border-line-strong
-                     px-8 py-3.5 text-sm transition hover:border-ink-muted"
-        >
-          Try it yourself
-        </a>
-      </div>
-
-      {/* [fine print] */}
-      <p className="mt-16 max-w-lg text-xs leading-relaxed text-ink-muted">
-        {brand.name} does not take requests, accept feedback, or improve with
-        use. Song selection is final. Not available in any store.
-      </p>
     </section>
   );
 }

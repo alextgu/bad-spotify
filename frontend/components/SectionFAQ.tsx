@@ -1,3 +1,4 @@
+import SectionHeading from "@/components/SectionHeading";
 import { faq } from "@/lib/content";
 
 /**
@@ -17,29 +18,32 @@ import { faq } from "@/lib/content";
  */
 export default function SectionFAQ() {
   return (
-    <section id="faq" className="section-page mx-auto flex max-w-3xl flex-col justify-center px-6 py-32">
-      <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.035em]">
-        Questions.
-      </h2>
-      <p className="mt-4 max-w-xl text-ink-muted">
+    <section id="faq" className="section-page mx-auto flex max-w-measure flex-col justify-center px-6 py-section-sm md:py-section">
+      <SectionHeading
+          index={8}
+          label="QUESTIONS"
+          lead="The part that"
+          trail="isn’t a joke."
+        />
+      <p className="mt-heading-sub max-w-measure-sub text-ink-muted">
         The part of the page that isn’t a joke.
       </p>
 
-      <div className="mt-14">
+      <div className="mt-sub-content">
         {faq.map((item) => (
           <details
             key={item.q}
-            className="group border-t border-line py-5 last:border-b"
+            className="group border-t border-subtle py-5 last:border-b"
           >
             <summary
               className="flex cursor-pointer list-none items-start justify-between gap-6
-                         text-lg font-medium tracking-[-0.02em] marker:hidden"
+                         text-lg font-medium marker:hidden"
             >
               <span className="flex flex-wrap items-baseline gap-3">
                 {item.q}
                 {item.pending && (
-                  <span className="rounded border border-line-strong px-2 py-0.5
-                                   font-mono text-[11px] font-normal text-ink-muted">
+                  <span className="rounded border border-strong px-2 py-0.5
+                                   font-mono text-caption font-normal text-ink-muted">
                     answer pending
                   </span>
                 )}
@@ -56,7 +60,7 @@ export default function SectionFAQ() {
             {item.pending ? (
               // Kept visibly unanswered on purpose. A confident placeholder
               // here would be worse than an honest gap — see FaqItem.pending.
-              <p className="mt-4 max-w-2xl leading-relaxed text-ink-muted">
+              <p className="mt-heading-sub max-w-measure leading-relaxed text-ink-muted">
                 We don’t have a good answer to this yet, and we’d rather say so
                 than invent one. It’s a real question — the system already
                 reads colour out of a scene and maps it toward sound, so what
@@ -64,7 +68,7 @@ export default function SectionFAQ() {
                 worth thinking about properly.
               </p>
             ) : (
-              <p className="mt-4 max-w-2xl leading-relaxed text-ink-secondary">
+              <p className="mt-heading-sub max-w-measure text-body text-ink-secondary">
                 {item.a}
               </p>
             )}

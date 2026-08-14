@@ -34,7 +34,11 @@ class ElevenLabsNarrator:
         self.cfg = cfg
         self.duck_to = float(cfg.get("duck_to", 0.25))
         self.max_chars = int(cfg.get("max_quip_chars", 120))
-        self.voice_id = os.environ.get("ELEVENLABS_VOICE_ID", "JBFqnCBsd6RMkjVDRZzb")
+        # Env wins, then config.yaml, then the repo default. Pick with
+        # `python scripts/voice_lines.py --list`, not from memory.
+        self.voice_id = (os.environ.get("ELEVENLABS_VOICE_ID")
+                         or cfg.get("voice_id")
+                         or "6OzrBCQf8cjERkYgzSg8")   # Nelson
         self.client = ElevenLabs(api_key=os.environ["ELEVENLABS_API_KEY"])
         self._fallback = MockNarrator(cfg)
 

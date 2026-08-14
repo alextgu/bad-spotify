@@ -76,6 +76,44 @@ voice:
   duck_to: 0.25           # duck music to this while narrating
   max_quip_chars: 120
 
+  # WHEN it speaks. Decided 14 Aug: the running product says one line, at
+  # startup, and then shuts up.
+  #   greeting     the startup line only. Default.
+  #   every_track  narrate every song too. Costs a call per decision and
+  #                fights the music -- the screens already show the reasoning.
+  #   off          silent
+  say: greeting
+
+  # The project's name. NOT CHOSEN YET -- blank falls back to "DJ", and the
+  # greeting still reads correctly. This is the one string to fill in when the
+  # name is picked; the site's recorded clips need re-rendering after.
+  agent_name:
+  greeting: "Hello. I'm your {name}. I'll help you choose the perfect music for any moment."
+
+  # What it says out loud. Same sentence every time, and SINCERE: the agent
+  # believes it read the room correctly and is pleased with its choice. It
+  # never winks. The line claims the song fits; the audience notices it
+  # doesn't. Placeholders: {title} {artist} {context} {mood} {quip}
+  #
+  # Alternates that keep the character:
+  #   "Now playing {title} by {artist}, to suit the mood."
+  #   "For your {context}, I've chosen {title} by {artist}. It fits."
+  #   "{context} calls for {title} by {artist}."
+  #
+  # Set to "" to speak the judge's quip instead.
+  line: "Now playing {title} by {artist} — the perfect fit for your {context}."
+
+  # Which ElevenLabs voice. Env ELEVENLABS_VOICE_ID wins over this.
+  # `python scripts/voice_lines.py --list` prints what your account has;
+  # `--audition` renders the same line in several so you can pick by ear.
+  #
+  # Nelson. Chosen 14 Aug — NOT yet heard saying one of our lines, because no
+  # ELEVENLABS_API_KEY has existed on any machine that ran this. Before the
+  # demo, run --audition and confirm it sounds like it MEANS the line: the
+  # agent is sincerely pleased with its choice, and any irony in the delivery
+  # kills the character.
+  voice_id: 6OzrBCQf8cjERkYgzSg8
+
 hud:
   enabled: true
   host: 127.0.0.1

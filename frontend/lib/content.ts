@@ -69,6 +69,26 @@ export const depth = [
 ] as const;
 
 /** Section 6 — what we'd build next, honestly ordered. */
+/** Section 6 — what we learned. Things we got wrong first, not hindsight wisdom. */
+export const learned = [
+  {
+    heading: "Distance is not the same as funny",
+    body: "The maths will happily hand you a harsh-noise record nobody has ever heard, because it is technically the furthest point from a sunny park. It gets a laugh from nobody. The joke needs the audience to recognise the song, so recognisability became a weight in the ranking rather than an afterthought — and the model, not the metric, picks the winner.",
+  },
+  {
+    heading: "Our own dial described something we don't do",
+    body: "We shipped a “cruelty” control — how far past inappropriate to go. It felt obvious until we tried to explain it: the system reads a mood and inverts a mood, and there is no meaningful halfway. Worse, an agent whose entire premise is that it ignores you should not take a parameter for how much to ignore you. We deleted it and replaced it with a measurement of how wrong the result actually turned out.",
+  },
+  {
+    heading: "Saving work can starve the work that depends on it",
+    body: "A local change detector skips the expensive model call when nothing has moved. A separate rule waits to see a change twice before acting, so one odd reading can't trigger a song. Together they deadlocked: on calm footage the detector suppressed the very repeats the second rule was waiting for, and nothing ever played. Now a quiet tick counts as positive evidence that the scene is stable.",
+  },
+  {
+    heading: "The unglamorous half is where demos die",
+    body: "Search for “Hurt” by Johnny Cash and you will be offered a karaoke backing track, a tribute band, and the Nine Inch Nails original — all plausible, all wrong. None of the interesting work matters if the wrong recording plays. Matching the right track got its own module and thirteen tests before anything else was allowed to be called finished.",
+  },
+] as const;
+
 export const roadmap = [
   {
     title: "Onto the actual glasses",

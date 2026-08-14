@@ -26,6 +26,7 @@ from badspotify.config import load_config                     #noqa: E402
 from badspotify.perceive.scene import build_perceiver, scene_from_text  #noqa: E402
 from badspotify.players.base import build_player              #noqa: E402
 from badspotify.schemas import DJAction                       #noqa: E402
+from badspotify.voice.lines import DEFAULT_GREETING, greeting  #noqa: E402
 from badspotify.voice.narrator import build_narrator          #noqa: E402
 
 
@@ -166,6 +167,13 @@ def main() -> None:
         except KeyboardInterrupt:
             server.should_exit = True
         return
+
+    # One line, at startup, and then it gets on with it. The running product
+    # does not narrate every track -- see voice.say in config.yaml.
+    if cfg.get_path("voice.say", "greeting") != "off":
+        vcfg = cfg.section("voice")
+        rt.narrator.say(greeting(vcfg.get("agent_name", ""),
+                                 vcfg.get("greeting", DEFAULT_GREETING)))
 
     rt.run(ticks=args.ticks)
 
