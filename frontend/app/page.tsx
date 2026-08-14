@@ -3,22 +3,10 @@ import Reveal from "@/components/Reveal";
 import Wordmark from "@/components/Wordmark";
 import { brand, specs, steps } from "@/lib/brand";
 
-/**
- * The launch page.
- *
- * Deliberately restrained: one idea per screen, a lot of empty space, and no
- * decoration that isn't carrying meaning. The product is absurd — so the
- * presentation plays it completely straight. The gap between how seriously
- * this page takes itself and what it's actually announcing is the joke.
- *
- * Don't add: gradients on text, more than one accent colour, icons on
- * everything, or a second call to action. Every one of those makes it read as
- * a hackathon page instead of a product.
- */
+
 export default function Home() {
   return (
     <>
-      {/* ---------------------------------------------------------- nav -- */}
       <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06]
                       bg-plane/70 backdrop-blur-xl">
         <div className="mx-auto flex h-12 max-w-5xl items-center px-6">
@@ -32,8 +20,6 @@ export default function Home() {
           </Link>
         </div>
       </nav>
-
-      {/* -------------------------------------------------------- hero -- */}
       <section className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
         <Reveal>
           <p className="mb-6 text-sm tracking-[0.2em] text-ink-muted uppercase">
@@ -68,8 +54,6 @@ export default function Home() {
           </Link>
         </Reveal>
       </section>
-
-      {/* ------------------------------------------------------- creed -- */}
       <section className="flex min-h-[85vh] items-center justify-center px-6">
         <div className="space-y-3 text-center">
           {brand.creed.map((line, i) => (
@@ -88,8 +72,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* ------------------------------------------------------- steps -- */}
       <section className="mx-auto max-w-5xl px-6 py-40">
         <Reveal>
           <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold
@@ -117,8 +99,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* -------------------------------------------------- the method -- */}
       <section className="mx-auto max-w-3xl px-6 py-40 text-center">
         <Reveal>
           <p className="text-[clamp(1.4rem,3.4vw,2.25rem)] font-medium
@@ -136,8 +116,6 @@ export default function Home() {
           </p>
         </Reveal>
       </section>
-
-      {/* ------------------------------------------------------- specs -- */}
       <section className="mx-auto max-w-5xl px-6 pb-40">
         <div className="grid grid-cols-2 gap-y-14 border-y border-white/10 py-16
                         lg:grid-cols-4">
@@ -156,8 +134,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* --------------------------------------------------------- cta -- */}
       <section className="flex min-h-[70vh] flex-col items-center justify-center
                           px-6 text-center">
         <Reveal>

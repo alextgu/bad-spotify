@@ -37,8 +37,8 @@ python scripts/build_seed_corpus.py     # writes data/corpus.seed.json
 python run.py                           # then open http://127.0.0.1:8420/dj
 ```
 
-**Every backend runs on a mock by default.** A fresh clone with no API keys, no
-Spotify account and no camera still runs the whole thing end to end. That's
+**Every external service runs on a mock by default.** Perception uses local CLIP
+and falls back to a mock when its packages or model are unavailable. That's
 deliberate — nobody should be blocked on credentials to work on their layer.
 Swap in real backends one at a time via `config.yaml`.
 
@@ -49,8 +49,53 @@ python run.py --video clip.mp4 --record demo1   # + write data/sessions/demo1.js
 python run.py --source webcam                   # real camera + mic
 python run.py --ticks 10 --no-hud               # bounded headless run
 python run.py --cruelty 1.0                     # maximum hostility
-pytest tests/ -q                                # 30 tests
+pytest tests/ -q                                # 52 tests
 ```
+
+## Free local video upload app
+
+This path needs no API key and makes no paid model call. It uses the local
+`openai/clip-vit-base-patch32` checkpoint through Hugging Face Transformers.
+The first analysis downloads the model. Later runs use the local model cache.
+
+```bash
+# terminal 1
+pip install -r requirements.txt
+python run.py --serve
+
+# terminal 2
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000/demo`, choose a video, and wait for the result.
+The browser sends the file to the local FastAPI server. The server samples one
+frame every five seconds, reads the matching audio window, classifies the mood,
+and sends each mood through the existing opposite music agent. The page keeps
+the video in the browser and shows the chosen track at each timestamp.
+
+`ffmpeg` is optional. Install it and place it on `PATH` to include video audio.
+Without it, the same flow runs with images, colour, blur, and motion only.
+
+The upload endpoint accepts common video extensions, uses generated temporary
+filenames, enforces a 200 MB limit, and removes each upload after analysis.
+Change the limit with `hud.max_upload_mb` in `config.yaml`.
+
+CLIP produces relative scores over this project's fixed mood taxonomy. These
+scores are useful for a prototype, but they are not a clinical emotion reading
+and they should be tested with representative demo footage before presentation.
+
+### Implementation references
+
+- [Hugging Face zero shot image classification](https://huggingface.co/docs/transformers/tasks/zero_shot_image_classification)
+- [CLIP ViT B 32 model card](https://huggingface.co/openai/clip-vit-base-patch32)
+- [OpenAI CLIP license](https://github.com/openai/CLIP/blob/main/LICENSE)
+- [FastAPI file uploads](https://fastapi.tiangolo.com/tutorial/request-files/)
+- [OpenCV video position properties](https://docs.opencv.org/4.9.0/d4/d15/group__videoio__flags__base.html)
+- [MDN FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
+- [OWASP file upload guidance](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html)
+- [Next.js July 2026 security release](https://nextjs.org/blog/july-2026-security-release)
 
 ### Two screens, one server
 

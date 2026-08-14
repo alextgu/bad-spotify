@@ -133,7 +133,7 @@ class GeminiJudge:
                             },
                             "required": ["track_id", "quip", "reasoning"],
                         },
-                        temperature=1.0,  # comedy wants variance
+                        temperature=1.0,  #Allows more varied jokes
                     ),
                 ),
                 self.timeout_s,

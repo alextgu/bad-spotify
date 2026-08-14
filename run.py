@@ -18,15 +18,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from badspotify.agents.graph import BadSpotifyGraph          # noqa: E402
-from badspotify.bus import BUS                                # noqa: E402
-from badspotify.capture.base import build_capture             # noqa: E402
-from badspotify.console import attach as attach_console        # noqa: E402
-from badspotify.config import load_config                     # noqa: E402
-from badspotify.perceive.scene import build_perceiver, scene_from_text  # noqa: E402
-from badspotify.players.base import build_player              # noqa: E402
-from badspotify.schemas import DJAction                       # noqa: E402
-from badspotify.voice.narrator import build_narrator          # noqa: E402
+from badspotify.agents.graph import BadSpotifyGraph          #noqa: E402
+from badspotify.bus import BUS                                #noqa: E402
+from badspotify.capture.base import build_capture             #noqa: E402
+from badspotify.console import attach as attach_console        #noqa: E402
+from badspotify.config import load_config                     #noqa: E402
+from badspotify.perceive.scene import build_perceiver, scene_from_text  #noqa: E402
+from badspotify.players.base import build_player              #noqa: E402
+from badspotify.schemas import DJAction                       #noqa: E402
+from badspotify.voice.narrator import build_narrator          #noqa: E402
 
 
 class Runtime:
@@ -48,7 +48,7 @@ class Runtime:
             "graph": "langgraph" if self.graph._compiled is not None else "sequential",
         }
 
-    # ---------------------------------------------------------------------
+    #Runs a scene entered from the engineering screen
 
     def inject_scene(self, text: str) -> None:
         """Stage button: run the real graph on a typed scene, bypassing bounds.
@@ -113,6 +113,8 @@ def main() -> None:
                     help="write the run to data/sessions/NAME.json for the demo site")
     ap.add_argument("--ticks", type=int, default=None, help="stop after N observations")
     ap.add_argument("--no-hud", action="store_true")
+    ap.add_argument("--serve", action="store_true",
+                    help="serve the upload app without starting a capture source")
     ap.add_argument("--quiet", action="store_true", help="only verdicts and errors")
     ap.add_argument("--turbo", action="store_true",
                     help="collapse DJ time bounds (verification runs only -- "
@@ -142,16 +144,28 @@ def main() -> None:
     rt = Runtime(cfg)
     print("\nbackends: " + "  ".join(f"{k}={v}" for k, v in rt.backends().items()))
 
+    server = None
     if cfg.get_path("hud.enabled", True):
         try:
             from badspotify.hud.server import serve_in_thread
             host = cfg.get_path("hud.host", "127.0.0.1")
             port = int(cfg.get_path("hud.port", 8420))
-            serve_in_thread(rt, host, port)
+            server = serve_in_thread(rt, host, port)
             print(f"[hud] DJ face:          http://{host}:{port}/dj")
             print(f"[hud] engineering view: http://{host}:{port}/")
         except Exception as e:
             print(f"[hud] disabled ({e})")
+
+    if args.serve:
+        if server is None:
+            raise SystemExit("the upload app needs the HUD server")
+        print("[hud] upload API:       POST /api/analyze-video")
+        try:
+            while not server.should_exit:
+                time.sleep(.25)
+        except KeyboardInterrupt:
+            server.should_exit = True
+        return
 
     rt.run(ticks=args.ticks)
 

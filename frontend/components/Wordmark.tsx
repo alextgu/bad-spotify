@@ -1,12 +1,6 @@
 import { brand } from "@/lib/brand";
 
-/**
- * PLACEHOLDER wordmark — set in type, not drawn.
- *
- * That's deliberate for now: a name set cleanly in tight-tracked type reads as
- * more considered than a rushed logo, and it costs nothing to replace. When
- * the real name is chosen, this is where the drawn mark goes.
- */
+
 export default function Wordmark({
   className = "",
   size = "hero",

@@ -31,7 +31,7 @@ class WebcamSource:
         try:
             import sounddevice as sd
 
-            def _cb(indata, frames, time_info, status):  # noqa: ANN001
+            def _cb(indata, frames, time_info, status):  #noqa: ANN001
                 self._ring.append(indata[:, 0].copy())
                 max_chunks = int(self.audio_window * self.sample_rate / 1024) + 2
                 if len(self._ring) > max_chunks:

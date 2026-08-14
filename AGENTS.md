@@ -46,7 +46,7 @@ Keeping these separate is the only reason they stay accurate. Don't merge them.
 Every one of these was run on 14 Aug 2026 and did what it says.
 
 ```bash
-# tests — 77 pass
+# tests — 83 pass
 source .venv/bin/activate && python -m pytest tests/ -q
 
 # the agent, bounded and headless (park -> Drowning Pool, library -> Sandstorm)
@@ -72,7 +72,7 @@ video audio; without it the sampler runs vision-only rather than failing.
 
 ---
 
-## Test inventory (77, verified by `--collect-only`)
+## Test inventory (83, verified by `--collect-only`)
 
 | File | Count | Guards |
 |---|---|---|
@@ -81,7 +81,8 @@ video audio; without it the sampler runs vision-only rather than failing.
 | `tests/test_spotify_player.py` | 15 | the player against a stand-in Spotify |
 | `tests/test_spotify_match.py` | 13 | search-result matching (karaoke, tribute bands, wrong artists) |
 | `tests/test_service.py` | 12 | `Engine`: describe / look / watch, no speakers by default, no bus leak |
-| `tests/test_video_and_session.py` | 5 | video-as-live and the recorded session format |
+| `tests/test_video_and_session.py` | 7 | video-as-live and the recorded session format |
+| `tests/test_local_video_app.py` | 4 | local perception, upload validation, and sampled analysis |
 
 ---
 
@@ -99,13 +100,14 @@ python -m videofeed   the sampler alone. Imports nothing from badspotify.
 | Path | What is actually in it |
 |---|---|
 | `src/badspotify/capture/` | `base` (Observation + factory), `gate` (change gate), `replay`, `video`, `webcam`, `glasses` (stub) |
-| `src/badspotify/perceive/` | `scene` (mock + Gemini perceiver, `scene_from_text`), `audio_features` (librosa) |
+| `src/badspotify/perceive/` | `scene` (mock + Gemini + Hugging Face perceivers, `scene_from_text`), `audio_features` (librosa) |
 | `src/badspotify/music/` | `vibe` (reflection, taboo rules), `corpus`, `strategies` (three) |
 | `src/badspotify/agents/` | `graph` (LangGraph, two entry points), `judge` (mock + Gemini) |
 | `src/badspotify/dj/` | `controller`: hysteresis, cooldown, queue-vs-interrupt, fallback deck |
 | `src/badspotify/players/` | `mock`, `local`, `spotify`, `spotify_match` |
 | `src/badspotify/voice/` | `narrator` (mock + ElevenLabs) |
-| `src/badspotify/hud/` | FastAPI: `/`, `/dj`, `/api/session`, `/api/state`, `/api/inject`, `/ws` |
+| `src/badspotify/hud/` | FastAPI: `/`, `/dj`, `/api/session`, `/api/state`, `/api/inject`, `/api/analyze-video`, `/ws` |
+| `src/badspotify/analysis.py` | local uploaded video analysis with no playback side effects |
 | `src/badspotify/service.py` | `Engine`: `describe()`, `look()`, `watch()` — no loop |
 | `src/badspotify/session.py` | records a run to the JSON the site replays |
 | `src/videofeed/` | standalone sampler: cadence + triggers, audio window, handoff stub |

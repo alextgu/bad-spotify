@@ -11,17 +11,12 @@ There is deliberately no "how wrong should it be" control. The agent always
 fully inverts; how wrong the result turned out is measured and reported, not
 requested.
 """
-#
-# NOTE: this module deliberately does NOT use `from __future__ import
-# annotations`. FastAPI resolves handler annotations with get_type_hints(),
-# which evaluates them against the MODULE globals -- and `WebSocket` is
-# imported lazily inside create_app(), so under postponed annotations it
-# isn't there. FastAPI then treats `sock: "WebSocket"` as an unknown query
-# parameter, refuses the handshake, and the browser sees a bare HTTP 403
-# with nothing in the server log. Keep annotations eager here.
-#
+#This module uses eager annotations because WebSocket is imported inside create_app
+#This keeps FastAPI WebSocket connections working
 import asyncio
 import json
+import tempfile
+import uuid
 from pathlib import Path
 
 from ..bus import BUS
@@ -31,11 +26,19 @@ STATIC = Path(__file__).parent / "static"
 
 
 def create_app(runtime=None):
-    from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+    from fastapi import FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
+    from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import FileResponse, JSONResponse
     from fastapi.staticfiles import StaticFiles
 
     app = FastAPI(title="bad-spotify HUD")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type"],
+    )
+    analysis_lock = asyncio.Lock()
 
     @app.get("/")
     async def index():
@@ -89,14 +92,68 @@ def create_app(runtime=None):
         await loop.run_in_executor(None, runtime.inject_scene, text)
         return {"ok": True}
 
+    @app.post("/api/analyze-video")
+    async def analyze_video(file: UploadFile = File(...)):
+        """Sample an uploaded video and return a replay session."""
+        if not runtime:
+            raise HTTPException(status_code=503, detail="the analysis runtime is not ready")
+
+        allowed = {".mp4", ".mov", ".webm", ".avi", ".mkv", ".m4v"}
+        original_name = Path(file.filename or "video.mp4").name
+        suffix = Path(original_name).suffix.lower()
+        if suffix not in allowed:
+            raise HTTPException(status_code=415, detail="choose a common video file")
+
+        max_mb = float(runtime.cfg.get_path("hud.max_upload_mb", 200))
+        max_bytes = int(max_mb * 1024 * 1024)
+
+        async with analysis_lock:
+            try:
+                with tempfile.TemporaryDirectory(prefix="badspotify_upload_") as folder:
+                    target = Path(folder) / f"{uuid.uuid4().hex}{suffix}"
+                    total = 0
+                    with target.open("wb") as output:
+                        while chunk := await file.read(1024 * 1024):
+                            total += len(chunk)
+                            if total > max_bytes:
+                                raise HTTPException(
+                                    status_code=413,
+                                    detail=f"video must be smaller than {max_mb:g} MB",
+                                )
+                            output.write(chunk)
+
+                    from ..analysis import VideoAnalyzer
+
+                    analyzer = VideoAnalyzer(
+                        runtime.cfg,
+                        perceiver=runtime.perceiver,
+                        judge=runtime.graph.judge,
+                        corpus=runtime.graph.corpus,
+                    )
+                    loop = asyncio.get_running_loop()
+                    result = await loop.run_in_executor(
+                        None,
+                        analyzer.analyze,
+                        target,
+                        original_name,
+                    )
+                    return JSONResponse(result)
+            except HTTPException:
+                raise
+            except Exception as error:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"video analysis failed: {error}",
+                ) from error
+            finally:
+                await file.close()
+
     @app.websocket("/ws")
     async def ws(sock: WebSocket):
         try:
             await sock.accept()
         except Exception as e:
-            # Do not swallow this silently: a failed accept shows up on the
-            # client as a bare HTTP 403 with nothing in the server log, which
-            # is a genuinely horrible thing to debug at 3am.
+            #Logs failed WebSocket connections so the error is visible
             print(f"[hud] websocket accept failed: {type(e).__name__}: {e}")
             raise
 
@@ -125,16 +182,14 @@ def serve_in_thread(runtime, host: str = "127.0.0.1", port: int = 8420):
     import uvicorn
 
     app = create_app(runtime)
-    # Pin the websocket implementation. With uvicorn's default "auto" and no
-    # ws library resolved, upgrade requests get a bare HTTP 403 and the HUD
-    # sits on "reconnecting" forever with nothing useful in the logs.
+    #Chooses an installed WebSocket backend for reliable connections
     ws_impl = "auto"
     try:
-        import websockets  # noqa: F401
+        import websockets  #noqa: F401
         ws_impl = "websockets"
     except ImportError:
         try:
-            import wsproto  # noqa: F401
+            import wsproto  #noqa: F401
             ws_impl = "wsproto"
         except ImportError:
             print("[hud] no websocket library -- pip install 'uvicorn[standard]'; "

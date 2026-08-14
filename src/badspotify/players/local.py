@@ -42,8 +42,7 @@ class LocalPlayer:
         return None
 
     def play(self, track: Track, mode: str = "interrupt") -> None:
-        # Local playback has no queue concept. Treating "queue" as "play now"
-        # is the right degradation: being early is better than being silent.
+        #Local playback starts queued tracks immediately to keep music playing
         path = self._resolve(track)
         if path is None:
             raise FileNotFoundError(f"no audio file for {track.title!r} in {self.dir}")

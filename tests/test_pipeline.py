@@ -13,12 +13,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from badspotify.dj.controller import DJController          # noqa: E402
-from badspotify.music.corpus import Corpus                 # noqa: E402
-from badspotify.music.strategies import generate           # noqa: E402
-from badspotify.music.vibe import build_antivibe, reflect  # noqa: E402
-from badspotify.perceive.scene import scene_from_text      # noqa: E402
-from badspotify.schemas import DJAction, Vibe, Verdict     # noqa: E402
+from badspotify.dj.controller import DJController          #noqa: E402
+from badspotify.music.corpus import Corpus                 #noqa: E402
+from badspotify.music.strategies import generate           #noqa: E402
+from badspotify.music.vibe import build_antivibe, reflect  #noqa: E402
+from badspotify.perceive.scene import scene_from_text      #noqa: E402
+from badspotify.schemas import DJAction, Vibe, Verdict     #noqa: E402
 
 
 def test_reflection_is_actually_opposite():
@@ -45,7 +45,7 @@ def test_peaceful_park_gets_something_awful():
                      ["genre_antipode", "tempo_clash", "lyrical_irony"])
     assert cands, "no candidates generated"
     top = cands[0].track
-    # whatever wins, it must not be a calm/pleasant record
+    #The selected track should feel unpleasant for a calm scene
     assert top.vibe.distance(scene.vibe) > 0.5, f"{top.title} is too appropriate"
 
 
@@ -107,7 +107,7 @@ def _verdict(tid: str = "sandstorm") -> Verdict:
     return Verdict(track=track, strategy="test", mismatch=.9, quip="hello")
 
 
-# ---------------------------------------------------------- queue vs interrupt
+#Queue and interrupt behavior
 
 def test_small_scene_change_queues_instead_of_cutting():
     """A slight shift should never cut the music off."""
@@ -129,7 +129,7 @@ def test_big_scene_change_interrupts_once_the_track_has_had_a_run():
     dj = DJController({"agreement_reads": 1, "cooldown_seconds": 0,
                        "min_interrupt_seconds": 15, "interrupt_threshold": 0.55})
     park = scene_from_text("a sunlit park, people reading on the grass")
-    dj.commit(_verdict(), scene=park, now=time.time() - 60)   # 60s in
+    dj.commit(_verdict(), scene=park, now=time.time() - 60)   #Track has played for sixty seconds
 
     funeral = scene_from_text("a hospital waiting room at 3am")
     d = dj.decide(funeral, _verdict("mariah"))
@@ -144,7 +144,7 @@ def test_big_change_still_queues_if_the_track_just_started():
     dj = DJController({"agreement_reads": 1, "cooldown_seconds": 0,
                        "min_interrupt_seconds": 15, "interrupt_threshold": 0.55})
     park = scene_from_text("a sunlit park, people reading on the grass")
-    dj.commit(_verdict(), scene=park, now=time.time() - 2)    # 2s in
+    dj.commit(_verdict(), scene=park, now=time.time() - 2)    #Track has played for two seconds
 
     funeral = scene_from_text("a hospital waiting room at 3am")
     d = dj.decide(funeral, _verdict("mariah"))
@@ -158,7 +158,7 @@ def test_nothing_playing_starts_immediately():
     assert d.action == DJAction.PLAY and d.mode == PlayMode.INTERRUPT
 
 
-# ------------------------------------------------------- timeouts & retries
+#Timeout and retry behavior
 
 def test_a_slow_call_is_abandoned_not_waited_on():
     """A late answer is worth less than a fast fallback. On stage, a stalled

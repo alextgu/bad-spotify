@@ -109,7 +109,7 @@ class SpotifyPlayer:
         self._uris: dict[str, str] = self._load_cache()
         self.device_id: str | None = None
 
-    # ------------------------------------------------------------ account --
+    #Account access
 
     def check_account(self) -> dict:
         """Return the user profile, raising if the account can't be controlled."""
@@ -123,7 +123,7 @@ class SpotifyPlayer:
                 f"'{me.get('product')}', not premium. Playback control needs Premium.")
         return me
 
-    # ------------------------------------------------------------- device --
+    #Playback device
 
     def list_devices(self) -> list[dict]:
         try:
@@ -160,13 +160,13 @@ class SpotifyPlayer:
         if not chosen.get("is_active"):
             try:
                 self.sp.transfer_playback(device_id=self.device_id, force_play=False)
-                time.sleep(0.4)   # Spotify needs a beat to actually move
+                time.sleep(0.4)   #Gives Spotify time to update the device
             except Exception as e:
                 print(f"[spotify] transfer to {chosen['name']!r} failed: {explain(e)}")
         print(f"[spotify] device: {chosen['name']} ({chosen['type']})")
         return self.device_id
 
-    # -------------------------------------------------------- resolution --
+    #Track lookup
 
     def _load_cache(self) -> dict[str, str]:
         if URI_CACHE.exists():
@@ -206,7 +206,7 @@ class SpotifyPlayer:
         why = rejections[0] if rejections else "no results"
         return None, f"unresolved ({why})"
 
-    # ---------------------------------------------------------- playback --
+    #Playback control
 
     def _is_playing(self) -> bool:
         try:
@@ -224,9 +224,7 @@ class SpotifyPlayer:
         device_id = self.ensure_device()
 
         def attempt(dev: str) -> str:
-            # Queueing only makes sense when something is already playing --
-            # an empty queue on a silent device just sits there, which reads
-            # as "the demo is broken".
+            #Starts playback when a silent device cannot process the queue
             if mode == "queue" and self._is_playing():
                 self.sp.add_to_queue(uri, device_id=dev)
                 if self.skip_to_queued:
@@ -239,8 +237,7 @@ class SpotifyPlayer:
         try:
             action = attempt(device_id)
         except Exception as e:
-            # Usual cause: the device fell asleep between calls. Re-acquire
-            # it once and retry before giving up to the fallback ladder.
+            #Refreshes the playback device once after a failed request
             print(f"[spotify] first attempt failed ({explain(e)}); re-acquiring device")
             try:
                 device_id = self.ensure_device(force=True)
@@ -254,11 +251,11 @@ class SpotifyPlayer:
         try:
             self.sp.pause_playback(device_id=self.device_id)
         except Exception:
-            pass   # already paused, or nothing to pause
+            pass   #Pause is already complete
 
     def set_volume(self, level: float) -> None:
         self.volume = max(0.0, min(1.0, level))
         try:
             self.sp.volume(int(self.volume * 100), device_id=self.device_id)
         except Exception:
-            pass   # some devices (phones especially) refuse remote volume
+            pass   #The device does not support remote volume

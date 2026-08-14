@@ -16,11 +16,11 @@ class AudioFeatures:
     rms: float = 0.0
     peak: float = 0.0
     tempo_bpm: float = 0.0
-    onset_rate: float = 0.0          # onsets per second -> "speed"
-    spectral_centroid: float = 0.0   # -> "brightness"
-    spectral_flatness: float = 0.0   # -> noisy vs tonal
-    pulse_regularity: float = 0.0    # -> steady vs irregular ("consistent" in the notes)
-    voiced_ratio: float = 0.0        # rough proxy for people talking
+    onset_rate: float = 0.0          #Detected sound events per second
+    spectral_centroid: float = 0.0   #Perceived audio brightness
+    spectral_flatness: float = 0.0   #Amount of noise in the audio
+    pulse_regularity: float = 0.0    #Consistency of the beat
+    voiced_ratio: float = 0.0        #Estimated amount of speech
 
     def as_dict(self) -> dict:
         return {k: round(float(v), 4) for k, v in asdict(self).items()}
@@ -66,14 +66,14 @@ def extract(audio: np.ndarray | None, sr: int = 16000) -> AudioFeatures:
         feats.spectral_centroid = float(np.mean(librosa.feature.spectral_centroid(y=x, sr=sr)))
         feats.spectral_flatness = float(np.mean(librosa.feature.spectral_flatness(y=x)))
 
-        # Regularity of inter-onset intervals: low variance == steady 4/4-ish.
+        #Measures how consistent the beat timing is
         if len(onsets) > 3:
             times = librosa.frames_to_time(onsets, sr=sr)
             iois = np.diff(times)
             if len(iois) > 1 and np.mean(iois) > 0:
                 cv = float(np.std(iois) / np.mean(iois))
                 feats.pulse_regularity = float(max(0.0, 1.0 - min(cv, 1.0)))
-    except Exception as e:  # never let feature extraction kill the loop
+    except Exception as e:  #Keeps the main loop running after analysis errors
         print(f"[audio] feature extraction degraded: {e}")
 
     return feats

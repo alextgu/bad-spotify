@@ -40,14 +40,13 @@ class DJController:
         self.agreement = int(cfg.get("agreement_reads", 2))
         self.max_failures = int(cfg.get("max_consecutive_failures", 3))
 
-        # How much the world has to change before cutting the music off,
-        # and how long a track is safe from being cut no matter what.
+        #Sets the scene change and playback time needed for an interruption
         self.interrupt_threshold = float(cfg.get("interrupt_threshold", 0.55))
         self.min_interrupt_seconds = float(cfg.get("min_interrupt_seconds", 15))
 
         self.state = DJState()
 
-    # ---------------------------------------------------------------- gates
+    #Safety checks
 
     def observe(self, scene: SceneRead) -> tuple[bool, str]:
         """Hysteresis. Returns (scene_change_confirmed, reason)."""
@@ -106,7 +105,7 @@ class DJController:
             return False, f"committed to current track ({wait:.0f}s left)", wait
         return True, "eligible to interrupt", 0.0
 
-    # -------------------------------------------------------------- decide
+    #Action selection
 
     def decide(self, scene: SceneRead, verdict: Verdict | None,
                now: float | None = None, force: bool = False) -> DJDecision:
@@ -164,7 +163,7 @@ class DJController:
     def note_failure(self) -> None:
         self.state.consecutive_failures += 1
 
-    # ------------------------------------------------------------ fallback
+    #Fallback action
 
     def fallback(self) -> Verdict | None:
         """The chaos deck: pre-vetted, always-wrong, needs no model at all."""

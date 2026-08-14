@@ -1,12 +1,6 @@
 import { type Moment, stamp, vibeGap } from "@/lib/types";
 
-/**
- * One decision, explained.
- *
- * Order matters here: what it saw, what it decided was the opposite, what it
- * played. That sequence is the argument -- it is what separates this from a
- * shuffle button, so keep it legible.
- */
+
 export default function MomentCard({ moment }: { moment: Moment }) {
   const { scene, opposite, chosen, played } = moment;
   const accent = scene?.colors?.[0] ?? "#3987e5";

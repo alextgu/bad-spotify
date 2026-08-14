@@ -57,7 +57,7 @@ class ElevenLabsNarrator:
                 duck.set_volume(self.duck_to)
             stream = self.client.text_to_speech.convert(
                 voice_id=self.voice_id,
-                model_id="eleven_flash_v2_5",   # low latency matters here
+                model_id="eleven_flash_v2_5",   #Uses the fast narration model
                 text=text,
                 output_format="mp3_44100_128",
             )

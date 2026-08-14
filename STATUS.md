@@ -11,7 +11,7 @@ Three states, and the middle one matters most:
 | **Built, unproven** | The code exists and runs on fake input. Nobody has pointed it at the real thing yet. **Assume it's broken until someone checks.** |
 | **Not started** | — |
 
-Last updated: 13 Aug 2026 (late) — after the mismatch refactor
+Last updated: 14 Aug 2026
 
 ---
 
@@ -35,6 +35,7 @@ Last updated: 13 Aug 2026 (late) — after the mismatch refactor
 | Site — scaffold + demo ground | Built, unproven | |
 | Site — launch page | Built, unproven | |
 | Site — pipeline diagram | Not started | |
+| Local video upload and mood timeline | Built, unproven | |
 | Video sampler (`src/videofeed/`) | Done — 17 tests, incl. a real generated clip | |
 | Engine (`service.py`) — one decision, no loop | Built, unproven | |
 | Gradio app (`app.py`) | Built, unproven | |
@@ -57,7 +58,7 @@ the single biggest risk to the demo.
   off when the room really changed *and* the current song has had a fair run.
 - **Backup list.** If anything upstream dies, a pre-picked list of always-wrong
   songs plays anyway. It is never silent.
-- **Tests.** 79 of them, each guarding a specific way the demo could break.
+- **Tests.** 83 of them, each guarding a specific way the demo could break.
 - **Timeouts on the model calls.** A slow answer is abandoned and retried
   rather than freezing the loop. A late answer is worth less than a fast fallback.
 
@@ -79,6 +80,12 @@ module-level bus), `graph.decide_from_scene` (so the Gradio app runs the real
 compiled graph instead of a second hand-rolled pipeline), and `force` — which
 was being set but silently dropped, because LangGraph discards state keys that
 aren't declared on the TypedDict.
+
+**The local video upload path is built.** FastAPI accepts a bounded temporary
+video, samples it through the current video source, and returns a mood and music
+timeline to `/demo`. Four focused tests pass, all 83 project tests pass, and the
+frontend type check and production build pass. It has not been tried with real
+user footage yet.
 
 ## Built, but nobody has run it for real
 

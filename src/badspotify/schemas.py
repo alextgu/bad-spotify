@@ -11,8 +11,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
-# The vibe space. Every scene and every track lives in this 5-cube.
-# All dims are 0..1 so distance and reflection are trivial.
+#Stores scene and track moods as five values from zero to one
 VIBE_DIMS = ("valence", "arousal", "density", "brightness", "organicness")
 
 
@@ -44,9 +43,9 @@ class TempoFeel(str, Enum):
 
 class Meter(str, Enum):
     """Consistent vs inconsistent, in your notes."""
-    STEADY = "steady"          # 4/4, predictable
-    SWUNG = "swung"            # jazz, shuffle
-    IRREGULAR = "irregular"    # odd time, no pulse
+    STEADY = "steady"          #Predictable rhythm
+    SWUNG = "swung"            #Jazz or shuffle rhythm
+    IRREGULAR = "irregular"    #Uneven rhythm or no clear beat
     UNKNOWN = "unknown"
 
 
@@ -67,13 +66,13 @@ class SceneRead(BaseModel):
     confidence: float = Field(0.5, ge=0, le=1)
     notes: str = ""
 
-    # provenance
-    source: Literal["mock", "gemini", "cached"] = "mock"
+    #Source details
+    source: Literal["mock", "gemini", "huggingface", "cached"] = "mock"
     latency_ms: int = 0
 
     def signature(self) -> str:
         """Coarse fingerprint used for hysteresis: did the scene really change?"""
-        b = lambda x: int(x * 4)  # noqa: E731  quantise to 4 buckets
+        b = lambda x: int(x * 4)  #noqa: E731
         return "|".join([
             self.mood_label.lower().strip(),
             self.social_context,
@@ -98,7 +97,7 @@ class Track(BaseModel):
     genres: list[str] = Field(default_factory=list)
     vibe: Vibe
     duration_s: Optional[float] = None
-    uri: Optional[str] = None          # spotify:track:... or file path
+    uri: Optional[str] = None          #Spotify track address or local file path
     tags: list[str] = Field(default_factory=list)
     recognisability: float = Field(0.5, ge=0, le=1,
                                    description="the joke only lands if they know the song")
@@ -134,14 +133,14 @@ class Verdict(BaseModel):
 
 class PlayMode(str, Enum):
     """Queue is polite; interrupt is funny. The DJ picks per situation."""
-    QUEUE = "queue"          # append -- lands after the current track
-    INTERRUPT = "interrupt"  # cut in now -- the moment is still happening
+    QUEUE = "queue"          #Adds the song to the queue
+    INTERRUPT = "interrupt"  #Starts the song immediately
 
 
 class DJAction(str, Enum):
     PLAY = "play"
-    HOLD = "hold"           # bounds say no
-    FALLBACK = "fallback"   # something broke, chaos deck
+    HOLD = "hold"           #Waits without changing the music
+    FALLBACK = "fallback"   #Uses an emergency music choice
     IDLE = "idle"
 
 

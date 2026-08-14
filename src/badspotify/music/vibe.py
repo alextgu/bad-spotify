@@ -56,10 +56,8 @@ def sharpen(target: Vibe, axis: str) -> Vibe:
     return Vibe(**d)
 
 
-# --------------------------------------------------------------------------
-# Cultural taboo rules. Keyword -> tags that would be maximally inappropriate.
-# Hand-written on purpose: these are the jokes, and jokes are authored.
-# --------------------------------------------------------------------------
+#Tags used to find culturally inappropriate songs for a scene
+#These rules define the joke
 
 TABOO_RULES: list[tuple[tuple[str, ...], list[str], str]] = [
     (("park", "garden", "sunlit", "sunny", "picnic", "beach"),
@@ -104,13 +102,13 @@ def contextual_taboo(scene: SceneRead, now: _dt.date | None = None) -> tuple[lis
             boost.extend(tags)
             reasons.append(why)
 
-    # Seasonal misfire: Christmas music is a war crime for eleven months a year.
+    #Treats Christmas music as inappropriate outside December
     today = now or _dt.date.today()
     if today.month not in (12,):
         boost.append("wrong-season")
         reasons.append("christmas music outside december")
 
-    # Never play something that would actually fit.
+    #Removes music that fits the scene
     ban: list[str] = []
     if scene.vibe.arousal < 0.25:
         ban.append("ambient")
@@ -142,7 +140,7 @@ def build_antivibe(scene: SceneRead,
     )
 
 
-# ---------------------------------------------------------------- helpers --
+#Helper functions
 
 TEMPO_TO_AROUSAL = {
     TempoFeel.STILL: 0.05, TempoFeel.SLOW: 0.25, TempoFeel.WALKING: 0.5,

@@ -6,24 +6,15 @@ import Timeline from "@/components/Timeline";
 import { activeMomentIndex, loadSession } from "@/lib/session";
 import type { Session } from "@/lib/types";
 
-/**
- * The demo ground.
- *
- * Plays the sample video and pops up what the agent chose, in sync, at the
- * point in the footage where it actually landed. No backend: it reads a
- * recorded session file produced by
- *
- *     python run.py --video clip.mp4 --record sample
- *
- * TODO(team):
- *   - drop the real sample video at public/videos/sample.mp4
- *   - drag-and-drop your own video (for now it falls back to the sample)
- *   - decide whether to show the losing candidates too
- */
+const API_URL =
+  process.env.NEXT_PUBLIC_BADSPOTIFY_API_URL ?? "http://127.0.0.1:8420";
+
 export default function DemoPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("/videos/sample.mp4");
   const [t, setT] = useState(0);
   const [videoBroken, setVideoBroken] = useState(false);
 
@@ -33,20 +24,108 @@ export default function DemoPage() {
       .catch((e: Error) => setError(e.message));
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (videoUrl.startsWith("blob:")) URL.revokeObjectURL(videoUrl);
+    };
+  }, [videoUrl]);
+
+  async function analyze(file: File) {
+    if (file.size > 200 * 1024 * 1024) {
+      setError("Choose a video smaller than 200 MB.");
+      return;
+    }
+
+    setError(null);
+    setProcessing(true);
+    setVideoBroken(false);
+    setSession(null);
+    setT(0);
+    setVideoUrl(URL.createObjectURL(file));
+
+    const form = new FormData();
+    form.append("file", file);
+
+    try {
+      const response = await fetch(`${API_URL}/api/analyze-video`, {
+        method: "POST",
+        body: form,
+      });
+      const body = (await response.json()) as Session | { detail?: string };
+      if (!response.ok) {
+        const message = "detail" in body ? body.detail : null;
+        throw new Error(message || "The video could not be analyzed.");
+      }
+      setSession(body as Session);
+      videoRef.current?.load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The video could not be analyzed.");
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  async function restoreSample() {
+    setError(null);
+    setProcessing(false);
+    setT(0);
+    setVideoBroken(false);
+    setVideoUrl("/videos/sample.mp4");
+    try {
+      setSession(await loadSession());
+      videoRef.current?.load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The sample could not be loaded.");
+    }
+  }
+
   const active = session ? activeMomentIndex(session, t) : -1;
   const moment = session && active >= 0 ? session.moments[active] : null;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
-      <header className="mb-8 flex items-baseline gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">Demo ground</h1>
-        <p className="text-sm text-ink-muted">
-          Watch it ruin a moment, and see why it chose what it chose.
-        </p>
+      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Demo ground</h1>
+          <p className="mt-1 text-sm text-ink-muted">
+            Upload a video. The local model reads its mood every five seconds.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="cursor-pointer rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-white/85">
+            {processing ? "Analyzing video..." : "Choose video"}
+            <input
+              className="hidden"
+              type="file"
+              accept="video/mp4,video/webm,video/quicktime,video/x-msvideo,video/x-matroska"
+              disabled={processing}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) void analyze(file);
+                event.currentTarget.value = "";
+              }}
+            />
+          </label>
+          <button
+            type="button"
+            onClick={() => void restoreSample()}
+            disabled={processing}
+            className="rounded-lg border border-white/15 px-4 py-2 text-sm text-ink-secondary transition hover:border-white/30 hover:text-white disabled:opacity-50"
+          >
+            Use sample
+          </button>
+        </div>
       </header>
 
+      {processing && (
+        <div className="mb-6 rounded-lg border border-scene/40 bg-scene/10 p-4 text-sm text-ink-secondary">
+          Reading frames, audio, colour, and movement. The first run also
+          downloads the local model.
+        </div>
+      )}
+
       {error && (
-        <div className="rounded-lg border border-critical/40 bg-critical/10 p-4 text-sm">
+        <div className="mb-6 rounded-lg border border-critical/40 bg-critical/10 p-4 text-sm">
           {error}
         </div>
       )}
@@ -58,37 +137,35 @@ export default function DemoPage() {
             className="w-full rounded-xl border border-white/10 bg-surface-1"
             controls
             playsInline
-            src="/videos/sample.mp4"
-            onTimeUpdate={(e) => setT(e.currentTarget.currentTime)}
-            onSeeked={(e) => setT(e.currentTarget.currentTime)}
+            src={videoUrl}
+            onTimeUpdate={(event) => setT(event.currentTarget.currentTime)}
+            onSeeked={(event) => setT(event.currentTarget.currentTime)}
             onError={() => setVideoBroken(true)}
           />
 
           {videoBroken && (
             <p className="mt-2 text-sm text-ink-muted">
-              The video didn&apos;t load, but the decisions still work — click a
-              dot on the timeline. (Codec support varies by browser; H.264 is
-              the safe bet.)
+              This browser could not play the video codec. The mood timeline is
+              still available below.
             </p>
           )}
-          {session && (
+
+          {session && session.moments.length > 0 && (
             <Timeline
               session={session}
               current={t}
               onSeek={(time) => {
-                // Drive our own state first. If the video is missing or the
-                // browser can't decode it, the walkthrough still works --
-                // the cards are the point, the footage is context.
                 setT(time);
-                if (videoRef.current) {
-                  try {
-                    videoRef.current.currentTime = time;
-                  } catch {
-                    /* not loaded yet; the card is already showing */
-                  }
-                }
+                if (videoRef.current) videoRef.current.currentTime = time;
               }}
             />
+          )}
+
+          {session?.model && (
+            <p className="mt-3 font-mono text-xs text-ink-muted">
+              {session.model} · one frame every {session.sample_interval_s ?? 5}s ·{" "}
+              {session.moment_count} mood reads
+            </p>
           )}
         </div>
 
@@ -97,7 +174,9 @@ export default function DemoPage() {
             <MomentCard moment={moment} />
           ) : (
             <div className="rounded-xl border border-white/10 bg-surface-1 p-6 text-sm text-ink-muted">
-              Press play. Cards appear as the agent makes decisions.
+              {processing
+                ? "The first mood card will appear when analysis finishes."
+                : "Choose a video or press play on the sample."}
             </div>
           )}
         </div>

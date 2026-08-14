@@ -10,7 +10,7 @@ from .log import notice as print  # stdout is reserved for data
 try:
     from dotenv import load_dotenv
     load_dotenv()
-except Exception:  # dotenv optional
+except Exception:  #dotenv is optional
     pass
 
 ROOT = Path(__file__).resolve().parents[2]

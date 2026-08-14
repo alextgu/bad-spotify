@@ -1,13 +1,42 @@
+#Python
 __pycache__/
 *.py[cod]
+*$py.class
 .venv/
 venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+#Node and Next.js
+node_modules/
+.next/
+out/
+coverage/
+next-env.d.ts
+*.tsbuildinfo
+
+#Local configuration and caches
 .env
+.env.*.local
 .cache/
+*.log
+
+#Operating system metadata
+.DS_Store
+Thumbs.db
+
+#Generated project data and local media
 data/genre_map.json
 data/corpus.json
 data/sessions/
 *.wav
 *.mp4
 *.mp3
-.DS_Store

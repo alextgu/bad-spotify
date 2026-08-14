@@ -36,8 +36,8 @@ try:
 except Exception:
     pass
 
-from badspotify.music.corpus import Corpus            # noqa: E402
-from badspotify.players.spotify import (              # noqa: E402
+from badspotify.music.corpus import Corpus            #noqa: E402
+from badspotify.players.spotify import (              #noqa: E402
     SpotifyError, SpotifyPlayer,
 )
 
@@ -67,7 +67,7 @@ def main() -> None:
     print("  bad spotify -- Spotify setup")
     print("=" * 64)
 
-    # ---------------------------------------------------------------- 1 ----
+    #Check credentials
     step(1, "Credentials")
     cfg = {"play_mode": "immediate", "device_name": args.device}
     try:
@@ -78,7 +78,7 @@ def main() -> None:
         die("spotipy is not installed. Run: pip install -r requirements.txt")
     print(f"[{OK}] client id and secret found")
 
-    # ---------------------------------------------------------------- 2/3 --
+    #Connect the Spotify account
     step(2, "Login and account type")
     print("A browser window may open. Approve the app, then come back here.")
     try:
@@ -88,7 +88,7 @@ def main() -> None:
     print(f"[{OK}] logged in as {me.get('display_name') or me.get('id')} "
           f"({me.get('product')})")
 
-    # ---------------------------------------------------------------- 4 ----
+    #Find a playback device
     step(3, "Devices")
     try:
         devices = player.list_devices()
@@ -108,7 +108,7 @@ def main() -> None:
     print("   Put this in config.yaml under player: to pin it every run:")
     print(f'     device_name: "{next((d["name"] for d in devices if d["id"] == player.device_id), "")}"')
 
-    # ---------------------------------------------------------------- 5 ----
+    #Find each track on Spotify
     step(4, "Resolving the song list")
     corpus = Corpus.load()
     resolved, failed = [], []
@@ -123,7 +123,7 @@ def main() -> None:
             failed.append((track, note))
             print(f"   {i:>3}/{len(corpus)}  {label[:44]:<44}  <-- {note}")
         if note not in ("cached", "from corpus"):
-            time.sleep(0.08)   # be polite to the search endpoint
+            time.sleep(0.08)   #Avoids sending requests too quickly
 
     player.save_cache()
     print(f"\n[{OK}] {len(resolved)}/{len(corpus)} tracks resolved "
@@ -139,7 +139,7 @@ def main() -> None:
         print("   will fall back if it picks an unresolved track, but you lose")
         print("   the joke you actually wanted.")
 
-    # ---------------------------------------------------------------- 6 ----
+    #Test playback
     if args.skip_test:
         print("\nSkipping the playback test.")
     else:
@@ -156,7 +156,7 @@ def main() -> None:
             die(str(e))
         print(f"[{OK}] playback confirmed")
 
-    # ------------------------------------------------------------- done ----
+    #Setup complete
     print("\n" + "=" * 64)
     print("  Setup complete. Now flip config.yaml:")
     print("      player:")

@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from badspotify.players.spotify_match import (  # noqa: E402
+from badspotify.players.spotify_match import (  #noqa: E402
     best_match, normalise, score_result, search_queries, token_overlap,
 )
 
