@@ -111,13 +111,21 @@ class Candidate(BaseModel):
     notes: str = ""
 
 
+# The widest possible gap in the 5-cube: one corner to the opposite corner.
+MAX_VIBE_DISTANCE = 5 ** 0.5
+
+
 class Verdict(BaseModel):
     """The judge's pick. Distance gives defensibility; the LLM gives the punchline."""
     track: Track
     strategy: str
-    mismatch: float = Field(0.0, ge=0, le=1)
-    """How far this pick sits from the scene, on the mood axes. Reported,
-    never set by a user -- it is a measurement, not a setting."""
+    mismatch: float = Field(
+        0.0, ge=0, le=1,
+        description="How far apart the moment and the music actually turned out "
+                    "to be, 0-1. MEASURED after the fact -- not a setting. There "
+                    "is deliberately no dial for this: an agent whose whole "
+                    "premise is that it ignores you should not take a parameter "
+                    "for how much to ignore you.")
     quip: str = ""
     reasoning: str = ""
     runner_ups: list[str] = Field(default_factory=list)

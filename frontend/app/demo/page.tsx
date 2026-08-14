@@ -55,7 +55,7 @@ export default function DemoPage() {
         <div>
           <video
             ref={videoRef}
-            className="w-full rounded-xl border border-line bg-surface-1"
+            className="w-full rounded-xl border border-white/10 bg-surface-1"
             controls
             playsInline
             src="/videos/sample.mp4"
@@ -96,7 +96,7 @@ export default function DemoPage() {
           {moment ? (
             <MomentCard moment={moment} />
           ) : (
-            <div className="rounded-xl border border-line bg-surface-1 p-6 text-sm text-ink-muted">
+            <div className="rounded-xl border border-white/10 bg-surface-1 p-6 text-sm text-ink-muted">
               Press play. Cards appear as the agent makes decisions.
             </div>
           )}

@@ -19,11 +19,14 @@ class EventBus:
         self._subs.append(fn)
 
     def unsubscribe(self, fn: Callable[[PipelineEvent], None]) -> None:
-        """Same reason as drop_queue: anything that subscribes per request --
-        a session recorder in a web handler, say -- has to be able to let go,
-        or every request leaves a listener behind that emit() keeps calling."""
-        if fn in self._subs:
+        """Detach a listener. Anything that subscribes for the duration of one
+        run -- a session recorder, say -- must call this in a finally block, or
+        every run leaves another listener attached to a module-level bus and
+        old runs keep recording into dead objects."""
+        try:
             self._subs.remove(fn)
+        except ValueError:
+            pass
 
     def drop_queue(self, q: asyncio.Queue) -> None:
         """Unregister a disconnected subscriber. Without this, every HUD

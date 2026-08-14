@@ -27,8 +27,8 @@ perceive:
   retries: 1              # ...after retrying once
 
 antagonize:
-  # No dial here on purpose. The opposite is the opposite -- see
-  # music/vibe.py. These axes are musical mood and nothing else.
+  # There is no "how far to go" dial. The agent always fully inverts the mood;
+  # how wrong the result turned out is measured afterwards, not requested.
   strategies:             # these fan out in parallel
     - genre_antipode
     - tempo_clash

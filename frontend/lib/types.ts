@@ -50,11 +50,8 @@ export interface Chosen {
   artist: string | null;
   quip: string | null;      // what it says out loud
   strategy: string | null;  // which theory of wrongness won
-  /**
-   * How far this pick sits from the scene on the mood axes, 0..1.
-   * A measurement, not a setting — there is no dial anywhere in this system.
-   * (Older session files called this `cruelty`; that knob is gone.)
-   */
+  /** How far apart the moment and the music turned out to be, 0-1.
+   *  MEASURED after the fact. There is deliberately no dial for it. */
   mismatch: number | null;
   why: string | null;
   runner_ups: string[];

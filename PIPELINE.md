@@ -58,28 +58,15 @@ guardrails below.
 
 ---
 
-## What "worst" means here
+## There is no "how wrong should it be" setting
 
-**Musically opposite in mood.** That is the whole definition. Five axes —
-happy/bleak, still/frantic, sparse/dense, dark/bright, synthetic/human — and the
-opposite is the reflection of the scene through the middle of that space.
+It always fully flips the mood. There used to be a dial for this and it was
+removed, because it described something the system doesn't do: this reads a
+mood and inverts a mood, and there's no meaningful halfway.
 
-It does not mean offensive, and the system has no way to be: it knows nothing
-about anyone's race, sex, religion, politics or identity, and never tries to
-infer them. It reads the mood of a place and picks a mismatched track from a
-hand-picked list of 47 well-known songs.
-
-There is no dial. A "how far to go" setting existed briefly and was removed —
-a partial inversion is a worse joke, and the control described a product this
-isn't. What the screens report as *mismatch* is a measurement of the pick, not
-a setting anyone turned.
-
-**The same machinery would find the *best* song.** Search near the scene instead
-of at its reflection, and ask the judge which candidate fits rather than which
-one ruins it. Nothing else changes — which is the point: the hard part was never
-the sign.
-
----
+What we *do* have is a **measurement**. After it picks a song, we work out how
+far apart the moment and the music actually turned out to be — a number from 0
+to 1 called the mismatch — and show that. It's a result, not a request.
 
 ## How it decides what's "worst"
 
@@ -143,9 +130,8 @@ takes on the colours of the room, says its line, and shows what's playing and
 whether it queued the song or cut in. Beside it, a running list of its reasoning.
 
 **The engineering view** — what we use while building. The same information in
-much more detail, plus a box where you type a situation
-("a hospital waiting room at 3am") and watch the whole thing run without a
-camera.
+much more detail, plus a box where you type a situation ("a hospital waiting
+room at 3am") and watch the whole thing run without a camera.
 
 **The site** — our presentation format. It explains the project, and has a demo
 area where you watch a video and see which song it chose at each point in the
@@ -192,4 +178,5 @@ starts**, and why. That file is what the site replays.
 |---|---|
 | What's actually finished, and what to work on | `STATUS.md` |
 | How to run it, and who owns which part | `README.md` |
+| How to add my part without breaking things | `INTEGRATION.md` |
 | How the site connects to the agent | `frontend/README.md` |

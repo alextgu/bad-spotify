@@ -13,6 +13,7 @@ import tempfile
 import threading
 
 from ..config import resolve_backend
+from ..log import notice as print  # stdout is reserved for data
 
 
 class MockNarrator:

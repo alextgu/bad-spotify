@@ -26,6 +26,7 @@ from pathlib import Path
 
 from ..schemas import Track
 from .spotify_match import best_match, search_queries
+from ..log import notice as print  # stdout is reserved for data
 
 SCOPES = (
     "user-modify-playback-state "

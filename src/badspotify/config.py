@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from .log import notice as print  # stdout is reserved for data
 
 try:
     from dotenv import load_dotenv

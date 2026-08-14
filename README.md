@@ -10,24 +10,17 @@ Sunlit park with people reading → Drowning Pool, *Bodies*.
 Toddler's birthday party → Johnny Cash, *Hurt*.
 Silent library during exam week → Darude, *Sandstorm*.
 
-**"Worst" means musically opposite in mood, and nothing else.** Every scene and
-every track is scored on five mood axes — valence, arousal, density, brightness,
-organicness — and the target is that scene reflected through the middle of the
-space. The system has no notion of anyone's race, sex, religion, politics or
-identity, and never tries to work them out. There is no "how far to go" dial and
-there should not be one: the opposite is the opposite. The site's FAQ says all
-of this in public, and it is worth keeping that promise true in the code.
-
 ---
 
 ## Which doc do I want?
 
 | | |
 |---|---|
-| **AGENTS.md** | **start here if you're an agent.** Verified facts, working commands, hard rules, and an explicit list of what is *not* settled. Symlinked as `CLAUDE.md` |
 | **README.md** | this file — how to run it, how it's built, who owns what |
 | **PIPELINE.md** | how it works, in plain language, no code. Start here if you're new |
 | **STATUS.md** | what's actually done, and what's only *built but unproven*. **Update it when you finish something** |
+| **INTEGRATION.md** | how to attach your part without breaking anyone else's. Read before your first change |
+| **AGENTS.md** | the rules. Every claim must be verifiable by a quoted command |
 | **frontend/README.md** | the site, and the one file that connects it to the agent |
 
 Each file has one job. PIPELINE never says what's finished; STATUS never explains
@@ -55,7 +48,8 @@ python run.py --video clip.mp4 --realtime       # ...at its true speed
 python run.py --video clip.mp4 --record demo1   # + write data/sessions/demo1.json
 python run.py --source webcam                   # real camera + mic
 python run.py --ticks 10 --no-hud               # bounded headless run
-pytest tests/ -q                                # 77 tests
+python run.py --cruelty 1.0                     # maximum hostility
+pytest tests/ -q                                # 30 tests
 ```
 
 ### Two screens, one server
@@ -63,7 +57,7 @@ pytest tests/ -q                                # 77 tests
 | | |
 |---|---|
 | `/dj` | **The presentation face.** An orb that takes on the room's colours, the spoken line in big type, now-playing with a queued/cut-in badge, and a compact reasoning ticker. This is what judges see. |
-| `/` | **The engineering view.** Vibe-gap chart, scene injection, full event trace. This is what we debug with. |
+| `/` | **The engineering view.** Vibe-gap chart, cruelty dial, scene injection, full event trace. This is what we debug with. |
 
 Keep both. The reasoning being visible is what separates this from a shuffle
 button, and it's most of why the technical work reads as serious.
@@ -104,51 +98,22 @@ that (`players/spotify_match.py`, 13 tests) but reality gets a vote. Fix
 mismatches before demo day: correct the title in `scripts/build_seed_corpus.py`,
 or paste a URI straight into the cache file.
 
-### Hosting it (Gradio)
+### One script per feature
+
+Each step of the pipeline is also a standalone script that reads JSON in and
+writes JSON out, so two people can work on two steps at once, and any step can
+be swapped without the others noticing.
 
 ```bash
-python app.py                  # http://127.0.0.1:7860
-python app.py --share          # public link, for a demo
-python app.py --play           # let it actually drive Spotify (off by default)
+python scripts/io/describe.py --text "a toddler's birthday party" \
+  | python scripts/io/invert.py \
+  | python scripts/io/choose.py \
+  | python scripts/io/play.py
 ```
 
-Four tabs: **describe a scene** (types → the whole pipeline, no camera, no keys,
-cannot fail), **a photo** (one frame → one decision — the same `Engine.look()`
-call a Ray-Ban companion app makes), **a video** (sampled by `videofeed` on a
-cadence *and* on cuts and bangs, exports the session JSON the site replays), and
-**what's actually running** (which backends are real and which are stand-ins).
-
-Nothing plays out loud unless you pass `--play`: a hosted page should not seize
-the host machine's speakers, and the project's decision was to *name* songs
-rather than play them at an audience.
-
-It sits on `src/badspotify/service.py` — `Engine`, the agent minus the live
-loop:
-
-```python
-from badspotify.service import Engine
-engine = Engine()
-engine.describe("a hospital waiting room at 3am")   # one decision
-engine.look(frame, audio)                           # one decision  <- the glasses call
-engine.watch("clip.mp4")                            # a whole session, site-ready
-```
-
-Every one of those runs through the same compiled LangGraph as `run.py`, just
-entered at a different node — see below.
-
-### Sampling a video on its own
-
-`src/videofeed/` is a standalone package: a video in, model-ready segments out.
-Fixed cadence **plus** event triggers (scene cut, audio onset, motion, light
-changes), with the audio window attached to each sample. It imports nothing from
-this project, and the model side is a documented stub rather than a guess.
-
-```bash
-PYTHONPATH=src python -m videofeed clip.mp4 --interval 5 \
-    --triggers scene-cut,audio-onset --out runs/demo1
-```
-
-Full docs: `src/videofeed/README.md`.
+`describe.py` is the swappable one — if you want to try HuggingFace, or split
+audio and video into separate models, that's the only file that changes. See
+`scripts/io/README.md`.
 
 ### The site
 
@@ -203,24 +168,6 @@ described at the bottom of this file.)
 
 ### Four decisions worth defending
 
-### LangGraph, and where it's actually used
-
-The graph is compiled in `agents/graph.py` and there are **two entry points into
-the same nodes**:
-
-| entry | who uses it | starts at |
-|---|---|---|
-| `graph.tick(obs)` | `run.py`, the live loop | the change gate — it has to decide whether the world moved before spending a model call |
-| `graph.decide_from_scene(state)` | `service.Engine` → the Gradio app, and any glasses companion app | `antagonize` — the scene is already known, because someone typed it, took a photo, or a sampler picked the moment out |
-
-Same nodes, same edges, same conditional play/stop. Not two pipelines: if they
-ever disagree, that's the bug. Without langgraph installed both fall back to a
-sequential executor with identical semantics, so the repo is never un-runnable.
-
-LangGraph earns its keep at the decision layer — explicit state, conditional
-edges, and somewhere to hang retries and timeouts. It is deliberately *not* used
-to fan out the perception fields; those belong in one call.
-
 **One perception call, not one agent per field.** Mood, tempo, meter and colour
 all derive from the same frame. Four agents would buy 4× the cost, 4× the
 failure surface and the latency of the slowest — for data one structured-output
@@ -238,6 +185,13 @@ vibe cube is deterministic, offline, instant and explainable in one slide — bu
 opposite of a calm sunny park is *funeral doom*, or a Christmas song in August,
 or Yakety Sax. Only a language model knows that. Distance gives defensibility,
 the model gives the punchline, and we never use one alone.
+
+**No dial for how wrong to be.** There used to be a `cruelty` setting. It was
+removed: the product reads a mood and inverts a mood, and a knob labelled "how
+far past inappropriate to go" described something else. How wrong a pick turned
+out is measured after the fact (`Verdict.mismatch`, 0–1) and reported. An agent
+whose premise is that it ignores you shouldn't take a parameter for how much to
+ignore you.
 
 **Queue is the default; interrupting is earned.** Cutting the music off needs
 two things at once: the room genuinely changed, *and* the current track has had
@@ -258,9 +212,13 @@ still happening. The DJ decides per moment — it isn't a setting.
 | `src/badspotify/voice/` | ElevenLabs narrator |
 | `src/badspotify/hud/` | FastAPI + websocket; `dj.html` and `index.html` |
 | `src/badspotify/session.py` | records a run to JSON for the site |
-| `src/videofeed/` | **standalone**: samples a video on a cadence *and* on triggers (cuts, onsets, motion), attaches the audio, hands segments to whatever you plug in. Imports nothing from `badspotify` — see its own README |
+| `src/badspotify/service.py` | `Engine` — one decision at a time, no loop. What the Gradio app and any future glasses app both sit on |
+| `src/videofeed/` | standalone video sampler: samples on a clock **and** on events (scene cuts, audio onsets). Imports nothing from `badspotify` |
+| `app.py` | Gradio surface — describe a scene, drop a photo, drop a video |
 | `frontend/` | **the presentation site** (Next.js, separate from the agent) |
+| `scripts/io/` | **one script per pipeline step** — JSON in, JSON out, pipeable |
 | `scripts/` | corpus builder, Spotify setup, every-noise scraper |
+| `src/badspotify/log.py` | diagnostics to stderr, so stdout stays pipeable |
 
 ---
 
@@ -320,11 +278,8 @@ and the streaming is a swappable backend.
 **Every Noise at Once.** `scripts/scrape_everynoise.py` pulls ~6000 genres with
 2D coordinates out of the genre map's inline CSS — a free offline genre
 embedding. The site's data is frozen (its maintainer left Spotify), which is
-fine: we need stable geometry, not fresh charts. **Verified 13 Aug 2026: 6291
-genres off the live page.** But its raw opposites are unusable as-is — it says
-the opposite of death metal is `funk bh, cartoon, kikuyu pop`, which is
-geometrically right and comedically dead. Nothing consumes it until there's a
-recognisability filter in front of it. See `STATUS.md`.
+fine: we need stable geometry, not fresh charts. **Unverified against the live
+page — run it and check the count before relying on it.**
 
 **Twelve Labs.** Indexing is asynchronous and won't serve a five-second loop. If
 we use it, it belongs at the *end*: index the session afterwards and close with
@@ -355,7 +310,7 @@ the site are how the agent's mind is made legible).
 
 | Criterion | Where it's answered |
 |---|---|
-| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 77 tests guarding specific live-demo failures |
+| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 30 tests guarding specific live-demo failures |
 | UX & intuition | A DJ character with a reacting orb, onboarding, one honest control, and a site that walks judges through the reasoning |
 | Creativity | Geometric opposition *plus* a cultural judge; three competing theories of wrongness rather than one similarity score |
 | Originality | An assistant that is deliberately useless. The failure mode and the feature are the same thing, which is why it holds up live |

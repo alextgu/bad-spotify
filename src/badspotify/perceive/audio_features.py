@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, asdict
 
 import numpy as np
+from ..log import notice as print  # stdout is reserved for data
 
 
 @dataclass
@@ -38,23 +39,6 @@ class AudioFeatures:
         return f"{loud}, ~{self.onset_rate:.1f} events/s, {pulse}"
 
 
-def _tempo_bpm(librosa, onset_env, sr: int) -> float:
-    for owner, name in (
-        (getattr(librosa, "feature", None), "tempo"),
-        (getattr(getattr(librosa, "feature", None), "rhythm", None), "tempo"),
-        (getattr(librosa, "beat", None), "tempo"),
-    ):
-        try:
-            fn = getattr(owner, name)
-        except Exception:
-            continue
-        if fn is None:
-            continue
-        tempo = np.atleast_1d(fn(onset_envelope=onset_env, sr=sr))
-        return float(tempo[0]) if tempo.size else 0.0
-    raise AttributeError("no tempo estimator in this librosa version")
-
-
 def extract(audio: np.ndarray | None, sr: int = 16000) -> AudioFeatures:
     if audio is None or getattr(audio, "size", 0) == 0:
         return AudioFeatures()
@@ -76,13 +60,8 @@ def extract(audio: np.ndarray | None, sr: int = 16000) -> AudioFeatures:
         duration = max(len(x) / sr, 1e-6)
         feats.onset_rate = len(onsets) / duration
 
-        # librosa moved this twice: beat.tempo (<=0.9) -> feature.rhythm.tempo
-        # (0.10) -> feature.tempo (1.0). Try newest first, and keep going if
-        # none of them exist -- a missing BPM shouldn't cost us the other features.
-        try:
-            feats.tempo_bpm = _tempo_bpm(librosa, onset_env, sr)
-        except Exception as e:
-            print(f"[audio] tempo unavailable: {e}")
+        tempo = librosa.beat.tempo(onset_envelope=onset_env, sr=sr)
+        feats.tempo_bpm = float(tempo[0]) if len(tempo) else 0.0
 
         feats.spectral_centroid = float(np.mean(librosa.feature.spectral_centroid(y=x, sr=sr)))
         feats.spectral_flatness = float(np.mean(librosa.feature.spectral_flatness(y=x)))

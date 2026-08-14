@@ -17,6 +17,7 @@ from typing import Callable
 from ..schemas import AntiVibe, Candidate, SceneRead, Track
 from .corpus import Corpus
 from .vibe import TEMPO_TO_AROUSAL, meter_clash
+from ..log import notice as print  # stdout is reserved for data
 
 Strategy = Callable[[SceneRead, AntiVibe, Corpus, set, int], list[Candidate]]
 

@@ -71,3 +71,29 @@ def test_export_is_self_describing():
     assert out["moment_count"] == 1
     assert "at_video_time" in out["README"], "the file should explain itself"
     assert out["moments"][0]["played"]["mode"] == "queue"
+
+
+# ------------------------------------------------ videofeed adoption
+
+def test_cadence_samples_still_go_through_the_gate():
+    """Only real events bypass the local change check. If a routine sample
+    were marked pre-gated, we'd call the expensive model on every tick and the
+    change gate would be doing nothing at all."""
+    from badspotify.capture.video import CADENCE_REASON, VideoSource
+    assert CADENCE_REASON == "interval", (
+        "must match reasons.append(...) in videofeed/feed.py -- if that string "
+        "changes, every cadence sample silently starts bypassing the gate")
+
+    src = VideoSource({"video_path": "x.mp4"})
+    assert src.name == "video"
+
+
+def test_a_trigger_reason_marks_the_observation_pre_gated():
+    from badspotify.capture.video import CADENCE_REASON
+    for reasons, expect in [
+        (["interval"], False),
+        (["scene_cut"], True),
+        (["interval", "audio_onset"], True),
+    ]:
+        triggered = [r for r in reasons if r != CADENCE_REASON]
+        assert bool(triggered) is expect, f"{reasons} -> expected {expect}"

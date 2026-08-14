@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 
 from ..schemas import Track
+from ..log import notice as print  # stdout is reserved for data
 
 
 class LocalPlayer:

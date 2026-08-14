@@ -7,6 +7,7 @@ from typing import Iterator
 import numpy as np
 
 from .base import Observation
+from ..log import notice as print  # stdout is reserved for data
 
 
 class WebcamSource:

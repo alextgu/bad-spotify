@@ -23,11 +23,11 @@ spotipy>=2.23                # playback control only (audio-features is dead)
 requests>=2.31
 beautifulsoup4>=4.12         # everynoise genre-map scrape
 
-# --- hosted app ---
-gradio>=5                    # app.py: the browser face. Not needed by run.py
+# --- the Gradio surface (app.py) ---
+gradio>=4.44
 
 # --- tests ---
-pytest>=8.0                  # `pytest tests/ -q` is in the README; ship the dep
+pytest>=8.0
 
 # --- hud ---
 fastapi>=0.110

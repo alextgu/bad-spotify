@@ -4,8 +4,12 @@ This is not a debug view. It is the product surface: the glasses have no
 display, so everything the agent perceives and decides has to be legible
 somewhere, and that somewhere is a screen the audience can watch.
 
-Also hosts the two endpoints that make a live demo survivable:
+Also hosts the endpoint that makes a live demo survivable:
   POST /api/inject   -- type a scene, run the whole pipeline on it, no camera
+
+There is deliberately no "how wrong should it be" control. The agent always
+fully inverts; how wrong the result turned out is measured and reported, not
+requested.
 """
 #
 # NOTE: this module deliberately does NOT use `from __future__ import
@@ -21,6 +25,7 @@ import json
 from pathlib import Path
 
 from ..bus import BUS
+from ..log import notice as print  # stdout is reserved for data
 
 STATIC = Path(__file__).parent / "static"
 

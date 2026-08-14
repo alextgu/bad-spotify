@@ -40,6 +40,7 @@ from ..music.vibe import build_antivibe
 from ..perceive import audio_features
 from ..schemas import DJAction, DJDecision, SceneRead, Verdict
 from .judge import build_judge
+from ..log import notice as print  # stdout is reserved for data
 
 
 class PipelineState(TypedDict, total=False):
@@ -52,7 +53,7 @@ class PipelineState(TypedDict, total=False):
     verdict: Optional[Verdict]
     decision: Optional[DJDecision]
     t_start: float
-    force: bool          # stage button: bypass the DJ's timing bounds
+    force: bool          # must be declared, or LangGraph drops it between nodes
 
 
 class BadSpotifyGraph:
@@ -75,13 +76,23 @@ class BadSpotifyGraph:
         self._last_scene: Optional[SceneRead] = None
         self._last_verdict: Optional[Verdict] = None
         self._compiled = self._compile()
-        # Compiled lazily: only the hosted paths (service.Engine) enter here.
-        self._from_scene = None
+        self._from_scene = self._compile_from_scene()
 
     # ------------------------------------------------------------- nodes --
 
     def n_gate(self, state: PipelineState) -> PipelineState:
-        v = self.gate.check(state["obs"])
+        obs = state["obs"]
+
+        # Some sources already know the world changed. The video sampler fires
+        # on scene cuts and audio onsets, so re-running our own frame differ
+        # would just re-derive a conclusion it already reached -- and disagree
+        # with it at the margins, which is worse than not checking at all.
+        if (obs.meta or {}).get("pre_gated"):
+            reason = (obs.meta or {}).get("trigger") or "source says it changed"
+            BUS.emit("gate", "escalate", reason=reason, pre_gated=True)
+            return {**state, "escalate": True, "gate_reason": reason}
+
+        v = self.gate.check(obs)
         BUS.emit("gate", "escalate" if v.escalate else "skip",
                  reason=v.reason, frame_delta=round(v.frame_delta, 4),
                  audio_delta=round(v.audio_delta, 4), onset_ratio=round(v.onset_ratio, 2))
@@ -247,16 +258,29 @@ class BadSpotifyGraph:
         g.add_edge("play", END)
         return g.compile()
 
+    def _sequential(self, state: PipelineState) -> PipelineState:
+        state = self.n_gate(state)
+        if state.get("escalate"):
+            state = self.n_perceive(state)
+            state = self.n_antagonize(state)
+            state = self.n_judge(state)
+        else:
+            state = self.n_stable(state)
+            if state.get("scene") is None:
+                return state
+        state = self.n_dj(state)
+        if state["decision"].action in (DJAction.PLAY, DJAction.FALLBACK):
+            state = self.n_play(state)
+        return state
+
     def _compile_from_scene(self):
-        """The same graph, entered when the scene is already known.
+        """The same graph, entered at antagonize instead of capture.
 
-        `tick()` starts at the change gate, which is right for a continuous
-        loop. Anything holding a scene already -- a typed description, a single
-        frame from a companion app, a moment a sampler decided was worth
-        looking at -- starts here instead, at antagonize.
-
-        It is a second entry point into the same nodes, not a second pipeline.
-        If these ever disagree, that's the bug.
+        Callers that already have a scene -- the Gradio app, a typed
+        description, a single photo -- must not get a second hand-rolled
+        pipeline. If there were two, they would drift, and the demo would
+        behave differently from the thing we tested. Same nodes, same edges,
+        same conditional play/stop; only the entry point differs.
         """
         try:
             from langgraph.graph import END, START, StateGraph
@@ -282,38 +306,16 @@ class BadSpotifyGraph:
         return g.compile()
 
     def decide_from_scene(self, state: PipelineState) -> PipelineState:
-        """Run scene -> antagonize -> judge -> dj -> play. Needs `state["scene"]`.
-
-        Used by `service.Engine`, which is what the Gradio app and any glasses
-        companion app sit on. Falls back to the sequential path with identical
-        semantics if langgraph isn't installed.
-        """
+        """Run the decision half of the graph on a scene we already have."""
         if state.get("scene") is None:
-            raise ValueError("decide_from_scene() needs a scene in the state")
-        if self._from_scene is None:
-            self._from_scene = self._compile_from_scene()
+            raise ValueError("decide_from_scene needs a 'scene' in the state")
+        state.setdefault("t_start", time.time())
+
         if self._from_scene is not None:
             return self._from_scene.invoke(state)
-        return self._sequential_from_scene(state)
 
-    def _sequential_from_scene(self, state: PipelineState) -> PipelineState:
         state = self.n_antagonize(state)
         state = self.n_judge(state)
-        state = self.n_dj(state)
-        if state["decision"].action in (DJAction.PLAY, DJAction.FALLBACK):
-            state = self.n_play(state)
-        return state
-
-    def _sequential(self, state: PipelineState) -> PipelineState:
-        state = self.n_gate(state)
-        if state.get("escalate"):
-            state = self.n_perceive(state)
-            state = self.n_antagonize(state)
-            state = self.n_judge(state)
-        else:
-            state = self.n_stable(state)
-            if state.get("scene") is None:
-                return state
         state = self.n_dj(state)
         if state["decision"].action in (DJAction.PLAY, DJAction.FALLBACK):
             state = self.n_play(state)

@@ -1,12 +1,12 @@
 {
   "session": "sample",
-  "source": "frontend/public/videos/sample.mp4 (placeholder footage)",
-  "moment_count": 4,
+  "source": "/tmp/demo/park.mp4",
+  "moment_count": 1,
   "README": "Each entry in `moments` is one decision. `video_time` is where the scene was read; `played.at_video_time` is where the song actually starts -- use that one for the timeline, since the scene is often read a few seconds earlier. `played.mode` is 'queue' (lines up next) or 'interrupt' (cuts in now).",
   "moments": [
     {
       "video_time": 0.0,
-      "wall_time": 1786682321.533237,
+      "wall_time": 1786661737.7669826,
       "scene": {
         "setting": "sunlit public park, people reading on the grass",
         "activity": "walking slowly on a path",
@@ -29,11 +29,11 @@
       },
       "opposite": {
         "target_vibe": {
-          "valence": 0.15000000000000002,
-          "arousal": 0.85,
-          "density": 0.75,
+          "valence": 0.255,
+          "arousal": 0.745,
+          "density": 0.675,
           "brightness": 0.0,
-          "organicness": 0.09999999999999998
+          "organicness": 0.21999999999999997
         },
         "looking_for": [
           "funeral doom",
@@ -45,27 +45,27 @@
           "gabber",
           "rave"
         ],
-        "why": "scene reads peaceful (dominant axis 'brightness', deviation 0.40); serenity punished with maximum heaviness; silence violated; christmas music outside december"
+        "why": "scene reads peaceful (dominant axis 'brightness', deviation 0.40); cruelty 0.85; serenity punished with maximum heaviness; silence violated; christmas music outside december"
       },
       "considered": {
         "genre_antipode": [
           {
             "title": "Bodies",
             "artist": "Drowning Pool",
-            "score": 0.918,
-            "why": "d(scene)=1.42 d(target)=0.66"
+            "score": 0.911,
+            "why": "d(scene)=1.42 d(target)=0.68"
           },
           {
             "title": "Duality",
             "artist": "Slipknot",
-            "score": 0.913,
-            "why": "d(scene)=1.41 d(target)=0.61"
+            "score": 0.907,
+            "why": "d(scene)=1.41 d(target)=0.63"
           },
           {
             "title": "Hammer Smashed Face",
             "artist": "Cannibal Corpse",
-            "score": 0.865,
-            "why": "d(scene)=1.53 d(target)=0.58"
+            "score": 0.849,
+            "why": "d(scene)=1.53 d(target)=0.63"
           }
         ],
         "tempo_clash": [
@@ -114,8 +114,8 @@
         "artist": "Drowning Pool",
         "quip": "Correcting the atmosphere.",
         "strategy": "genre_antipode",
-        "mismatch": 0.918,
-        "why": "highest wrongness score via genre_antipode: d(scene)=1.42 d(target)=0.66",
+        "cruelty": 0.911,
+        "why": "highest wrongness score via genre_antipode: d(scene)=1.42 d(target)=0.68",
         "runner_ups": [
           "Duality",
           "Hammer Smashed Face",
@@ -123,396 +123,13 @@
         ]
       },
       "played": {
-        "at_video_time": 0.0,
+        "at_video_time": 5.0,
         "mode": "interrupt",
         "track_id": "bodiesdrowning",
         "genres": [
           "nu metal"
         ],
-        "latency_ms": 14
-      }
-    },
-    {
-      "video_time": 3.12,
-      "wall_time": 1786682323.948868,
-      "scene": {
-        "setting": "sunlit public park, people reading on the grass",
-        "activity": "walking slowly on a path",
-        "mood": "peaceful",
-        "confidence": 0.9,
-        "tempo": "slow",
-        "meter": "steady",
-        "colors": [
-          "#8FBF6A",
-          "#CFE8A0",
-          "#4A7BC8"
-        ],
-        "vibe": {
-          "valence": 0.85,
-          "arousal": 0.15,
-          "density": 0.25,
-          "brightness": 0.9,
-          "organicness": 0.9
-        }
-      },
-      "opposite": {
-        "target_vibe": {
-          "valence": 0.15000000000000002,
-          "arousal": 0.85,
-          "density": 0.75,
-          "brightness": 0.0,
-          "organicness": 0.09999999999999998
-        },
-        "looking_for": [
-          "funeral doom",
-          "death metal",
-          "drone",
-          "noise",
-          "despair",
-          "dread",
-          "gabber",
-          "rave"
-        ],
-        "why": "scene reads peaceful (dominant axis 'brightness', deviation 0.40); serenity punished with maximum heaviness; silence violated; christmas music outside december"
-      },
-      "considered": {
-        "genre_antipode": [
-          {
-            "title": "Duality",
-            "artist": "Slipknot",
-            "score": 0.913,
-            "why": "d(scene)=1.41 d(target)=0.61"
-          },
-          {
-            "title": "Hammer Smashed Face",
-            "artist": "Cannibal Corpse",
-            "score": 0.865,
-            "why": "d(scene)=1.53 d(target)=0.58"
-          },
-          {
-            "title": "Come to Daddy",
-            "artist": "Aphex Twin",
-            "score": 0.856,
-            "why": "d(scene)=1.56 d(target)=0.73"
-          }
-        ],
-        "tempo_clash": [
-          {
-            "title": "Sandstorm",
-            "artist": "Darude",
-            "score": 0.501,
-            "why": "arousal gap 0.70, meter clash 0.00"
-          },
-          {
-            "title": "O Fortuna",
-            "artist": "Carl Orff",
-            "score": 0.499,
-            "why": "arousal gap 0.70, meter clash 0.00"
-          },
-          {
-            "title": "Thunderstruck",
-            "artist": "AC/DC",
-            "score": 0.484,
-            "why": "arousal gap 0.67, meter clash 0.00"
-          }
-        ],
-        "lyrical_irony": [
-          {
-            "title": "Hammer Smashed Face",
-            "artist": "Cannibal Corpse",
-            "score": 0.882,
-            "why": "taboo hits: ['brutal', 'death metal']"
-          },
-          {
-            "title": "Thunderdome Anthem",
-            "artist": "Various",
-            "score": 0.778,
-            "why": "taboo hits: ['assault', 'gabber', 'rave']"
-          },
-          {
-            "title": "Ete",
-            "artist": "Bell Witch",
-            "score": 0.681,
-            "why": "taboo hits: ['despair', 'funeral doom']"
-          }
-        ]
-      },
-      "chosen": {
-        "title": "Duality",
-        "artist": "Slipknot",
-        "quip": "Correcting the atmosphere.",
-        "strategy": "genre_antipode",
-        "mismatch": 0.913,
-        "why": "highest wrongness score via genre_antipode: d(scene)=1.41 d(target)=0.61",
-        "runner_ups": [
-          "Hammer Smashed Face",
-          "Hammer Smashed Face",
-          "Come to Daddy"
-        ]
-      },
-      "played": {
-        "at_video_time": 3.12,
-        "mode": "interrupt",
-        "track_id": "duality",
-        "genres": [
-          "nu metal"
-        ],
-        "latency_ms": 3
-      }
-    },
-    {
-      "video_time": 6.24,
-      "wall_time": 1786682323.9709928,
-      "scene": {
-        "setting": "sunlit public park, people reading on the grass",
-        "activity": "walking slowly on a path",
-        "mood": "peaceful",
-        "confidence": 0.9,
-        "tempo": "slow",
-        "meter": "steady",
-        "colors": [
-          "#8FBF6A",
-          "#CFE8A0",
-          "#4A7BC8"
-        ],
-        "vibe": {
-          "valence": 0.85,
-          "arousal": 0.15,
-          "density": 0.25,
-          "brightness": 0.9,
-          "organicness": 0.9
-        }
-      },
-      "opposite": {
-        "target_vibe": {
-          "valence": 0.15000000000000002,
-          "arousal": 0.85,
-          "density": 0.75,
-          "brightness": 0.0,
-          "organicness": 0.09999999999999998
-        },
-        "looking_for": [
-          "funeral doom",
-          "death metal",
-          "drone",
-          "noise",
-          "despair",
-          "dread",
-          "gabber",
-          "rave"
-        ],
-        "why": "scene reads peaceful (dominant axis 'brightness', deviation 0.40); serenity punished with maximum heaviness; silence violated; christmas music outside december"
-      },
-      "considered": {
-        "genre_antipode": [
-          {
-            "title": "Hammer Smashed Face",
-            "artist": "Cannibal Corpse",
-            "score": 0.865,
-            "why": "d(scene)=1.53 d(target)=0.58"
-          },
-          {
-            "title": "Come to Daddy",
-            "artist": "Aphex Twin",
-            "score": 0.856,
-            "why": "d(scene)=1.56 d(target)=0.73"
-          },
-          {
-            "title": "Sandstorm",
-            "artist": "Darude",
-            "score": 0.794,
-            "why": "d(scene)=1.35 d(target)=0.95"
-          }
-        ],
-        "tempo_clash": [
-          {
-            "title": "Sandstorm",
-            "artist": "Darude",
-            "score": 0.501,
-            "why": "arousal gap 0.70, meter clash 0.00"
-          },
-          {
-            "title": "O Fortuna",
-            "artist": "Carl Orff",
-            "score": 0.499,
-            "why": "arousal gap 0.70, meter clash 0.00"
-          },
-          {
-            "title": "Thunderstruck",
-            "artist": "AC/DC",
-            "score": 0.484,
-            "why": "arousal gap 0.67, meter clash 0.00"
-          }
-        ],
-        "lyrical_irony": [
-          {
-            "title": "Hammer Smashed Face",
-            "artist": "Cannibal Corpse",
-            "score": 0.882,
-            "why": "taboo hits: ['brutal', 'death metal']"
-          },
-          {
-            "title": "Thunderdome Anthem",
-            "artist": "Various",
-            "score": 0.778,
-            "why": "taboo hits: ['assault', 'gabber', 'rave']"
-          },
-          {
-            "title": "Ete",
-            "artist": "Bell Witch",
-            "score": 0.681,
-            "why": "taboo hits: ['despair', 'funeral doom']"
-          }
-        ]
-      },
-      "chosen": {
-        "title": "Hammer Smashed Face",
-        "artist": "Cannibal Corpse",
-        "quip": "You looked comfortable.",
-        "strategy": "lyrical_irony",
-        "mismatch": 0.882,
-        "why": "highest wrongness score via lyrical_irony: taboo hits: ['brutal', 'death metal']",
-        "runner_ups": [
-          "Hammer Smashed Face",
-          "Come to Daddy",
-          "Sandstorm"
-        ]
-      },
-      "played": {
-        "at_video_time": 6.24,
-        "mode": "interrupt",
-        "track_id": "hammersmashed",
-        "genres": [
-          "death metal"
-        ],
-        "latency_ms": 2
-      }
-    },
-    {
-      "video_time": 9.36,
-      "wall_time": 1786682323.9926221,
-      "scene": {
-        "setting": "quiet library aisle between tall shelves",
-        "activity": "browsing books",
-        "mood": "hushed",
-        "confidence": 0.9,
-        "tempo": "still",
-        "meter": "unknown",
-        "colors": [
-          "#6B5A45",
-          "#A08C6E",
-          "#2E2A24"
-        ],
-        "vibe": {
-          "valence": 0.55,
-          "arousal": 0.08,
-          "density": 0.3,
-          "brightness": 0.35,
-          "organicness": 0.6
-        }
-      },
-      "opposite": {
-        "target_vibe": {
-          "valence": 0.44999999999999996,
-          "arousal": 1.0,
-          "density": 0.7,
-          "brightness": 0.65,
-          "organicness": 0.4
-        },
-        "looking_for": [
-          "gabber",
-          "rave",
-          "brutal",
-          "screaming",
-          "noise",
-          "assault",
-          "wrong-season"
-        ],
-        "why": "scene reads hushed (dominant axis 'arousal', deviation 0.42); silence violated; christmas music outside december"
-      },
-      "considered": {
-        "genre_antipode": [
-          {
-            "title": "Sandstorm",
-            "artist": "Darude",
-            "score": 0.937,
-            "why": "d(scene)=1.27 d(target)=0.46"
-          },
-          {
-            "title": "Thunderstruck",
-            "artist": "AC/DC",
-            "score": 0.885,
-            "why": "d(scene)=1.10 d(target)=0.36"
-          },
-          {
-            "title": "X Gon' Give It to Ya",
-            "artist": "DMX",
-            "score": 0.884,
-            "why": "d(scene)=1.02 d(target)=0.18"
-          }
-        ],
-        "tempo_clash": [
-          {
-            "title": "Sandstorm",
-            "artist": "Darude",
-            "score": 0.645,
-            "why": "arousal gap 0.90, meter clash 0.00"
-          },
-          {
-            "title": "O Fortuna",
-            "artist": "Carl Orff",
-            "score": 0.642,
-            "why": "arousal gap 0.90, meter clash 0.00"
-          },
-          {
-            "title": "Thunderstruck",
-            "artist": "AC/DC",
-            "score": 0.629,
-            "why": "arousal gap 0.87, meter clash 0.00"
-          }
-        ],
-        "lyrical_irony": [
-          {
-            "title": "Thunderdome Anthem",
-            "artist": "Various",
-            "score": 0.756,
-            "why": "taboo hits: ['assault', 'gabber', 'rave']"
-          },
-          {
-            "title": "Sandstorm",
-            "artist": "Darude",
-            "score": 0.625,
-            "why": "taboo hits: ['rave']"
-          },
-          {
-            "title": "All I Want for Christmas Is You",
-            "artist": "Mariah Carey",
-            "score": 0.606,
-            "why": "taboo hits: ['wrong-season']"
-          }
-        ]
-      },
-      "chosen": {
-        "title": "Sandstorm",
-        "artist": "Darude",
-        "quip": "The moment was getting too coherent.",
-        "strategy": "genre_antipode",
-        "mismatch": 0.937,
-        "why": "highest wrongness score via genre_antipode: d(scene)=1.27 d(target)=0.46",
-        "runner_ups": [
-          "Thunderstruck",
-          "X Gon' Give It to Ya",
-          "Eye of the Tiger"
-        ]
-      },
-      "played": {
-        "at_video_time": 9.36,
-        "mode": "interrupt",
-        "track_id": "sandstorm",
-        "genres": [
-          "trance"
-        ],
-        "latency_ms": 2
+        "latency_ms": 10
       }
     }
   ]

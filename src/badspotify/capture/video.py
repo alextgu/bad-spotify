@@ -1,36 +1,46 @@
 """A video file, pretending to be a live camera.
 
 This is the demo path. We don't have Ray-Bans, so we film something and feed
-the recording in as though it were happening now. The point is that *nothing
-downstream knows the difference* -- same interface, same timing, same
-decisions. It is not a simulation of the product; it is the product, with a
-recording where the glasses would be.
+the recording in as though it were happening now. Nothing downstream knows the
+difference -- same interface, same timing, same decisions.
 
 Two reasons this beats a live camera on stage:
   it is repeatable  -- the same video gives the same run, every rehearsal
   it cannot fail    -- no camera permissions, no lighting, no luck
 
-Audio is pulled out once with ffmpeg and sliced to match each frame. Without
-ffmpeg it degrades to vision-only rather than refusing to run.
+**This is now a thin adapter over `src/videofeed/`.** It used to be a second,
+independent video reader: its own ffmpeg call, its own frame differ, its own
+audio slicing -- all near-copies of what lived elsewhere. Two implementations
+of the same thing drift, and then the demo behaves differently from the thing
+we tested. `videofeed` is the better of the two and it is separately tested, so
+this file adapts it rather than competing with it.
+
+`videofeed` also samples on **events** -- a scene cut, a spike in the audio --
+not only on a fixed clock. So a five-second cadence no longer means we miss the
+door opening at second three.
 
     python run.py --video demo/park.mp4
     python run.py --video demo/park.mp4 --realtime    # play at true speed
 """
 from __future__ import annotations
 
-import shutil
-import subprocess
-import tempfile
+import sys
 import time
-import wave
 from pathlib import Path
 from typing import Iterator
 
-import numpy as np
-
+from ..log import notice as print
 from .base import Observation
 
-SAMPLE_RATE = 16000
+# videofeed is a sibling package under src/, deliberately independent of
+# badspotify -- it knows nothing about scenes, songs or agents.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+DEFAULT_TRIGGERS = "scene-cut,audio-onset"
+
+#: What videofeed calls a sample taken because the clock said so, rather than
+#: because anything happened. Must match `reasons.append(...)` in feed.py.
+CADENCE_REASON = "interval"
 
 
 class VideoSource:
@@ -42,21 +52,12 @@ class VideoSource:
         self.interval = float(cfg.get("frame_interval_s", 5.0))
         self.audio_window = float(cfg.get("audio_window_s", 3.0))
         self.realtime = bool(cfg.get("realtime", False))
-        self.loop = bool(cfg.get("loop", False))
-
-        self._cap = None
-        self._fps = 30.0
-        self._frame_count = 0
-        self._audio: np.ndarray | None = None
-        self._tmpdir: tempfile.TemporaryDirectory | None = None
-
-    # ----------------------------------------------------------------------
+        self.trigger_names = cfg.get("triggers", DEFAULT_TRIGGERS)
+        self._feed = None
 
     @property
     def duration_s(self) -> float:
-        if not self._frame_count or not self._fps:
-            return 0.0
-        return self._frame_count / self._fps
+        return getattr(self._feed, "duration_s", 0.0) or 0.0
 
     def open(self) -> None:
         if not self.path or not self.path.exists():
@@ -64,124 +65,56 @@ class VideoSource:
                 f"video not found: {self.path!r}\n"
                 "Pass one with --video, or set capture.video_path in config.yaml")
 
-        import cv2
-        self._cap = cv2.VideoCapture(str(self.path))
-        if not self._cap.isOpened():
-            raise RuntimeError(f"could not open {self.path} -- unsupported codec?")
+        from videofeed import VideoFeed, build_triggers
 
-        self._fps = self._cap.get(cv2.CAP_PROP_FPS) or 30.0
-        self._frame_count = int(self._cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
-        print(f"[video] {self.path.name}: {self.duration_s:.1f}s "
-              f"at {self._fps:.1f}fps, sampling every {self.interval:.1f}s")
+        names = ([t.strip() for t in self.trigger_names.split(",") if t.strip()]
+                 if isinstance(self.trigger_names, str) else list(self.trigger_names))
+        triggers = build_triggers(names) if names else []
 
-        self._audio = self._extract_audio()
-        if self._audio is None:
-            print("[video] no audio track available -- running vision-only")
+        self._feed = VideoFeed(
+            self.path,
+            interval_s=self.interval,
+            audio_window_s=self.audio_window,
+            triggers=triggers,
+            realtime=self.realtime,
+            verbose=False,
+        )
+        self._feed.open()
+        print(f"[video] {self.path.name}: {self.duration_s:.1f}s, "
+              f"every {self.interval:.1f}s plus {', '.join(names) or 'no'} triggers")
 
     def close(self) -> None:
-        if self._cap is not None:
-            self._cap.release()
-            self._cap = None
-        if self._tmpdir is not None:
-            self._tmpdir.cleanup()
-            self._tmpdir = None
-
-    # ---------------------------------------------------------------- audio
-
-    def _extract_audio(self) -> np.ndarray | None:
-        if not shutil.which("ffmpeg"):
-            print("[video] ffmpeg not on PATH; install it to use the video's audio")
-            return None
-
-        self._tmpdir = tempfile.TemporaryDirectory()
-        wav_path = Path(self._tmpdir.name) / "audio.wav"
-        cmd = [
-            "ffmpeg", "-nostdin", "-loglevel", "error", "-y",
-            "-i", str(self.path),
-            "-vn", "-ac", "1", "-ar", str(SAMPLE_RATE), "-f", "wav",
-            str(wav_path),
-        ]
-        try:
-            subprocess.run(cmd, check=True, timeout=120,
-                           stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
-        except subprocess.CalledProcessError as e:
-            err = (e.stderr or b"").decode(errors="replace").strip().splitlines()
-            hint = err[-1] if err else "unknown error"
-            print(f"[video] audio extraction failed ({hint})")
-            return None
-        except Exception as e:
-            print(f"[video] audio extraction failed ({e})")
-            return None
-
-        if not wav_path.exists() or wav_path.stat().st_size == 0:
-            return None
-
-        with wave.open(str(wav_path), "rb") as w:
-            raw = w.readframes(w.getnframes())
-            width = w.getsampwidth()
-        if width != 2:
-            print(f"[video] unexpected sample width {width}; skipping audio")
-            return None
-
-        audio = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
-        print(f"[video] audio: {len(audio) / SAMPLE_RATE:.1f}s extracted")
-        return audio
-
-    def _audio_slice(self, t: float) -> np.ndarray | None:
-        """The audio window ENDING at t -- what was just heard, not what's next."""
-        if self._audio is None:
-            return None
-        end = int(t * SAMPLE_RATE)
-        start = max(0, end - int(self.audio_window * SAMPLE_RATE))
-        chunk = self._audio[start:end]
-        return chunk if chunk.size else None
-
-    # --------------------------------------------------------------- frames
-
-    def _seek(self, t: float) -> np.ndarray | None:
-        import cv2
-        self._cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000.0)
-        ok, frame = self._cap.read()
-        return frame if ok else None
+        if self._feed is not None:
+            self._feed.close()
+            self._feed = None
 
     def stream(self) -> Iterator[Observation]:
-        t = 0.0
-        index = 0
-        wall_start = time.time()
-
-        while True:
-            if self.duration_s and t >= self.duration_s:
-                if not self.loop:
-                    print(f"[video] reached end of {self.path.name}")
-                    return
-                t, index, wall_start = 0.0, 0, time.time()
-
-            frame = self._seek(t)
-            if frame is None:
-                if not self.loop:
-                    return
-                t, index, wall_start = 0.0, 0, time.time()
-                continue
+        for seg in self._feed.segments():
+            # `reasons` says WHY this moment was sampled. If a trigger fired,
+            # the world demonstrably changed and the cheap local gate would
+            # only be re-deriving what videofeed already knows -- so we mark it
+            # pre-gated and let the graph skip straight to perception. A plain
+            # cadence sample stays ungated: the gate still decides.
+            # "interval" is videofeed's word for a plain cadence sample --
+            # anything else in `reasons` is an actual event.
+            triggered = [r for r in seg.reasons if r != CADENCE_REASON]
 
             yield Observation(
-                frame=frame,
-                audio=self._audio_slice(t),
-                sample_rate=SAMPLE_RATE,
+                frame=seg.frame,
+                audio=seg.audio,
+                sample_rate=seg.sample_rate,
                 ts=time.time(),
                 meta={
                     "source": "video",
                     "file": self.path.name,
-                    # video_time is what the presentation site needs: *where*
-                    # in the footage this decision belongs.
-                    "video_time": round(t, 2),
+                    # where in the footage this decision belongs -- the
+                    # presentation site places its timeline off this
+                    "video_time": round(seg.t, 2),
                     "duration": round(self.duration_s, 2),
-                    "index": index,
+                    "index": seg.index,
+                    "reasons": list(seg.reasons),
+                    "pre_gated": bool(triggered),
+                    "trigger": ", ".join(triggered) or None,
                 },
             )
-
-            t += self.interval
-            index += 1
-
-            if self.realtime:
-                target = wall_start + (index * self.interval)
-                time.sleep(max(0.0, target - time.time()))
+        print(f"[video] reached end of {self.path.name}")

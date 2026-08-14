@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ..schemas import Track
+from ..log import notice as print  # stdout is reserved for data
 
 
 class MockPlayer:

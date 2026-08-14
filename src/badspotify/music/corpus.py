@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 
 from ..schemas import Track, Vibe
+from ..log import notice as print  # stdout is reserved for data
 
 ROOT = Path(__file__).resolve().parents[3]
 

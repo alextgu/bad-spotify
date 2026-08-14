@@ -19,6 +19,7 @@ from ..config import resolve_backend
 from ..resilience import call_with_timeout
 from ..schemas import Meter, SceneRead, TempoFeel, Vibe
 from .audio_features import AudioFeatures, to_vibe_hints
+from ..log import notice as print  # stdout is reserved for data
 
 SYSTEM_PROMPT = """You are the perception module of a wearable agent.
 You receive one still frame from a body-worn camera plus numeric audio features.

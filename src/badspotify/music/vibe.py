@@ -21,18 +21,21 @@ from ..schemas import VIBE_DIMS, AntiVibe, Meter, SceneRead, TempoFeel, Vibe
 
 
 def reflect(v: Vibe) -> Vibe:
-    """Reflect through the centre of the cube: the opposite on every axis.
+    """Reflect through the centre of the cube -- the exact opposite on every axis.
 
-    These axes are *musical mood* -- valence, arousal, density, brightness,
-    organicness -- and nothing else. There is no dial on this. A partial
-    reflection is just a less funny answer, and a knob labelled "how far to
-    go" invites a reading of this system that isn't what it does.
+    This used to take a 0-1 "how far to go" parameter. It was removed: the
+    product reads a mood and inverts a mood, and a dial labelled "how far past
+    inappropriate to go" was describing something the system doesn't do. How
+    wrong the result turned out is now MEASURED afterwards (`Verdict.mismatch`)
+    rather than requested up front.
     """
-    out = {}
-    for dim in VIBE_DIMS:
-        x = getattr(v, dim)
-        out[dim] = max(0.0, min(1.0, 1.0 - x))
-    return Vibe(**out)
+    return Vibe(**{dim: 1.0 - getattr(v, dim) for dim in VIBE_DIMS})
+
+
+def mismatch(scene: Vibe, track: Vibe) -> float:
+    """How far apart the moment and the music actually are, normalised 0-1."""
+    from ..schemas import MAX_VIBE_DISTANCE
+    return min(1.0, scene.distance(track) / MAX_VIBE_DISTANCE)
 
 
 def dominant_axis(v: Vibe) -> tuple[str, float]:

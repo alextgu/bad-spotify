@@ -12,7 +12,7 @@ export default function MomentCard({ moment }: { moment: Moment }) {
   const accent = scene?.colors?.[0] ?? "#3987e5";
 
   return (
-    <article className="rounded-xl border border-line bg-surface-1 p-5">
+    <article className="rounded-xl border border-white/10 bg-surface-1 p-5">
       <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-ink-muted">
         <span
           className="h-2.5 w-2.5 rounded-full"
@@ -24,7 +24,7 @@ export default function MomentCard({ moment }: { moment: Moment }) {
             className={`ml-auto rounded border px-2 py-0.5 text-[10px] ${
               played.mode === "interrupt"
                 ? "border-target text-target"
-                : "border-line-strong text-ink-muted"
+                : "border-white/15 text-ink-muted"
             }`}
           >
             {played.mode === "interrupt" ? "cut in" : "queued"}
@@ -56,7 +56,7 @@ export default function MomentCard({ moment }: { moment: Moment }) {
       )}
 
       {chosen && (
-        <div className="mt-5 border-t border-line pt-4">
+        <div className="mt-5 border-t border-white/10 pt-4">
           <p className="text-xs uppercase tracking-widest text-ink-muted">
             So it plays
           </p>
@@ -68,7 +68,7 @@ export default function MomentCard({ moment }: { moment: Moment }) {
             </p>
           )}
           <p className="mt-3 font-mono text-xs text-ink-muted">
-            via {chosen.strategy} · wrongness {vibeGap(moment).toFixed(2)}
+            via {chosen.strategy} · mismatch {(chosen.mismatch ?? vibeGap(moment)).toFixed(2)}
           </p>
         </div>
       )}

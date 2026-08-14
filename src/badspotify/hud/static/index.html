@@ -168,7 +168,7 @@
   table.data th { color: var(--muted); font-weight: 600; }
   table.data td:first-child, table.data th:first-child { text-align: left; color: var(--text-secondary); }
 
-  /* --------------------------------------------------- meters, etc ----- */
+  /* ------------------------------------------------------ mismatch ---- */
   .hero { display: flex; align-items: baseline; gap: 10px; margin: 2px 0 10px; }
   .hero .val { font-size: 40px; font-weight: 650; letter-spacing: -0.03em; line-height: 1; }
   .hero .unit { color: var(--muted); font-size: 13px; }
@@ -341,6 +341,20 @@
       </section>
 
       <section class="card">
+        <h2>Mismatch</h2>
+        <p class="sub">
+          How far apart the moment and the music actually turned out to be.
+          Measured after the fact — there is no dial for this.
+        </p>
+        <div class="hero">
+          <span class="val" id="mismatch-val">—</span>
+          <span class="unit">of 1.00</span>
+        </div>
+        <div class="meter"><i id="mismatch-bar" style="width:0%"></i></div>
+        <div class="rangelabels"><span>it fits</span><span>maximum wrongness</span></div>
+      </section>
+
+      <section class="card">
         <h2>Scene injection</h2>
         <p class="sub">
           Describe a situation and the real pipeline runs on it — no camera,
@@ -509,6 +523,10 @@ function onEvent(ev) {
     }
   }
   if (ev.kind === "antivibe") { targetVibe = d.target || targetVibe; renderVibes(); }
+  if (ev.kind === "verdict" && typeof d.mismatch === "number") {
+    document.getElementById("mismatch-val").textContent = d.mismatch.toFixed(2);
+    document.getElementById("mismatch-bar").style.width = (d.mismatch * 100) + "%";
+  }
   if (ev.kind === "play" || ev.kind === "verdict") {
     if (ev.kind === "verdict") {
       document.getElementById("np-title").textContent = ev.label;
@@ -534,10 +552,7 @@ function connect() {
   ws.onmessage = (m) => { try { onEvent(JSON.parse(m.data)); } catch (e) {} };
 }
 
-/* ---------------------------------------------------------- controls --
-   There is no dial. The agent has one behaviour: read the mood, invert the
-   mood. A knob labelled "how far to go" was removed on purpose -- it invited
-   a reading of this system that isn't what it does. */
+/* ---------------------------------------------------------- controls -- */
 
 const PRESETS = [
   "a sunlit park, people reading on the grass",
@@ -576,7 +591,7 @@ const OB = [
   ["It reads the room, then betrays it.",
    "One vision pass turns a frame and three seconds of audio into five numbers. The agent reflects those numbers through the middle of the vibe space and hunts for whatever sits at the other end."],
   ["You control nothing.",
-   "Every choice is its own, it will not take requests, and there is no dial to soften it. It reads the mood of a moment and plays the musical opposite — nothing more. Press a scene chip below to watch it think."],
+   "Every decision is its own, and it will not take requests. All you can do is watch it think — press a scene chip below."],
 ];
 let obStep = 0;
 const overlay = document.getElementById("onboarding");

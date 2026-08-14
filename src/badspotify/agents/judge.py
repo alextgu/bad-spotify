@@ -15,7 +15,9 @@ import random
 
 from ..config import resolve_backend
 from ..resilience import call_with_timeout
+from ..music.vibe import mismatch
 from ..schemas import AntiVibe, Candidate, SceneRead, Verdict
+from ..log import notice as print  # stdout is reserved for data
 
 JUDGE_PROMPT = """You are the taste module of an agent whose ONLY purpose is to
 play the worst possible music for the moment. Not bad music -- WRONG music.
@@ -38,7 +40,7 @@ Deadpan, smug, under 15 words, never explains the joke. It is not sorry.
 Good: "You looked comfortable." / "This is a funeral now."
 Bad: "Ha ha, I'm playing the opposite of what you'd want!"
 
-Return JSON: {"track_id", "mismatch" (0-1), "quip", "reasoning"}"""
+Return JSON: {"track_id", "quip", "reasoning"}"""
 
 _MOCK_QUIPS = [
     "You looked comfortable.",
@@ -65,7 +67,7 @@ class MockJudge:
         return Verdict(
             track=top.track,
             strategy=top.strategy,
-            mismatch=min(1.0, top.raw_distance),
+            mismatch=mismatch(scene.vibe, top.track.vibe),
             quip=self._rng.choice(_MOCK_QUIPS),
             reasoning=f"highest wrongness score via {top.strategy}: {top.notes}",
             runner_ups=[c.track.title for c in candidates[1:4]],
@@ -126,7 +128,6 @@ class GeminiJudge:
                             "type": "object",
                             "properties": {
                                 "track_id": {"type": "string"},
-                                "mismatch": {"type": "number"},
                                 "quip": {"type": "string"},
                                 "reasoning": {"type": "string"},
                             },
@@ -144,7 +145,7 @@ class GeminiJudge:
             return Verdict(
                 track=chosen.track,
                 strategy=chosen.strategy,
-                mismatch=min(1.0, float(d.get("mismatch", chosen.raw_distance))),
+                mismatch=mismatch(scene.vibe, chosen.track.vibe),
                 quip=d["quip"],
                 reasoning=d["reasoning"],
                 runner_ups=[c.track.title for c in candidates[:4] if c.track.id != chosen.track.id],

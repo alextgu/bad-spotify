@@ -6,13 +6,8 @@
  * mention in the copy. Don't hardcode the name anywhere else.
  */
 export const brand = {
-  /**
-   * WORKING TITLE, agreed 13 Aug: keep the repo's own name for now.
-   * It cannot ship publicly — Spotify's developer terms forbid "Spotify" in a
-   * product name — so this still has to change before anything goes out.
-   * Change it here and the wordmark, title, metadata and copy all follow.
-   */
-  name: "bad spotify",
+  /** PLACEHOLDER — swap when the team decides. */
+  name: "DJ 180",
 
   /** Shown small above the wordmark. Optional. */
   eyebrow: "Introducing",

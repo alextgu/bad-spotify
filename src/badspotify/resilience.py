@@ -18,6 +18,7 @@ from __future__ import annotations
 import time
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from typing import Callable, TypeVar
+from .log import notice as print  # stdout is reserved for data
 
 T = TypeVar("T")
 

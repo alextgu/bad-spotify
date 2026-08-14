@@ -110,28 +110,25 @@ class DJController:
 
     def decide(self, scene: SceneRead, verdict: Verdict | None,
                now: float | None = None, force: bool = False) -> DJDecision:
-        """`force` is the stage button: a human pressing it is not thrashing.
+        """`force` skips the bounds.
 
-        It skips hysteresis and the timing bounds, but nothing else -- the
-        fallback ladder below still runs if the verdict is missing.
+        The bounds exist to stop a live camera thrashing between two readings.
+        A human deliberately asking for one decision -- pressing a button on
+        the site, running a single photo through a script -- is not thrashing,
+        and making them wait out a cooldown just looks broken.
         """
         now = now or time.time()
 
-        confirmed, why = self.observe(scene)
-        if force:
-            # The stage button, a single photo, a moment a sampler picked out:
-            # all deliberate, none of them thrashing.
-            why = "forced (deliberate sample)"
-        elif not confirmed:
-            return DJDecision(action=DJAction.HOLD, reason=why)
-
-        if force:
-            # Cut in: the point of the button is that the change lands now.
-            mode, delta, mode_why = (PlayMode.INTERRUPT, self.scene_delta(scene),
-                                     "bounds bypassed, cutting in")
+        if not force:
+            confirmed, why = self.observe(scene)
+            if not confirmed:
+                return DJDecision(action=DJAction.HOLD, reason=why)
         else:
-            mode, delta, mode_why = self.choose_mode(scene, now)
+            why = "forced (single request, bounds skipped)"
 
+        mode, delta, mode_why = self.choose_mode(scene, now)
+
+        if not force:
             allowed, gate_reason, wait = self.may_act(mode, now)
             if not allowed:
                 return DJDecision(action=DJAction.HOLD, mode=mode, scene_delta=delta,
@@ -143,7 +140,7 @@ class DJController:
                               scene_delta=delta,
                               reason="no verdict upstream; chaos deck engaged")
 
-        if (self.state.current is not None
+        if (not force and self.state.current is not None
                 and verdict.track.id == self.state.current.track.id):
             return DJDecision(action=DJAction.HOLD, mode=mode, scene_delta=delta,
                               reason="judge picked the track already playing")

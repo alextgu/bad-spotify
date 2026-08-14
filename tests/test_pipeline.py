@@ -30,14 +30,11 @@ def test_reflection_is_actually_opposite():
 
 
 def test_reflection_has_no_dial():
-    """There is no "how far to go" setting, and there should not be one:
-    the axes are musical mood, and a partial reflection is just a worse joke."""
+    """Removed on purpose. The product reads a mood and inverts a mood; a knob
+    labelled "how far past inappropriate to go" described something else."""
     import inspect
-
-    assert list(inspect.signature(reflect).parameters) == ["v"]
-    v = Vibe(valence=.9, arousal=.2)
-    back = reflect(reflect(v))                              # its own inverse
-    assert all(abs(a - b) < 1e-9 for a, b in zip(back.as_tuple(), v.as_tuple()))
+    assert list(inspect.signature(reflect).parameters) == ["v"], \
+        "reflect() should take only a vibe -- no intensity parameter"
 
 
 def test_peaceful_park_gets_something_awful():

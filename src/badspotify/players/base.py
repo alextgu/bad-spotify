@@ -4,6 +4,7 @@ from typing import Protocol
 
 from ..config import resolve_backend
 from ..schemas import Track
+from ..log import notice as print  # stdout is reserved for data
 
 
 class Player(Protocol):
