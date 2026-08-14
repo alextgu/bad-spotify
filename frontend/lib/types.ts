@@ -82,6 +82,9 @@ export interface Session {
   session: string;
   source: string;
   moment_count: number;
+  sample_interval_s?: number;
+  duration_s?: number;
+  model?: string;
   README: string;
   moments: Moment[];
 }

@@ -34,7 +34,7 @@ def genre_antipode(scene: SceneRead, anti: AntiVibe, corpus: Corpus,
     for t in corpus.filter(exclude, anti.banned_genres):
         to_target = t.vibe.distance(anti.target)
         from_scene = t.vibe.distance(scene.vibe)
-        # close to the opposite AND far from the truth
+        #Scores each track using the target mood and scene mood
         score = (from_scene * 0.6 + (1.0 - min(to_target, 1.0)) * 0.4) * _recog_weight(t)
         scored.append(Candidate(
             track=t, strategy="genre_antipode", raw_distance=score,
@@ -102,7 +102,7 @@ def generate(scene: SceneRead, anti: AntiVibe, corpus: Corpus,
         except Exception as e:
             print(f"[strategy] {name} failed: {e}")
 
-    # dedupe, keeping the strongest claim on each track
+    #Keeps the strongest candidate entry for each track
     best: dict[str, Candidate] = {}
     for c in out:
         cur = best.get(c.track.id)

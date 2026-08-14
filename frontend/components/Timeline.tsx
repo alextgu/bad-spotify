@@ -2,12 +2,7 @@
 
 import { momentTime, stamp, type Session } from "@/lib/types";
 
-/**
- * Where each song lands in the footage.
- *
- * TODO(team): mark queue vs interrupt differently, and show the song title on
- * hover rather than only in the tooltip.
- */
+
 export default function Timeline({
   session,
   current,

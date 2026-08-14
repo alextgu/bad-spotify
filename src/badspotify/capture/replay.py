@@ -61,7 +61,7 @@ class ReplaySource:
 
     def _synthetic(self, i: int) -> Observation:
         spec = SYNTHETIC_SCENES[i % len(SYNTHETIC_SCENES)]
-        rng = np.random.default_rng(i)  # deterministic per index
+        rng = np.random.default_rng(i)  #Keeps each generated frame repeatable
         base = np.array(spec["rgb"], dtype=np.float32)
         frame = np.tile(base, (240, 320, 1))
         frame += rng.normal(0, 12, frame.shape)
@@ -78,7 +78,7 @@ class ReplaySource:
         )
 
     def _from_disk(self, i: int) -> Observation:
-        import cv2  # local import: replay works without opencv in synthetic mode
+        import cv2  #Loads OpenCV only when image files are used
         path = self._frames[i % len(self._frames)]
         frame = cv2.imread(str(path))
         return Observation(

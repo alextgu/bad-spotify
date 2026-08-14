@@ -9,7 +9,7 @@ body {
   color: #ffffff;
 }
 
-/* Faint engineering grid, same as the agent's own screens. */
+
 .grid-bg::before {
   content: "";
   position: fixed;
@@ -23,9 +23,7 @@ body {
   z-index: 0;
 }
 
-/* The launch page is deliberately plain: no grid, no texture, nothing to
-   look at except the words. Restraint is what makes it read as a product
-   rather than a hackathon page. The demo page keeps the grid. */
+
 html { scroll-behavior: smooth; }
 
 @media (prefers-reduced-motion: reduce) {

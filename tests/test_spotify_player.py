@@ -15,8 +15,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from badspotify.players.spotify import SpotifyError, SpotifyPlayer  # noqa: E402
-from badspotify.schemas import Track, Vibe                          # noqa: E402
+from badspotify.players.spotify import SpotifyError, SpotifyPlayer  #noqa: E402
+from badspotify.schemas import Track, Vibe                          #noqa: E402
 
 
 class SpotifyException(Exception):
@@ -93,11 +93,11 @@ def item(name, artists, uri="spotify:track:real"):
 
 def player(fake, **cfg):
     p = SpotifyPlayer({"play_mode": "queue", **cfg}, client=fake)
-    p._uris = {}          # ignore any cache file on disk
+    p._uris = {}          #Starts with an empty track cache
     return p
 
 
-# ------------------------------------------------------------------ account
+#Account behavior
 
 def test_free_account_is_rejected_with_a_clear_reason():
     p = player(FakeSpotify(product="free"))
@@ -110,7 +110,7 @@ def test_premium_account_passes():
     assert player(FakeSpotify()).check_account()["product"] == "premium"
 
 
-# ------------------------------------------------------------------- device
+#Device behavior
 
 def test_no_devices_tells_you_what_to_do():
     p = player(FakeSpotify(devices=[]))
@@ -137,7 +137,7 @@ def test_falls_back_when_the_named_device_is_gone():
     assert player(fake, device_name="Kitchen Speaker").ensure_device() == "d9"
 
 
-# ---------------------------------------------------------------- resolution
+#Track lookup behavior
 
 def test_cached_uri_skips_the_search():
     fake = FakeSpotify(search_items=[item("Wrong Song", ["Nobody"])])
@@ -171,7 +171,7 @@ def test_playing_an_unresolvable_track_raises_rather_than_going_silent():
         p.play(track())
 
 
-# ------------------------------------------------------------------ playback
+#Playback behavior
 
 def test_queue_mode_queues_when_something_is_already_playing():
     fake = FakeSpotify(playing=True, search_items=[item("Hurt", ["Johnny Cash"])])
@@ -201,7 +201,7 @@ def test_device_falling_asleep_is_retried_once():
         search_items=[item("Hurt", ["Johnny Cash"])],
         fail_first_play=SpotifyException(404, reason="NO_ACTIVE_DEVICE"),
     )
-    player(fake).play(track())          # must not raise
+    player(fake).play(track())          #Should complete without an error
     assert any(c[0] == "start" for c in fake.calls), "should have retried"
 
 

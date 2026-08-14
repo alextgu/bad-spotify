@@ -2,14 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/**
- * Fade and rise as it enters view. One section at a time is the whole point
- * of this layout — the restraint is what makes it read as confident rather
- * than busy.
- *
- * Respects prefers-reduced-motion: those visitors get the content immediately,
- * with no movement.
- */
+
 export default function Reveal({
   children,
   delay = 0,

@@ -1,10 +1,4 @@
-/**
- * Loading a recorded session.
- *
- * Right now this reads the bundled sample. When someone drops in their own
- * video the plan is unchanged: the agent produces a session file, and this
- * function returns it. Nothing else in the app needs to know the difference.
- */
+
 import type { Session } from "./types";
 
 export const SAMPLE_SESSION_URL = "/sessions/sample.json";
@@ -20,7 +14,7 @@ export async function loadSession(url: string = SAMPLE_SESSION_URL): Promise<Ses
   return (await res.json()) as Session;
 }
 
-/** The moment that should be on screen at a given point in the video. */
+
 export function activeMomentIndex(
   session: Session,
   videoTime: number,

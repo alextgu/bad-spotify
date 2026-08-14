@@ -10,6 +10,9 @@ langchain-core>=0.3.0
 # --- models (all optional at runtime; mock backends exist) ---
 google-genai>=0.3.0          # Gemini: perception + judge
 elevenlabs>=1.0              # narrator voice
+transformers>=4.46           # local CLIP mood classifier
+torch>=2.2                   # local model runtime
+Pillow>=10.0                 # image input for Transformers
 # twelvelabs                 # optional: post-session recap only, NOT the live loop
 
 # --- capture ---
@@ -31,5 +34,6 @@ pytest>=8.0
 
 # --- hud ---
 fastapi>=0.110
+python-multipart>=0.0.9
 uvicorn[standard]>=0.29
 websockets>=12.0

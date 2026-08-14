@@ -37,15 +37,13 @@ class SessionRecorder:
         BUS.subscribe(self._on_event)
         return self
 
-    # ----------------------------------------------------------------------
+    #Event recording
 
     def _on_event(self, ev: PipelineEvent) -> None:
         d = ev.detail or {}
 
         if ev.kind == "scene":
-            # A new scene read starts a new moment. Anything half-built from
-            # the previous one is dropped: it never reached a song, so it
-            # isn't a moment, it's a false start.
+            #Starts a fresh moment when a new scene arrives
             self._pending = {
                 "video_time": d.get("video_time"),
                 "wall_time": ev.ts,
@@ -84,9 +82,7 @@ class SessionRecorder:
 
         elif ev.kind == "play" and self._pending:
             self._pending["played"] = {
-                # When the song actually landed. This is what a timeline on
-                # the site should use -- the scene may have been read a few
-                # seconds earlier, before hysteresis confirmed it.
+                #Stores the playback time used by the session timeline
                 "at_video_time": d.get("video_time"),
                 "mode": d.get("mode"),
                 "track_id": d.get("track_id"),
@@ -96,7 +92,7 @@ class SessionRecorder:
             self.moments.append(self._pending)
             self._pending = {}
 
-    # ----------------------------------------------------------------------
+    #Session output
 
     def to_dict(self) -> dict:
         played = [m for m in self.moments if m.get("played")]

@@ -17,8 +17,8 @@ import numpy as np
 @dataclass
 class Observation:
     """One slice of the world: a frame plus the audio around it."""
-    frame: Optional[np.ndarray] = None        # HxWx3 uint8 BGR
-    audio: Optional[np.ndarray] = None        # mono float32
+    frame: Optional[np.ndarray] = None        #OpenCV image in BGR format
+    audio: Optional[np.ndarray] = None        #Single channel audio samples
     sample_rate: int = 16000
     ts: float = field(default_factory=time.time)
     meta: dict = field(default_factory=dict)

@@ -6,9 +6,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from badspotify.bus import BUS                      # noqa: E402
-from badspotify.capture.base import build_capture   # noqa: E402
-from badspotify.session import SessionRecorder      # noqa: E402
+from badspotify.bus import BUS                      #noqa: E402
+from badspotify.capture.base import build_capture   #noqa: E402
+from badspotify.session import SessionRecorder      #noqa: E402
 
 
 def test_video_source_is_selectable():
@@ -45,7 +45,7 @@ def test_recorder_builds_a_moment_from_the_event_stream():
     assert m["scene"]["setting"] == "a park"
     assert m["chosen"]["quip"] == "You looked comfortable."
     assert m["opposite"]["looking_for"] == ["funeral doom"]
-    # the timeline must use when it PLAYED, not when the scene was read
+    #The timeline uses the time when playback starts
     assert m["played"]["at_video_time"] == 8.0
     assert m["video_time"] == 3.0
 
@@ -56,7 +56,7 @@ def test_a_moment_that_never_plays_is_not_recorded():
     BUS.subscribe(rec._on_event)
     BUS.emit("scene", "peaceful", setting="a park")
     BUS.emit("verdict", "Bodies", artist="Drowning Pool")
-    BUS.emit("scene", "tense", setting="a garage")   # new scene, old one abandoned
+    BUS.emit("scene", "tense", setting="a garage")   #Starts a new scene
     assert rec.moments == []
 
 

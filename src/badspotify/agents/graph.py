@@ -78,7 +78,7 @@ class BadSpotifyGraph:
         self._compiled = self._compile()
         self._from_scene = self._compile_from_scene()
 
-    # ------------------------------------------------------------- nodes --
+    #Graph steps
 
     def n_gate(self, state: PipelineState) -> PipelineState:
         obs = state["obs"]
@@ -134,7 +134,7 @@ class BadSpotifyGraph:
                  target_genres=anti.target_genres[:8],
                  banned=anti.banned_genres)
 
-        # genuine fan-out: three different theories of wrongness, concurrently
+        #Build candidates with three music picking strategies
         futures = {
             name: self._pool.submit(
                 strategies.generate, scene, anti, self.corpus,
@@ -217,7 +217,7 @@ class BadSpotifyGraph:
                     BUS.emit("error", "fallback playback failed too", error=str(e2))
         return state
 
-    # ---------------------------------------------------------- assembly --
+    #Graph setup
 
     def _compile(self):
         try:

@@ -1,32 +1,23 @@
-/**
- * Everything nameable, in one place.
- *
- * The name is a PLACEHOLDER. When the team picks the real one, change `name`
- * here and it updates the wordmark, the page title, the metadata, and every
- * mention in the copy. Don't hardcode the name anywhere else.
- */
+
 export const brand = {
-  /** PLACEHOLDER — swap when the team decides. */
+
   name: "DJ 180",
 
-  /** Shown small above the wordmark. Optional. */
+
   eyebrow: "Introducing",
 
   tagline: "The worst music for the best moments.",
   taglineSecond: "And vice versa.",
 
-  /** One sentence, for metadata and for anyone who asks what it is. */
+
   description:
     "A wearable agent that reads the room, works out exactly what it should play, and plays the opposite.",
 
-  /** The three-beat statement. Kept short on purpose. */
+
   creed: ["It watches you.", "It understands you.", "It does not help you."],
 } as const;
 
-/**
- * Numbers for the specs strip. Keep these HONEST — a judge may ask, and
- * "we made it up" is a bad answer. Update as the real system is measured.
- */
+
 export const specs = [
   { value: "5s", label: "between looks at the room" },
   { value: "3", label: "competing theories of wrong" },
@@ -34,7 +25,7 @@ export const specs = [
   { value: "0", label: "requests taken" },
 ] as const;
 
-/** The loop, for the how-it-works section. Mirrors PIPELINE.md. */
+
 export const steps = [
   { n: "01", title: "Look", body: "A picture, and the last few seconds of sound." },
   {

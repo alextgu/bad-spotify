@@ -9,6 +9,7 @@ not by output field.
 from __future__ import annotations
 
 import base64
+import importlib.util
 import json
 import time
 from typing import Protocol
@@ -45,7 +46,7 @@ class ScenePerceiver(Protocol):
     def read(self, frame, audio_features: AudioFeatures, meta: dict) -> SceneRead: ...
 
 
-# ----------------------------------------------------------------- mock ---
+#Mock scene reader
 
 _MOCK_TABLE = [
     dict(setting="sunlit public park, people reading on the grass",
@@ -83,9 +84,7 @@ class MockPerceiver:
     def __init__(self, cfg: dict | None = None):
         self._i = 0
 
-    #: how many consecutive reads return the same scene. The real world does
-    #: not change every 5 seconds, and if the mock does, hysteresis can never
-    #: confirm a change and nothing ever plays.
+    #Keeps mock scenes stable long enough for the DJ to confirm them
     HOLD_TICKS = 3
 
     def read(self, frame, audio_features: AudioFeatures, meta: dict) -> SceneRead:
@@ -110,7 +109,7 @@ class MockPerceiver:
         )
 
 
-# --------------------------------------------------------------- gemini ---
+#Gemini scene reader
 
 RESPONSE_SCHEMA = {
     "type": "object",
@@ -209,14 +208,198 @@ class GeminiPerceiver:
                 latency_ms=int((time.time() - t0) * 1000),
             )
         except Exception as e:
-            # Falling back rather than raising is the whole point: a late or
-            # broken read must not stall the loop.
+            #Uses a fallback scene when reading fails so the loop can continue
             print(f"[perceive] gemini failed ({e}) -> reusing a canned read")
             return self._fallback.read(frame, audio_features, meta)
 
 
+#Local open source scene reader
+
+MOOD_PROFILES = {
+    "peaceful": (dict(valence=.78, arousal=.16, density=.25, organicness=.72), Meter.STEADY),
+    "joyful": (dict(valence=.92, arousal=.66, density=.62, organicness=.68), Meter.STEADY),
+    "sad": (dict(valence=.14, arousal=.20, density=.30, organicness=.62), Meter.UNKNOWN),
+    "tense": (dict(valence=.22, arousal=.73, density=.65, organicness=.42), Meter.IRREGULAR),
+    "energetic": (dict(valence=.75, arousal=.90, density=.78, organicness=.52), Meter.STEADY),
+    "romantic": (dict(valence=.82, arousal=.30, density=.38, organicness=.74), Meter.STEADY),
+    "eerie": (dict(valence=.12, arousal=.47, density=.28, organicness=.38), Meter.IRREGULAR),
+    "focused": (dict(valence=.56, arousal=.28, density=.34, organicness=.48), Meter.STEADY),
+    "lonely": (dict(valence=.20, arousal=.14, density=.12, organicness=.60), Meter.UNKNOWN),
+    "chaotic": (dict(valence=.38, arousal=.96, density=.92, organicness=.38), Meter.IRREGULAR),
+}
+
+SCENE_LABELS = (
+    "a park or nature scene",
+    "a party or celebration",
+    "an office or classroom",
+    "a restaurant or cafe",
+    "a gym or sports scene",
+    "a concert or performance",
+    "a street or travel scene",
+    "a home or bedroom",
+    "a store or shopping scene",
+    "a dark or empty place",
+)
+
+
+def _dominant_colors(frame: np.ndarray, count: int = 3) -> list[str]:
+    """Find common color groups in a small copy of the frame."""
+    import cv2
+
+    small = cv2.resize(frame, (48, 48), interpolation=cv2.INTER_AREA)
+    rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB).reshape(-1, 3)
+    groups = (rgb // 64).astype(np.int16)
+    values, totals = np.unique(groups, axis=0, return_counts=True)
+    order = np.argsort(totals)[::-1][:count]
+    colors = []
+    for group in values[order]:
+        center = np.clip(group * 64 + 32, 0, 255)
+        colors.append("#" + "".join(f"{int(value):02X}" for value in center))
+    return colors
+
+
+class HuggingFacePerceiver:
+    """Use a local CLIP model to score a fixed scene taxonomy."""
+
+    backend = "huggingface"
+
+    def __init__(self, cfg: dict, classifier=None):
+        self.cfg = cfg
+        self.model = cfg.get("model", "openai/clip-vit-base-patch32")
+        self.device = int(cfg.get("device", -1))
+        self._classifier = classifier
+        self._load_error: Exception | None = None
+        self._previous_gray: np.ndarray | None = None
+        self._fallback = MockPerceiver()
+        if classifier is None and importlib.util.find_spec("transformers") is None:
+            raise ImportError("transformers is not installed")
+
+    def reset(self) -> None:
+        self._previous_gray = None
+
+    def _load(self):
+        if self._classifier is not None:
+            return self._classifier
+        if self._load_error is not None:
+            raise self._load_error
+        try:
+            from transformers import pipeline
+            self._classifier = pipeline(
+                task="zero-shot-image-classification",
+                model=self.model,
+                device=self.device,
+            )
+            return self._classifier
+        except Exception as error:
+            self._load_error = error
+            raise
+
+    def _visual_features(self, frame: np.ndarray) -> tuple[float, float, list[str]]:
+        import cv2
+
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.resize(gray, (160, 90), interpolation=cv2.INTER_AREA)
+        motion = 0.0
+        if self._previous_gray is not None:
+            motion = float(np.mean(cv2.absdiff(gray, self._previous_gray)) / 255.0)
+        self._previous_gray = gray
+
+        sharpness = float(cv2.Laplacian(gray, cv2.CV_64F).var())
+        blur = 1.0 - min(sharpness / 500.0, 1.0)
+        visual_speed = min(1.0, max(motion * 4.0, blur * 0.35))
+        brightness = float(np.mean(gray) / 255.0)
+        return visual_speed, brightness, _dominant_colors(frame)
+
+    @staticmethod
+    def _tempo(arousal: float) -> TempoFeel:
+        if arousal < .16:
+            return TempoFeel.STILL
+        if arousal < .34:
+            return TempoFeel.SLOW
+        if arousal < .58:
+            return TempoFeel.WALKING
+        if arousal < .82:
+            return TempoFeel.BRISK
+        return TempoFeel.FRANTIC
+
+    def read(self, frame, audio_features: AudioFeatures, meta: dict) -> SceneRead:
+        t0 = time.time()
+        if frame is None or not getattr(frame, "size", 0):
+            return self._fallback.read(frame, audio_features, meta)
+
+        try:
+            import cv2
+            from PIL import Image
+
+            labels = list(MOOD_PROFILES) + list(SCENE_LABELS)
+            image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            results = self._load()(image, candidate_labels=labels)
+            scores = {item["label"]: float(item["score"]) for item in results}
+
+            mood = max(MOOD_PROFILES, key=lambda label: scores.get(label, 0.0))
+            setting = max(SCENE_LABELS, key=lambda label: scores.get(label, 0.0))
+            mood_total = sum(scores.get(label, 0.0) for label in MOOD_PROFILES) or 1.0
+            confidence = scores.get(mood, 0.0) / mood_total
+
+            visual_speed, frame_brightness, colors = self._visual_features(frame)
+            hints = to_vibe_hints(audio_features)
+            profile, default_meter = MOOD_PROFILES[mood]
+            arousal = (
+                profile["arousal"] * .60
+                + hints["arousal_hint"] * .25
+                + visual_speed * .15
+            )
+            density = profile["density"] * .70 + hints["density_hint"] * .30
+            brightness = frame_brightness * .70 + hints["brightness_hint"] * .30
+
+            meter = default_meter
+            if audio_features.pulse_regularity > .60:
+                meter = Meter.STEADY
+            elif audio_features.onset_rate > 0:
+                meter = Meter.IRREGULAR
+
+            activity = "little visible movement"
+            if visual_speed > .65:
+                activity = "fast visible movement"
+            elif visual_speed > .30:
+                activity = "some visible movement"
+
+            return SceneRead(
+                setting=setting,
+                activity=activity,
+                social_context="unknown",
+                mood_label=mood,
+                vibe=Vibe(
+                    valence=profile["valence"],
+                    arousal=arousal,
+                    density=density,
+                    brightness=brightness,
+                    organicness=profile["organicness"],
+                ),
+                tempo_feel=self._tempo(arousal),
+                meter=meter,
+                dominant_colors=colors,
+                audio_summary=audio_features.summary(),
+                confidence=max(0.0, min(1.0, confidence)),
+                notes=f"CLIP mood score from {self.model}",
+                source="huggingface",
+                latency_ms=int((time.time() - t0) * 1000),
+            )
+        except Exception as error:
+            print(f"[perceive] huggingface failed ({error}) -> mock")
+            return self._fallback.read(frame, audio_features, meta)
+
+
 def build_perceiver(cfg: dict) -> ScenePerceiver:
-    backend = resolve_backend(cfg.get("backend", "mock"), "GOOGLE_API_KEY", "perceive")
+    requested = str(cfg.get("backend", "mock")).lower()
+    if requested in {"huggingface", "local", "open_source"}:
+        try:
+            return HuggingFacePerceiver(cfg)
+        except Exception as e:
+            print(f"[perceive] huggingface init failed ({e}) -> mock")
+        return MockPerceiver(cfg)
+
+    backend = resolve_backend(requested, "GOOGLE_API_KEY", "perceive")
     if backend == "gemini":
         try:
             return GeminiPerceiver(cfg)
@@ -225,7 +408,7 @@ def build_perceiver(cfg: dict) -> ScenePerceiver:
     return MockPerceiver(cfg)
 
 
-# ------------------------------------------------------- text injection ---
+#Text scene reader
 
 _TEXT_RULES = [
     (("funeral", "hospital", "memorial", "grief", "vigil", "3am"),

@@ -12,8 +12,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
-# Words that mean "this is not the recording you meant". Weighted, because
-# a live version is a mild problem and a karaoke version is a fatal one.
+#Penalties for alternate recordings such as live or karaoke tracks
 JUNK_MARKERS: dict[str, float] = {
     "karaoke": 1.0,
     "tribute": 1.0,
@@ -35,7 +34,7 @@ JUNK_MARKERS: dict[str, float] = {
     "re-recorded": 0.3,
 }
 
-# Decoration that is not part of the title and should not count against a match.
+#Words removed from titles before matching
 NOISE_RE = re.compile(
     r"\s*[\(\[\-–—]\s*"
     r"(remaster(ed)?|\d{4}\s*remaster|mono|stereo|deluxe|expanded|"
@@ -90,16 +89,14 @@ def score_result(item: dict, want_title: str, want_artist: str) -> Match:
     dur = (item.get("duration_ms") or 0) / 1000 or None
 
     title_score = token_overlap(want_title, got_title)
-    # Any credited artist may carry the match -- compilations and classical
-    # recordings list the composer alongside performers.
+    #Accepts a match from any credited artist
     artist_score = max((token_overlap(want_artist, a) for a in artists), default=0.0)
     penalty = junk_penalty(got_title, got_artist)
 
     m = Match(uri=uri, title=got_title, artist=got_artist,
               score=0.0, duration_s=dur)
 
-    # "Various" in our corpus means we never knew the artist. Don't hold
-    # Spotify to a name we invented.
+    #Skips artist validation when the corpus artist is unknown
     artist_is_wildcard = normalise(want_artist) in {"various", "various artists", ""}
 
     if not artist_is_wildcard and artist_score < 0.34:
