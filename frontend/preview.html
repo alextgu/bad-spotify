@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CJ — motion preview</title>
+<style>
+  :root{
+    --plane:#0d0d0d; --surface:#1a1a19; --surface2:#212120;
+    --ink:#fff; --ink2:#c3c2b7; --muted:#898781;
+    --line:rgba(255,255,255,.10); --target:#d95926; --scene:#3987e5;
+    --font:system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--plane);color:var(--ink);font-family:var(--font)}
+  .label{position:fixed;top:0;left:0;right:0;z-index:60;background:var(--target);
+    color:#fff;font-family:var(--mono);font-size:11px;padding:6px 12px;letter-spacing:.06em}
+  section{padding:120px 24px}
+  h2{font-size:clamp(1.75rem,4vw,3rem);font-weight:600;letter-spacing:-.035em;margin:0 0 8px}
+  .sub{color:var(--muted);margin:0 0 48px;max-width:34rem}
+  .wrap{max-width:64rem;margin:0 auto}
+  .tag{font-family:var(--mono);font-size:11px;color:var(--target);letter-spacing:.1em;
+    text-transform:uppercase;margin-bottom:14px}
+
+  /* ---------- 1. HERO VIDEO DIALOG ---------- */
+  .thumb{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+    cursor:pointer;background:linear-gradient(135deg,#1d2a3a,#3a2418);aspect-ratio:16/9;
+    transition:transform .5s cubic-bezier(.2,.7,.3,1),box-shadow .5s}
+  .thumb:hover{transform:scale(1.015);box-shadow:0 40px 90px -30px rgba(0,0,0,.9)}
+  .thumb::after{content:"";position:absolute;inset:0;
+    background:radial-gradient(circle at 50% 50%,transparent 30%,rgba(0,0,0,.45))}
+  .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;
+    width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.94);
+    display:grid;place-items:center;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+  .play::before{content:"";border-left:20px solid var(--plane);border-top:12px solid transparent;
+    border-bottom:12px solid transparent;margin-left:5px}
+  .ring{position:absolute;left:50%;top:50%;width:76px;height:76px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.6);transform:translate(-50%,-50%);
+    animation:ping 2.6s cubic-bezier(0,0,.2,1) infinite}
+  @keyframes ping{0%{transform:translate(-50%,-50%) scale(1);opacity:.7}
+    100%{transform:translate(-50%,-50%) scale(2.1);opacity:0}}
+  .thumbcap{position:absolute;left:20px;bottom:18px;z-index:2}
+  .thumbcap b{display:block;font-size:19px;letter-spacing:-.01em}
+  .thumbcap span{font-size:13px;color:#cfcfc8}
+
+  /* ---------- 2. BLUR FADE ---------- */
+  .bf{opacity:0;filter:blur(10px);transform:translateY(22px);
+    transition:opacity .8s ease,filter .8s ease,transform .8s cubic-bezier(.2,.7,.3,1)}
+  .bf.in{opacity:1;filter:blur(0);transform:none}
+  .grid3{display:grid;gap:28px;grid-template-columns:repeat(3,1fr)}
+  .card{border-top:1px solid var(--line);padding-top:18px}
+  .card h3{margin:10px 0 6px;font-size:19px;font-weight:500;letter-spacing:-.02em}
+  .card p{margin:0;color:var(--ink2);line-height:1.6;font-size:14px}
+  .n{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+  /* ---------- 3. STICKY SCROLL ---------- */
+  .sticky-wrap{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start}
+  .sticky-visual{position:sticky;top:calc(50vh - 150px);height:300px;border-radius:14px;
+    border:1px solid var(--line);display:grid;place-items:center;
+    background:var(--surface);transition:background .7s ease}
+  .steps{display:flex;flex-direction:column;gap:52vh;padding:34vh 0}
+  .step h3{font-size:26px;margin:0 0 10px;letter-spacing:-.025em;
+    color:var(--muted);transition:color .4s}
+  .step.on h3{color:var(--ink)}
+  .step p{margin:0;color:var(--ink2);line-height:1.65;max-width:26rem}
+  .orb{width:130px;height:130px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,var(--scene),transparent 60%),
+      linear-gradient(140deg,var(--scene),var(--target));
+    filter:blur(1px);transition:background .7s ease,transform .7s ease}
+  .vis-note{position:absolute;bottom:14px;left:16px;font-family:var(--mono);
+    font-size:11px;color:var(--muted)}
+
+  /* ---------- modal ---------- */
+  .modal{position:fixed;inset:0;z-index:70;background:rgba(5,5,5,.86);
+    backdrop-filter:blur(8px);display:grid;place-items:center;padding:5vw}
+  .modal[hidden]{display:none}
+  .modal .frame{width:min(1000px,92vw);aspect-ratio:16/9;border-radius:14px;
+    border:1px solid var(--line);background:linear-gradient(135deg,#1d2a3a,#3a2418);
+    display:grid;place-items:center;animation:pop .4s cubic-bezier(.2,.8,.3,1)}
+  @keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+  .modal .close{position:absolute;top:24px;right:28px;color:var(--muted);
+    font-size:26px;cursor:pointer;background:none;border:0}
+</style>
+</head>
+<body>
+<div class="label">MOTION PREVIEW — three components, your palette. Scroll.</div>
+
+<!-- 1 ------------------------------------------------------------------ -->
+<section style="padding-top:140px">
+  <div class="wrap">
+    <p class="tag">1 — Hero Video Dialog</p>
+    <h2>Watch it ruin a moment.</h2>
+    <p class="sub">Click the thumbnail. It expands into a full player instead of
+      sitting on the page as a grey rectangle with browser controls.</p>
+
+    <div class="thumb" onclick="document.getElementById('m').hidden=false">
+      <div class="ring"></div>
+      <div class="play"></div>
+      <div class="thumbcap"><b>A christening, 14:22</b><span>Drowning Pool — Bodies</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 ------------------------------------------------------------------ -->
+<section>
+  <div class="wrap">
+    <p class="tag">2 — Blur Fade</p>
+    <h2 class="bf">It reads the room.</h2>
+    <p class="sub bf">Each item fades up <em>and</em> unblurs, staggered. Your current
+      Reveal only fades and rises — the blur is what makes it feel expensive.</p>
+    <div class="grid3">
+      <div class="card bf"><p class="n">01</p><h3>Sees the light</h3>
+        <p>A frame every five seconds, plus the moment anything changes.</p></div>
+      <div class="card bf"><p class="n">02</p><h3>Hears the room</h3>
+        <p>Three seconds of audio around each look.</p></div>
+      <div class="card bf"><p class="n">03</p><h3>Knows the moment</h3>
+        <p>One call returns mood, pace, meter and colour.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 ------------------------------------------------------------------ -->
+<section style="padding-bottom:0">
+  <div class="wrap">
+    <p class="tag">3 — Sticky Scroll Reveal</p>
+    <h2>A useless product, built properly.</h2>
+    <p class="sub">The panel on the left stays put. The text scrolls past it and the
+      panel changes to match. This is the Daylight effect.</p>
+
+    <div class="sticky-wrap">
+      <div class="sticky-visual" id="vis" style="position:sticky">
+        <div class="orb" id="orb"></div>
+        <span class="vis-note" id="visnote">01 — the change gate</span>
+      </div>
+      <div class="steps">
+        <div class="step on" data-i="0" data-a="#3987e5" data-b="#1baf7a">
+          <h3>A change gate, so thinking is rare</h3>
+          <p>Most ticks are boring. A local pixel-and-RMS diff decides whether the
+             world moved enough to be worth a model call.</p></div>
+        <div class="step" data-i="1" data-a="#d95926" data-b="#eda100">
+          <h3>Geometry shortlists, culture chooses</h3>
+          <p>Reflection through the vibe cube is defensible and instant. Only a
+             language model knows the opposite of a sunlit park is funeral doom.</p></div>
+        <div class="step" data-i="2" data-a="#9085e9" data-b="#e34948">
+          <h3>Three theories, not one score</h3>
+          <p>They genuinely disagree, which is what makes the judge between them
+             worth having rather than parallelism theatre.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+<div style="height:40vh"></div>
+
+<div class="modal" id="m" hidden>
+  <button class="close" onclick="document.getElementById('m').hidden=true">✕</button>
+  <div class="frame"><div class="play" style="position:static;transform:none"></div></div>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach((e,i)=>{
+    if(e.isIntersecting){setTimeout(()=>e.target.classList.add('in'),i*110);io.unobserve(e.target)}
+  })},{threshold:.2});
+  document.querySelectorAll('.bf').forEach(e=>io.observe(e));
+
+  const steps=[...document.querySelectorAll('.step')],
+        orb=document.getElementById('orb'), note=document.getElementById('visnote'),
+        labels=['01 — the change gate','02 — geometry vs culture','03 — three theories'];
+  const so=new IntersectionObserver((es)=>{es.forEach(e=>{
+    if(e.isIntersecting){
+      steps.forEach(s=>s.classList.remove('on')); e.target.classList.add('on');
+      const i=+e.target.dataset.i;
+      orb.style.background=`radial-gradient(circle at 35% 30%,${e.target.dataset.a},transparent 60%),
+        linear-gradient(140deg,${e.target.dataset.a},${e.target.dataset.b})`;
+      note.textContent=labels[i];
+    }})},{threshold:.6});
+  steps.forEach(s=>so.observe(s));
+</script>
+</body>
+</html>
