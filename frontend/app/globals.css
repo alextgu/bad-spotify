@@ -24,6 +24,113 @@ body {
 }
 
 
+/* ---------------------------------------------------------------- rig ---
+   The rotating product in section 2. Deliberately plain for now -- the UI
+   pass comes later; this only has to read as "a pair of camera glasses,
+   in 3D" without pulling in a WebGL dependency.
+
+   Lost once already: the token-layer rewrite replaced this whole file and
+   dropped the block, which left ProductRotator rendering unstyled divs and
+   section 2 with an empty left half. If you rewrite globals.css, grep the
+   components for class names before you delete anything. */
+.rig-scene {
+  --rig-lens-w: 132px;
+  --rig-lens-h: 78px;
+  --rig-temple-l: 150px;
+  perspective: 900px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+}
+
+.rig {
+  position: relative;
+  transform-style: preserve-3d;
+  animation: rig-spin 18s linear infinite;
+}
+
+.rig-front {
+  display: flex;
+  align-items: center;
+  transform-style: preserve-3d;
+}
+
+.rig-lens {
+  position: relative;
+  width: var(--rig-lens-w);
+  height: var(--rig-lens-h);
+  border: 2px solid #4a4a46;
+  border-radius: 22px;
+  background: linear-gradient(140deg, rgba(57, 135, 229, 0.18), rgba(13, 13, 13, 0.9));
+}
+
+.rig-bridge {
+  width: 34px;
+  height: 12px;
+  border-top: 2px solid #4a4a46;
+  border-radius: 6px 6px 0 0;
+}
+
+.rig-temple {
+  position: absolute;
+  top: 14px;
+  width: var(--rig-temple-l);
+  height: 10px;
+  border-radius: 5px;
+  background: #4a4a46;
+}
+
+.rig-temple-left {
+  left: 0;
+  transform-origin: left center;
+  transform: rotateY(-84deg);
+}
+
+.rig-temple-right {
+  right: 0;
+  transform-origin: right center;
+  transform: rotateY(84deg);
+}
+
+/* The camera. The only part of the hardware the agent needs. */
+.rig-camera {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #d95926;
+}
+
+.rig-camera-pulse {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #d95926;
+  animation: rig-pulse 5s ease-out infinite;   /* one look every ~5s */
+}
+
+@keyframes rig-spin {
+  from { transform: rotateX(-8deg) rotateY(0deg); }
+  to   { transform: rotateX(-8deg) rotateY(360deg); }
+}
+
+@keyframes rig-pulse {
+  0%        { transform: scale(1);   opacity: 0.9; }
+  40%, 100% { transform: scale(3.6); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rig { animation: none; transform: rotateX(-8deg) rotateY(-24deg); }
+  .rig-camera-pulse { animation: none; opacity: 0; }
+}
+
+
 /* ---------------------------------------------------------------------------
    .section-page — one idea, one screen.
 
