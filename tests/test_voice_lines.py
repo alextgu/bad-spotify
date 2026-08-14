@@ -200,3 +200,50 @@ def test_the_site_and_the_renderer_agree_on_every_line():
     for name, text in script.items():
         assert site[name] == text, (
             f"{name}: renderer says {text!r}, site says {site[name]!r}")
+
+
+# ------------------------------------------------------------- the greeting --
+
+
+def test_the_greeting_works_before_the_project_is_named():
+    """The name isn't chosen. Startup must not wait for it."""
+    from badspotify.voice.lines import greeting
+
+    line = greeting("")
+    assert line == ("Hello. I'm your DJ. I'll help you choose the perfect "
+                    "music for any moment.")
+
+
+def test_the_greeting_takes_the_name_when_there_is_one():
+    from badspotify.voice.lines import greeting
+
+    assert "I'm your Nelson." in greeting("Nelson")
+
+
+def test_a_typo_in_the_greeting_template_does_not_start_in_silence():
+    from badspotify.voice.lines import greeting
+
+    line = greeting("DJ", "Hello, I am {nonexistent}.")
+    assert "DJ" in line and len(line) > 10
+
+
+def test_the_greeting_is_sincere():
+    """Same character rule as the announcement: it means it."""
+    from badspotify.voice.lines import greeting
+
+    line = greeting("DJ").lower()
+    assert "perfect" in line or "help" in line
+    for knowing in ("worst", "wrong", "ignor", "ruin", "sorry"):
+        assert knowing not in line
+
+
+def test_the_running_product_does_not_narrate_every_track_by_default():
+    """Decided 14 Aug. A voice over every song is a latency and ducking
+    problem in exchange for a joke the screens already tell."""
+    import sys
+    from pathlib import Path as _P
+
+    sys.path.insert(0, str(_P(__file__).resolve().parents[1]))
+    from badspotify.config import load_config
+
+    assert load_config().get_path("voice.say", "greeting") == "greeting"

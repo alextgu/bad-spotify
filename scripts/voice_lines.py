@@ -51,8 +51,14 @@ AUDITION_TEXT = ("Now playing Bodies by Drowning Pool — the perfect fit "
                  "for your silent library during exam week.")
 
 # What the site plays. Keyed by the file name they land under.
+#
+# `intro` is also what the running program says at startup -- the only line it
+# actually speaks (voice.say in config.yaml). Keep it identical to
+# voice.greeting there, with the name already filled in.
+#
+# RE-RENDER THESE once the project is named: the greeting says the name.
 LINES: dict[str, str] = {
-    "intro": "Hello. I'm your DJ. I read the room, and I pick what fits.",
+    "intro": "Hello. I'm your DJ. I'll help you choose the perfect music for any moment.",
     "now-playing": AUDITION_TEXT,
     "no-requests": "No need for requests. I already know what this moment needs.",
 }

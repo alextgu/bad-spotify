@@ -32,6 +32,18 @@ import re
 from ..schemas import SceneRead, Verdict
 
 DEFAULT_TEMPLATE = "Now playing {title} by {artist} — the perfect fit for your {context}."
+
+DEFAULT_GREETING = ("Hello. I'm your {name}. "
+                    "I'll help you choose the perfect music for any moment.")
+"""Said once, at startup. This is the only line the running product actually
+speaks -- per-track narration is off by default (`voice.say` in config.yaml),
+because a voice over every song is a latency problem and a ducking problem in
+exchange for a joke the screens already tell.
+
+{name} comes from `voice.agent_name`, and is the project's name. It is not
+chosen yet, so the fallback is "DJ" and the greeting still works."""
+
+DEFAULT_AGENT_NAME = "DJ"
 """Placeholders: {title} {artist} {context} {mood} {quip}. Set `voice.line`
 in config.yaml to change it; set it empty to speak the raw quip instead."""
 
@@ -79,6 +91,19 @@ def context_phrase(scene: SceneRead | None) -> str:
         text = text[0].lower() + text[1:]
 
     return text or "moment"
+
+
+def greeting(name: str = "", template: str = DEFAULT_GREETING) -> str:
+    """The startup line. Sincere, and the only thing the product says aloud.
+
+    Never raises: an empty name falls back to "DJ", and a typo'd placeholder
+    falls back to a plain greeting rather than starting the program in silence.
+    """
+    name = (name or "").strip() or DEFAULT_AGENT_NAME
+    try:
+        return (template or DEFAULT_GREETING).format(name=name).strip()
+    except (KeyError, IndexError, ValueError):
+        return DEFAULT_GREETING.format(name=name)
 
 
 def announcement(

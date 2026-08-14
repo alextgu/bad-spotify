@@ -33,9 +33,11 @@ export interface VoiceLine {
 }
 
 export const VOICE_LINES = {
+  /** Also the line the running program speaks at startup. Re-render when the
+   *  project is named -- the greeting says the name. */
   intro: {
     file: "/audio/intro.mp3",
-    text: "Hello. I'm your DJ. I read the room, and I pick what fits.",
+    text: "Hello. I'm your DJ. I'll help you choose the perfect music for any moment.",
   },
   nowPlaying: {
     file: "/audio/now-playing.mp3",

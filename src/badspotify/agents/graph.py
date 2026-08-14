@@ -76,6 +76,10 @@ class BadSpotifyGraph:
         vcfg = cfg.section("voice")
         self.voice_line = vcfg.get("line", DEFAULT_TEMPLATE)
         self.max_line_chars = int(vcfg.get("max_quip_chars", 120))
+        # Decided 14 Aug: the product speaks once, at startup. Narrating every
+        # track costs a TTS call per decision and talks over the music, to say
+        # what the screens are already showing.
+        self.say_mode = (vcfg.get("say") or "greeting").lower()
 
         self._pool = ThreadPoolExecutor(max_workers=4)
         self._last_scene: Optional[SceneRead] = None
@@ -197,14 +201,16 @@ class BadSpotifyGraph:
         if verdict is None:
             return state
         try:
-            # What it SAYS is the fixed announcement; what the screens show as
-            # its personality is the judge's quip. Two different lines on
-            # purpose -- see voice/lines.py.
+            # The announcement is always composed -- the screens and the
+            # recorded session show it either way -- but it is only SPOKEN
+            # when someone has asked for per-track narration.
             spoken = announcement(verdict, state.get("scene"),
                                   self.voice_line, self.max_line_chars)
             if spoken:
-                self.narrator.say(spoken, duck=self.player)
-                BUS.emit("voice", spoken, quip=verdict.quip)
+                if self.say_mode == "every_track":
+                    self.narrator.say(spoken, duck=self.player)
+                BUS.emit("voice", spoken, quip=verdict.quip,
+                         spoken=self.say_mode == "every_track")
             self.player.play(verdict.track, mode=decision.mode.value)
             self.dj.commit(verdict, scene=state.get("scene"))
             BUS.emit("play", f"{verdict.track.title} - {verdict.track.artist}",

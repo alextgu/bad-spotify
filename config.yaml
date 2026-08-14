@@ -71,6 +71,20 @@ voice:
   duck_to: 0.25           # duck music to this while narrating
   max_quip_chars: 120
 
+  # WHEN it speaks. Decided 14 Aug: the running product says one line, at
+  # startup, and then shuts up.
+  #   greeting     the startup line only. Default.
+  #   every_track  narrate every song too. Costs a call per decision and
+  #                fights the music -- the screens already show the reasoning.
+  #   off          silent
+  say: greeting
+
+  # The project's name. NOT CHOSEN YET -- blank falls back to "DJ", and the
+  # greeting still reads correctly. This is the one string to fill in when the
+  # name is picked; the site's recorded clips need re-rendering after.
+  agent_name:
+  greeting: "Hello. I'm your {name}. I'll help you choose the perfect music for any moment."
+
   # What it says out loud. Same sentence every time, and SINCERE: the agent
   # believes it read the room correctly and is pleased with its choice. It
   # never winks. The line claims the song fits; the audience notices it

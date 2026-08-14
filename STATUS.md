@@ -28,7 +28,7 @@ Last updated: 14 Aug 2026
 | Working out the opposite | Built, unproven | |
 | The song list (47 songs) | Built, unproven | |
 | Picking the funniest one | Built, unproven | |
-| The voice | Voice chosen and heard; pipeline still unproven | Nelson (`6OzrBCQf8cjERkYgzSg8`), in `config.yaml` — listened to and approved 14 Aug. What's still unproven is *our* path to him: nothing has run `narrator.say()` against the real API, so latency, ducking and the mid-song interruption are all untested. Key is coming |
+| The voice | Scoped down 14 Aug | Nelson (`6OzrBCQf8cjERkYgzSg8`), listened to and approved. **Not in the live loop**: one greeting at startup, and pre-rendered clips on the site. That deletes the latency, ducking and mid-song-interrupt risks entirely — none of them can bite a line spoken before the music starts. Still needs a key to render the site's three clips |
 | Video file as input | Built, unproven — now sampled by `videofeed` | |
 | Recording a run for the site | Built, unproven | |
 | Screens — DJ face and engineering view | Built, unproven | |
@@ -187,6 +187,12 @@ problem entirely — no visitor login, no licensing mess, no live playback to fa
 
 Don't re-open these without a reason.
 
+- **14 Aug** — **The voice is not part of the running product.** It says one
+  line at startup ("Hello. I'm your [name]. I'll help you choose the perfect
+  music for any moment.") and then stays quiet. Everything else people hear is
+  pre-rendered for the website demo. Narrating every track cost a TTS call per
+  decision and talked over the music, to say what the screens already show.
+  `voice.say: every_track` in `config.yaml` turns it back on if we're wrong.
 - **13 Aug** — Queue by default, interrupt only when the room changed a lot and
   the song has had a run. Not a setting; the system decides per moment.
 - **13 Aug** — Feed it a video file for the demo rather than a live camera.
