@@ -12,7 +12,7 @@ import { learned } from "@/lib/content";
  */
 export default function SectionLearned() {
   return (
-    <section id="learned" className="section-page mx-auto max-w-5xl px-6 py-32">
+    <section id="learned" className="section-page section-tall mx-auto max-w-5xl px-6 py-32">
       <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.035em]">
         What we got wrong first.
       </h2>

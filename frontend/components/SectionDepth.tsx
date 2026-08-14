@@ -12,7 +12,7 @@ import { depth } from "@/lib/content";
  */
 export default function SectionDepth() {
   return (
-    <section id="how" className="section-page mx-auto max-w-5xl px-6 py-32">
+    <section id="how" className="section-page section-tall mx-auto max-w-5xl px-6 py-32">
       <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.035em]">
         A useless product, built properly.
       </h2>

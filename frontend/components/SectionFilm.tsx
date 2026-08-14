@@ -1,12 +1,13 @@
-import { CLIPS } from "@/lib/clips";
+import { FILM } from "@/lib/clips";
 
 /**
- * Section 5 — the film. A screen to itself.
+ * Section 2 — the film. A screen to itself, immediately after the pitch.
  *
  * One uninterrupted watch-it-happen. No cards, no annotation, nothing beside
- * it. By the time this plays the page has already explained the machinery, so
- * the video is proof rather than a claim — the judge knows what should have
- * happened and gets to watch it not happen.
+ * it, and nothing explained yet. An ad that explains before it shows has
+ * already lost the reader — nobody watches a product film because they were
+ * persuaded to. The explaining starts on the next screen, once they have
+ * something to attach it to.
  *
  * Full-bleed on purpose: this is the only section that isn't argument.
  *
@@ -15,7 +16,7 @@ import { CLIPS } from "@/lib/clips";
  * that sidesteps licensing and live playback entirely.
  */
 export default function SectionFilm() {
-  const clip = CLIPS[0];
+  const clip = FILM;
 
   return (
     <section
@@ -39,6 +40,9 @@ export default function SectionFilm() {
           src={clip.video}
         />
 
+        {/* Shown honestly rather than hidden. One flag in lib/clips.ts drives
+            this, the picker's note, and the dev banner — delete it there and
+            all three disappear together. */}
         {clip.placeholder && (
           <p className="mt-4 text-sm text-target">
             Placeholder footage — the real film hasn’t been shot yet.

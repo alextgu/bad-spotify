@@ -24,6 +24,40 @@ body {
 }
 
 
+/* ---------------------------------------------------------------------------
+   .section-page — one idea, one screen.
+
+   Every section on the launch page carries this class. It was being used
+   before it was ever defined, which meant the page rendered as one long
+   document instead of a paced sequence of screens — the sections were there,
+   the rhythm wasn't.
+
+   `100svh` rather than `100vh`: on mobile, `vh` includes the browser chrome
+   that retracts as you scroll, so a full-height section is taller than the
+   visible area and every screen starts slightly clipped.
+
+   `min-height`, never `height` — a section is allowed to be taller than the
+   viewport when its content demands it. Fixing the height would clip the
+   long text sections on a laptop, which is exactly where judges will read it.
+--------------------------------------------------------------------------- */
+.section-page {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  scroll-margin-top: 0;
+}
+
+/* Sections that are genuinely long — the ones with five stacked arguments —
+   shouldn't be vertically centred, or the top scrolls off before you reach it. */
+.section-page.section-tall {
+  justify-content: flex-start;
+}
+
+@supports not (min-height: 100svh) {
+  .section-page { min-height: 100vh; }
+}
+
 html { scroll-behavior: smooth; }
 
 @media (prefers-reduced-motion: reduce) {
