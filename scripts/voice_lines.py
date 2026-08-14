@@ -42,14 +42,19 @@ SITE_AUDIO_DIR = ROOT / "frontend" / "public" / "audio"
 
 # One sentence, in the real format, with real names in it. Auditioning on
 # "hello world" tells you nothing about how a voice handles a band name.
-AUDITION_TEXT = ("Now playing Bodies by Drowning Pool, "
+#
+# Judge every voice on one question: does it sound like it MEANS it? The agent
+# is sincerely pleased with its choice and has no idea the pick is wrong. A
+# voice with a smile in it, or any hint of irony, kills that -- it turns the
+# agent into someone doing a bit. Wise, warm, unhurried, completely sincere.
+AUDITION_TEXT = ("Now playing Bodies by Drowning Pool — the perfect fit "
                  "for your silent library during exam week.")
 
 # What the site plays. Keyed by the file name they land under.
 LINES: dict[str, str] = {
-    "intro": "I'm the DJ. I have read the room, and I have decided against it.",
+    "intro": "Hello. I'm your DJ. I read the room, and I pick what fits.",
     "now-playing": AUDITION_TEXT,
-    "no-requests": "I do not take requests.",
+    "no-requests": "No need for requests. I already know what this moment needs.",
 }
 
 

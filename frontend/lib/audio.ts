@@ -1,6 +1,13 @@
 /**
  * The agent's recorded voice lines.
  *
+ * **Character note, and it is load-bearing: the agent thinks it is doing a
+ * good job.** It is a conscientious DJ, pleased with its choices, sincerely
+ * confident it has matched the room. It never winks, never jokes, never
+ * acknowledges a mismatch. Every line here must be one a genuinely helpful DJ
+ * would say. The comedy is the gap between that sincerity and the pick — the
+ * moment a line is knowing, it collapses into someone doing a bit.
+ *
  * These are pre-rendered on purpose. The site is static and has no API key, so
  * anything spoken here is a file that shipped with the page — no request, no
  * latency, nothing to fail on stage.
@@ -28,15 +35,15 @@ export interface VoiceLine {
 export const VOICE_LINES = {
   intro: {
     file: "/audio/intro.mp3",
-    text: "I'm the DJ. I have read the room, and I have decided against it.",
+    text: "Hello. I'm your DJ. I read the room, and I pick what fits.",
   },
   nowPlaying: {
     file: "/audio/now-playing.mp3",
-    text: "Now playing Bodies by Drowning Pool, for your silent library during exam week.",
+    text: "Now playing Bodies by Drowning Pool — the perfect fit for your silent library during exam week.",
   },
   noRequests: {
     file: "/audio/no-requests.mp3",
-    text: "I do not take requests.",
+    text: "No need for requests. I already know what this moment needs.",
   },
 } as const satisfies Record<string, VoiceLine>;
 

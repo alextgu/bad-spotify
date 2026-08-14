@@ -109,7 +109,7 @@ export default function SectionLogo() {
 
       {/* [caption] */}
       <p className="mt-8 max-w-lg text-[clamp(1.25rem,2.6vw,1.75rem)] leading-snug tracking-[-0.02em]">
-        {showText ? `“${line.text}”` : "“I’ve read the room. I’m ignoring it.”"}
+        {showText ? `“${line.text}”` : "“I’ve read the room. This is what it needs.”"}
       </p>
 
       {showText && (

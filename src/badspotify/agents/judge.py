@@ -6,7 +6,14 @@ noise record nobody knows. Comedy needs specificity and recognition, and
 that is exactly the thing an LLM has and a distance metric does not.
 
 So: geometry shortlists, the model chooses, and it must justify the choice
-in one line that we then speak aloud. The quip IS the product.
+in one line that we then speak aloud.
+
+**The agent believes it is doing a good job.** That is the character, and it is
+load-bearing. It is not smug, it is not winking, it does not know the music is
+wrong -- it is a conscientious DJ announcing a considered choice. The comedy is
+entirely in the gap between how sincerely it says the line and how catastrophic
+the pick is. The moment it acknowledges the joke, it stops being funny and
+starts being a person doing a bit.
 """
 from __future__ import annotations
 
@@ -35,21 +42,33 @@ How to choose:
   funnier than horror music during a tense moment.
 - Never pick something that would genuinely FIT. That is failure.
 
-Then write `quip`: what the agent says out loud as it starts the track.
-Deadpan, smug, under 15 words, never explains the joke. It is not sorry.
-Good: "You looked comfortable." / "This is a funeral now."
-Bad: "Ha ha, I'm playing the opposite of what you'd want!"
+Then write `quip`: what the agent says as it starts the track.
+
+CRITICAL -- the agent thinks this is a GOOD choice and is pleased with it. It
+is a professional DJ who has read the room carefully and is confident it has
+matched it. Sincere, warm, under 15 words. It never jokes, never winks, never
+apologises, and never acknowledges any mismatch, because as far as it is
+concerned there isn't one.
+
+Good: "This should suit the room nicely."
+Good: "A perfect fit for the occasion."
+Good: "I think this is exactly what the moment needs."
+Bad:  "You looked comfortable."            (smug -- it knows)
+Bad:  "This is a funeral now."             (in on the joke)
+Bad:  "Ha ha, the opposite of what you want!"
 
 Return JSON: {"track_id", "quip", "reasoning"}"""
 
+# Sincere, every one. The agent is pleased with its work -- see the note at
+# the top of this file. If a line here reads as knowing, it is wrong.
 _MOCK_QUIPS = [
-    "You looked comfortable.",
-    "This is a funeral now.",
-    "I've read the room. I'm ignoring it.",
-    "Everyone here needs to hear this.",
-    "Correcting the atmosphere.",
-    "You'll thank me eventually. You won't, but you'll say it.",
-    "The moment was getting too coherent.",
+    "This should suit the room nicely.",
+    "A perfect fit for the occasion.",
+    "I think this is exactly what the moment needs.",
+    "Reading the room, and this is my choice.",
+    "Matched to the mood.",
+    "This is the right call for the room.",
+    "Chosen to fit the occasion.",
 ]
 
 

@@ -64,7 +64,7 @@ def test_the_default_line_names_the_song_and_the_moment():
     scene = scene_from_text("a silent library during exam week")
     line = announcement(verdict(), scene)
 
-    assert line == ("Now playing Bodies by Drowning Pool, "
+    assert line == ("Now playing Bodies by Drowning Pool — the perfect fit "
                     "for your silent library during exam week.")
 
 
@@ -78,6 +78,20 @@ def test_the_line_is_the_same_shape_every_time():
 
     assert a.startswith("Now playing ") and b.startswith("Now playing ")
     assert a.endswith(".") and b.endswith(".")
+
+
+def test_the_default_line_claims_the_song_fits():
+    """The character is load-bearing: the agent believes it did a good job.
+
+    The line has to ASSERT the match -- that sincerity is the whole joke, and
+    the audience supplies the punchline by noticing it isn't true. A neutral
+    "now playing X" is a worse line, and a knowing one is a much worse line.
+    """
+    line = announcement(verdict(), scene_from_text("a funeral"), DEFAULT_TEMPLATE)
+
+    assert "perfect fit" in line
+    for knowing in ("ignoring", "wrong", "worst", "sorry", "ruin", "instead"):
+        assert knowing not in line.lower(), f"the agent must not wink: {line!r}"
 
 
 def test_an_empty_template_speaks_the_quip_instead():
@@ -131,7 +145,8 @@ def test_every_demo_scene_produces_a_speakable_line(text):
     """These six are the ones on stage. None may come out mangled."""
     line = announcement(verdict(), scene_from_text(text), DEFAULT_TEMPLATE)
 
-    assert line.startswith("Now playing Bodies by Drowning Pool, for your ")
+    assert line.startswith(
+        "Now playing Bodies by Drowning Pool — the perfect fit for your ")
     assert line.endswith(".")
     # No dangling article straight after "for your" -- "for your a hospital
     # waiting room" is the failure this guards. Articles later in the phrase

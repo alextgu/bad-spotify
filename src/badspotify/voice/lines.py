@@ -8,12 +8,18 @@ Two different jobs, and they are not the same line:
                         the moment slotted in: *"Now playing Bodies by Drowning
                         Pool, for your quiet library aisle."*
 
-The announcement is deliberately the same shape every time. A varying joke
-delivered in a serious voice stops being funny by the third one, because the
-audience starts listening for the joke. A flight-announcement cadence that
-never changes keeps working, because the format is straight and only the
-contents are absurd — and it makes the mismatch explicit: it names the music
-*and* the moment in one breath, so nobody has to be told what the joke is.
+The announcement is deliberately the same shape every time, and it is
+deliberately **sincere**. The agent believes it has read the room correctly and
+made a good choice; it says so plainly, the way a DJ who is pleased with a
+transition would. It never winks, never acknowledges a mismatch, and is never
+smug -- as far as it is concerned, the song fits.
+
+That is what makes it work. A varying joke delivered in a serious voice stops
+landing by the third one, because the audience starts listening for the joke.
+An announcement that earnestly claims the pick is *perfect* keeps working,
+because the line names the music and the moment in one breath and asserts they
+belong together -- leaving the audience to notice, every time, that they do
+not.
 
 Composition happens here rather than in the narrator so it can be tested
 without an API key, and so the screens can show the exact string that was
@@ -25,7 +31,7 @@ import re
 
 from ..schemas import SceneRead, Verdict
 
-DEFAULT_TEMPLATE = "Now playing {title} by {artist}, for your {context}."
+DEFAULT_TEMPLATE = "Now playing {title} by {artist} — the perfect fit for your {context}."
 """Placeholders: {title} {artist} {context} {mood} {quip}. Set `voice.line`
 in config.yaml to change it; set it empty to speak the raw quip instead."""
 
