@@ -3,7 +3,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import GlassesRig from "@/components/GlassesRig";
+import GlassesModel from "@/components/GlassesModel";
 import Label from "@/components/Label";
 import Slot from "@/components/Slot";
 import { description } from "@/lib/site";
@@ -180,7 +180,12 @@ export default function SectionDescription() {
         className="relative mx-auto grid w-full max-w-content items-center gap-rest px-gutter lg:grid-cols-[1fr_1fr]"
       >
         <div className="hidden lg:block">
-          <GlassesRig />
+          <GlassesModel />
+          {/* Attribution rendered on the page, not just in a source comment.
+              An attribution nobody can see is not an attribution. */}
+          <p className="mt-3 text-center font-mono text-label uppercase text-graphite/60">
+            Model by mminharali · Sketchfab
+          </p>
         </div>
 
         <div>
