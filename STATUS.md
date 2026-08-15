@@ -32,6 +32,7 @@ Last updated: 14 Aug 2026
 | Video file as input | Built, unproven — now sampled by `videofeed` | |
 | Recording a run for the site | Built, unproven | |
 | Screens — DJ face and engineering view | Built, unproven | |
+| Live camera/shared-screen HUD | Built, unproven — chosen song and playback errors reach the live response; browser not exercised | |
 | Site — scaffold + demo ground | Built, unproven | |
 | Site — launch page | Built, unproven | |
 | Site — pipeline diagram | Done — watched it render at 1440px and at a 360px container; six steps, the gate's skip-back edge, and the three-strategy fan-out all draw. Inline SVG, no dependency. `tsc --noEmit` and `next build` pass | |

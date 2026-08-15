@@ -43,7 +43,9 @@ class FakeRuntime:
             from badspotify.perceive.scene import scene_from_text
             from badspotify.schemas import DJAction, DJDecision
             return {"scene": scene_from_text("a silent library during exam week"),
-                    "decision": DJDecision(action=DJAction.HOLD, reason="deadband")}
+                    "decision": DJDecision(action=DJAction.HOLD, reason="deadband"),
+                    "verdict": self.dj.state.current,
+                    "play_error": "No Spotify devices visible"}
 
     def __init__(self):
         self.graph = self._Graph()
@@ -88,6 +90,8 @@ def test_the_response_carries_what_the_page_renders(client_and_runtime):
     assert d["scene"]["setting"]
     assert d["scene"]["confidence"] is not None
     assert d["playing"]["title"] == "Baby Shark"
+    assert d["chosen"]["title"] == "Baby Shark"
+    assert d["error"] == "No Spotify devices visible"
     assert d["action"] == "hold"
 
 

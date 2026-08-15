@@ -56,6 +56,7 @@ class PipelineState(TypedDict, total=False):
     t_start: float
     force: bool          # must be declared, or LangGraph drops it between nodes
     hold: str            # set when the deadband says don't reconsider; same rule
+    play_error: str      # why the sound didn't come out; same declaration rule
     approved: bool       # the deadband RAN and said yes. Never infer this from
                          # `force`: quiet ticks reach the DJ without passing
                          # through the deadband at all.
@@ -88,6 +89,7 @@ class BadSpotifyGraph:
         self._pool = ThreadPoolExecutor(max_workers=4)
         self._last_scene: Optional[SceneRead] = None
         self._last_verdict: Optional[Verdict] = None
+        self._last_play_error: Optional[str] = None
         self._compiled = self._compile()
         self._from_scene = self._compile_from_scene()
 
@@ -185,7 +187,8 @@ class BadSpotifyGraph:
 
     def n_judge(self, state: PipelineState) -> PipelineState:
         if state.get("hold"):
-            return {**state, "verdict": None}
+            return {**state, "verdict": self._last_verdict,
+                    "play_error": self._last_play_error}
         candidates = state.get("candidates") or []
         if not candidates:
             BUS.emit("error", "no candidates survived")
@@ -240,6 +243,7 @@ class BadSpotifyGraph:
                 BUS.emit("voice", spoken, quip=verdict.quip,
                          spoken=self.say_mode == "every_track")
             self.player.play(verdict.track, mode=decision.mode.value)
+            self._last_play_error = None
             anti = state.get("anti")
             self.dj.commit(verdict, scene=state.get("scene"),
                            mode=decision.mode,
@@ -254,6 +258,11 @@ class BadSpotifyGraph:
         except Exception as e:
             BUS.emit("error", "playback failed", error=str(e))
             self.dj.note_failure()
+            #Carry the reason forward: a sleeping speaker is the single most
+            #likely live failure, and it is fixed in two seconds IF the person
+            #in front of the screen is told what is wrong.
+            self._last_play_error = str(e)
+            state = {**state, "play_error": self._last_play_error}
             fb = self.dj.fallback()
             if fb:
                 try:

@@ -29,6 +29,7 @@ class DJState:
     pending_signature: str | None = None
     pending_count: int = 0
     consecutive_failures: int = 0
+    last_failure_at: float = 0.0
     played_ids: set[str] = field(default_factory=set)
     history: list[tuple[float, str]] = field(default_factory=list)
 
@@ -120,6 +121,13 @@ class DJController:
             s.moved_count = 0
             return False, f"low confidence ({scene.confidence:.2f}), not acting"
         if s.current is None:
+            if s.consecutive_failures:
+                retry_after = self.cooldown * min(s.consecutive_failures,
+                                                  self.max_failures)
+                since_failure = now - s.last_failure_at
+                if since_failure < retry_after:
+                    return False, (f"playback failed; retry in "
+                                   f"{retry_after - since_failure:.0f}s")
             return True, "nothing playing"
         if s.current_target is None:
             return True, "no target on record for the current track"
@@ -288,8 +296,9 @@ class DJController:
         #to look again. Fail towards deciding, never towards going quiet.
         s.current_target = target
 
-    def note_failure(self) -> None:
+    def note_failure(self, now: float | None = None) -> None:
         self.state.consecutive_failures += 1
+        self.state.last_failure_at = time.time() if now is None else now
 
     #Fallback action
 

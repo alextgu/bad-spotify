@@ -417,3 +417,15 @@ def test_nothing_playing_always_reconsiders():
     scene = scene_from_text(LIBRARY)
     go, why = dj.should_reconsider(scene, build_antivibe(scene).target, now=0.0)
     assert go and "nothing playing" in why
+
+
+def test_failed_playback_retries_with_backoff():
+    dj = DJController(CFG)
+    scene = scene_from_text(LIBRARY)
+    target = build_antivibe(scene).target
+    dj.note_failure(now=100.0)
+
+    go, why = dj.should_reconsider(scene, target, now=102.0)
+    assert not go and "retry in" in why
+    go, why = dj.should_reconsider(scene, target, now=108.0)
+    assert go and why == "nothing playing"
