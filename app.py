@@ -42,7 +42,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 import gradio as gr                                    # noqa: E402
 
-from badspotify.service import Decision, Engine        # noqa: E402
+from badspotify.service import FROM_CONFIG, Decision, Engine   # noqa: E402
 from videofeed import BUILTIN_TRIGGERS                 # noqa: E402
 
 ENGINE: Engine | None = None
@@ -258,7 +258,11 @@ def build_ui() -> gr.Blocks:
                 "writes, so it replays on the site with no backend."
             )
             with gr.Row():
-                video_in = gr.Video(label="a clip", sources=["upload"])
+                #"webcam" records straight from the camera, which is the
+                #closest thing in this app to the live loop: a sequence of
+                #decisions over time rather than the photo tab's single frame.
+                #Screen recordings work here too -- upload the mp4.
+                video_in = gr.Video(label="a clip", sources=["upload", "webcam"])
                 with gr.Column():
                     interval = gr.Slider(0, 15, value=5, step=1,
                                          label="cadence (seconds, 0 = triggers only)")
@@ -321,7 +325,10 @@ def main() -> int:
     args = ap.parse_args()
 
     global ENGINE
-    ENGINE = Engine(player=None if args.play else "mock")
+    #`--play` is the "in so many words" that Engine asks for. Passing None
+    #here used to mean the same thing, but None is also what every casual
+    #caller passes, so it now means mock.
+    ENGINE = Engine(player=FROM_CONFIG if args.play else "mock")
     print("[app] backends: " +
           "  ".join(f"{k}={v}" for k, v in ENGINE.backends().items()))
 

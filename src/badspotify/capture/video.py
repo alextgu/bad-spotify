@@ -52,6 +52,7 @@ class VideoSource:
         self.interval = float(cfg.get("frame_interval_s", 5.0))
         self.audio_window = float(cfg.get("audio_window_s", 3.0))
         self.realtime = bool(cfg.get("realtime", False))
+        self.loop = bool(cfg.get("loop", False))
         self.trigger_names = cfg.get("triggers", DEFAULT_TRIGGERS)
         self._feed = None
 
@@ -89,6 +90,21 @@ class VideoSource:
             self._feed = None
 
     def stream(self) -> Iterator[Observation]:
+        #`capture.loop` existed in config.yaml but nothing read it, so a demo
+        #left running just stopped when the clip ended. `pass_index` keeps the
+        #timeline honest: `video_time` restarts each pass, so anything plotting
+        #a recording needs to know which pass a moment belongs to.
+        pass_index = 0
+        while True:
+            if pass_index:
+                self.open()
+            yield from self._segments(pass_index)
+            print(f"[video] reached end of {self.path.name}")
+            if not self.loop:
+                return
+            pass_index += 1
+
+    def _segments(self, pass_index: int = 0) -> Iterator[Observation]:
         for seg in self._feed.segments():
             # `reasons` says WHY this moment was sampled. If a trigger fired,
             # the world demonstrably changed and the cheap local gate would
@@ -112,9 +128,9 @@ class VideoSource:
                     "video_time": round(seg.t, 2),
                     "duration": round(self.duration_s, 2),
                     "index": seg.index,
+                    "pass": pass_index,
                     "reasons": list(seg.reasons),
                     "pre_gated": bool(triggered),
                     "trigger": ", ".join(triggered) or None,
                 },
             )
-        print(f"[video] reached end of {self.path.name}")

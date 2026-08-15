@@ -1,0 +1,218 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>bad spotify — live</title>
+<style>
+  :root {
+    --bg: #0b0c0e; --panel: #14161a; --line: #23262c;
+    --ink: #e9ecf1; --dim: #8b93a1; --accent: #7ee787; --warn: #f0883e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  header {
+    padding: 18px 24px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  }
+  h1 { font-size: 16px; margin: 0; font-weight: 600; letter-spacing: .01em; }
+  .sub { color: var(--dim); font-size: 13px; }
+  main {
+    display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 20px; padding: 20px 24px; align-items: start;
+  }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; padding: 16px;
+  }
+  video { width: 100%; border-radius: 8px; background: #000; display: block; }
+  .controls { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  button {
+    font: inherit; font-weight: 600; padding: 9px 15px; border-radius: 8px;
+    border: 1px solid var(--line); background: #1d2026; color: var(--ink);
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) { border-color: #39414d; }
+  button.go { background: var(--accent); color: #06210c; border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: default; }
+  label.rate { color: var(--dim); font-size: 13px; display: flex;
+               align-items: center; gap: 8px; margin-left: auto; }
+  input[type=number] {
+    width: 62px; font: inherit; padding: 6px 8px; border-radius: 6px;
+    background: #1d2026; color: var(--ink); border: 1px solid var(--line);
+  }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .09em;
+       color: var(--dim); margin: 0 0 10px; font-weight: 600; }
+  .song { font-size: 25px; font-weight: 650; line-height: 1.2; }
+  .artist { color: var(--dim); margin-top: 2px; }
+  .quip { margin-top: 12px; color: var(--dim); font-style: italic; }
+  .scene { font-size: 17px; font-weight: 550; }
+  .meta { color: var(--dim); font-size: 13px; margin-top: 6px; }
+  .swatches { display: flex; gap: 6px; margin-top: 10px; }
+  .swatches i { width: 22px; height: 22px; border-radius: 5px;
+                border: 1px solid #0006; }
+  #log { margin-top: 16px; max-height: 220px; overflow: auto;
+         font: 12px/1.6 ui-monospace, "Cascadia Code", Consolas, monospace;
+         color: var(--dim); }
+  #log div { padding: 2px 0; border-bottom: 1px solid #1b1e23; }
+  .status { margin-left: auto; color: var(--dim); font-size: 13px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+         background: #454b55; margin-right: 6px; vertical-align: middle; }
+  .dot.on { background: var(--accent); }
+  .dot.busy { background: var(--warn); }
+  .hint { color: var(--dim); font-size: 13px; margin-top: 12px; }
+  code { background: #1d2026; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+
+<header>
+  <h1>bad spotify — live</h1>
+  <span class="sub">the camera, or a shared screen, straight into the agent</span>
+  <span class="status"><span class="dot" id="dot"></span><span id="status">idle</span></span>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="controls">
+      <button class="go" id="cam">Use camera</button>
+      <button class="go" id="screen">Share a screen</button>
+      <button id="stop" disabled>Stop</button>
+      <label class="rate">every
+        <input type="number" id="rate" value="2" min="1" max="30" step="1">s
+      </label>
+    </div>
+    <video id="v" autoplay muted playsinline></video>
+    <p class="hint">
+      Nothing is recorded. Frames are sent one at a time to this machine's
+      own agent, which reads them and decides what to play.
+    </p>
+  </section>
+
+  <section>
+    <div class="panel">
+      <h2>Now playing</h2>
+      <div class="song" id="song">—</div>
+      <div class="artist" id="artist"></div>
+      <div class="quip" id="quip"></div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <h2>What it sees</h2>
+      <div class="scene" id="setting">—</div>
+      <div class="meta" id="meta"></div>
+      <div class="swatches" id="swatches"></div>
+      <div id="log"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const video = $("v"), canvas = document.createElement("canvas");
+let stream = null, timer = null;
+
+function setStatus(text, cls) {
+  $("status").textContent = text;
+  $("dot").className = "dot" + (cls ? " " + cls : "");
+}
+
+function log(line) {
+  const el = document.createElement("div");
+  el.textContent = new Date().toLocaleTimeString() + "  " + line;
+  $("log").prepend(el);
+  while ($("log").children.length > 60) $("log").lastChild.remove();
+}
+
+async function start(kind) {
+  stop();
+  try {
+    stream = kind === "screen"
+      ? await navigator.mediaDevices.getDisplayMedia({video: {frameRate: 5}})
+      : await navigator.mediaDevices.getUserMedia({video: {width: 1280}});
+  } catch (e) {
+    // Denied, dismissed, or no device. Say which -- "it didn't work" is the
+    // least useful thing a demo page can tell you.
+    log("could not start " + kind + ": " + e.name + " (" + e.message + ")");
+    setStatus("blocked");
+    return;
+  }
+  video.srcObject = stream;
+  // If the user stops sharing from the browser's own bar, stop cleanly.
+  stream.getVideoTracks()[0].addEventListener("ended", stop);
+  $("stop").disabled = false;
+  setStatus("watching", "on");
+  log("started: " + kind);
+  schedule();
+}
+
+function schedule() {
+  clearInterval(timer);
+  const every = Math.max(1, Number($("rate").value) || 2) * 1000;
+  timer = setInterval(sendFrame, every);
+  sendFrame();
+}
+
+function stop() {
+  clearInterval(timer); timer = null;
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  video.srcObject = null;
+  $("stop").disabled = true;
+  setStatus("idle");
+}
+
+async function sendFrame() {
+  if (!stream || video.videoWidth === 0) return;
+  // Downscale before sending: the model doesn't need more, and a full-size
+  // screen grab is a lot of bytes on a timer.
+  const w = 960, h = Math.round(video.videoHeight * w / video.videoWidth);
+  canvas.width = w; canvas.height = h;
+  canvas.getContext("2d").drawImage(video, 0, 0, w, h);
+
+  const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.8));
+  if (!blob) return;
+  const body = new FormData();
+  body.append("file", blob, "frame.jpg");
+
+  setStatus("thinking", "busy");
+  try {
+    const res = await fetch("/api/frame", {method: "POST", body});
+    if (!res.ok) { log("HTTP " + res.status + " " + (await res.text()).slice(0, 120)); }
+    else render(await res.json());
+  } catch (e) {
+    log("post failed: " + e.message);
+  }
+  if (stream) setStatus("watching", "on");
+}
+
+function render(d) {
+  if (d.skipped) return;                       // still busy with the last one
+  if (d.scene) {
+    $("setting").textContent = d.scene.setting || "—";
+    const refs = (d.scene.references || []).join(", ");
+    $("meta").textContent =
+      [refs && "occasion: " + refs, d.scene.mood,
+       "confidence " + d.scene.confidence,
+       d.scene.latency_ms + "ms via " + d.scene.source]
+      .filter(Boolean).join("  ·  ");
+    $("swatches").innerHTML = (d.scene.colors || [])
+      .map(c => '<i style="background:' + c + '"></i>').join("");
+  }
+  if (d.playing) {
+    $("song").textContent = d.playing.title;
+    $("artist").textContent = d.playing.artist
+      + (d.playing.strategy ? "   ·   " + d.playing.strategy : "");
+    $("quip").textContent = d.playing.quip || "";
+  }
+  if (d.action) log(d.action.toUpperCase() + " — " + (d.reason || ""));
+}
+
+$("cam").onclick = () => start("camera");
+$("screen").onclick = () => start("screen");
+$("stop").onclick = stop;
+$("rate").onchange = () => { if (stream) schedule(); };
+
+if (!navigator.mediaDevices?.getDisplayMedia) {
+  $("screen").disabled = true;
+  $("screen").title = "this browser can't share a screen";
+}
+</script>

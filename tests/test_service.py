@@ -17,6 +17,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from badspotify.config import load_config  # noqa: E402
 from badspotify.service import Decision, Engine  # noqa: E402
 
 cv2 = pytest.importorskip("cv2")
@@ -48,6 +49,23 @@ def clip(tmp_path_factory) -> Path:
 def test_nothing_plays_out_loud_by_default(engine):
     """A hosted page must not seize the host machine's speakers."""
     assert engine.backends()["player"] == "mock"
+
+
+def test_a_real_player_in_config_does_not_arm_the_engine():
+    """The guard above passed for the wrong reason: it only held while
+    config.yaml happened to say "mock". `Engine` used `setdefault`, which never
+    fires because that key is always present -- so the day the live loop was
+    pointed at Spotify, every hosted surface was armed too.
+
+    Default has to mean default, whatever the file says.
+    """
+    from badspotify.service import FROM_CONFIG
+
+    assert Engine().backends()["player"] == "mock"
+    assert Engine(player=None).backends()["player"] == "mock"
+    #...and the explicit opt-in still reaches the configured backend.
+    assert Engine(player=FROM_CONFIG).backends()["player"] == \
+        (load_config(None).get_path("player.backend") or "mock")
 
 
 def test_describe_returns_a_full_decision(engine):

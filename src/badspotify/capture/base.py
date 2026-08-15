@@ -48,6 +48,9 @@ def build_capture(cfg: dict) -> CaptureSource:
     if source == "video":
         from .video import VideoSource
         return VideoSource(cfg)
+    if source == "screen":
+        from .screen import ScreenSource
+        return ScreenSource(cfg)
     if source == "glasses":
         from .glasses import GlassesSource
         return GlassesSource(cfg)

@@ -51,6 +51,11 @@ from .config import load_config                    # noqa: E402
 from .perceive.scene import build_perceiver, scene_from_text  # noqa: E402
 from .players.base import build_player             # noqa: E402
 from .schemas import DJAction, SceneRead           # noqa: E402
+
+#: Pass as `player=` to mean "whatever config.yaml says", including a real one.
+#: Deliberately not the default: an unqualified Engine() must stay silent, so
+#: opting in to the host's speakers has to be written down at the call site.
+FROM_CONFIG = "from_config"
 from .session import SessionRecorder               # noqa: E402
 from .voice.narrator import build_narrator         # noqa: E402
 
@@ -116,10 +121,18 @@ class Engine:
         self.cfg = load_config(config_path)
 
         # Never take over the host's speakers unless asked in so many words.
-        if player is not None:
-            self.cfg.setdefault("player", {})["backend"] = player
-        else:
+        #
+        # This used to `setdefault`, which only fires when the key is MISSING
+        # -- and it never is, because config.yaml always names a backend. So
+        # the promise above held only while that file happened to say "mock",
+        # and flipping the live loop to Spotify silently armed every surface
+        # built on Engine. Default now means default: mock unless a caller
+        # names something else, or asks for the configured one on purpose.
+        wanted = "mock" if player is None else player
+        if wanted == FROM_CONFIG:
             self.cfg.setdefault("player", {}).setdefault("backend", "mock")
+        else:
+            self.cfg.setdefault("player", {})["backend"] = wanted
         if voice is not None:
             self.cfg.setdefault("voice", {})["backend"] = voice
 

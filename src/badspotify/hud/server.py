@@ -39,6 +39,7 @@ def create_app(runtime=None):
         allow_headers=["Content-Type"],
     )
     analysis_lock = asyncio.Lock()
+    frame_lock = asyncio.Lock()
 
     @app.get("/")
     async def index():
@@ -59,7 +60,7 @@ def create_app(runtime=None):
             return JSONResponse({"error": "no sessions recorded yet -- run: "
                                           "python run.py --video clip.mp4 --record name"},
                                 status_code=404)
-        return JSONResponse(json.loads(files[-1].read_text()))
+        return JSONResponse(json.loads(files[-1].read_text(encoding="utf-8")))
 
     @app.get("/api/state")
     async def state():
@@ -91,6 +92,77 @@ def create_app(runtime=None):
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, runtime.inject_scene, text)
         return {"ok": True}
+
+    @app.get("/live")
+    async def live():
+        """Point the browser's camera -- or a shared screen -- at the agent.
+
+        The glasses don't exist, and a video file can't be pointed at something
+        new mid-demo. This is the closest thing to wearing it: the browser
+        grabs frames and posts them, and the same graph reads them.
+        """
+        return FileResponse(STATIC / "live.html")
+
+    @app.post("/api/frame")
+    async def frame(file: UploadFile = File(...)):
+        """One frame from the browser, through the real pipeline.
+
+        Deliberately `graph.tick()` and not a shortcut: a live stream is
+        exactly what the change gate and the DJ's deadband exist for, and a
+        path that skipped them would behave nothing like the product.
+        """
+        if not runtime:
+            raise HTTPException(status_code=503, detail="the runtime is not ready")
+
+        data = await file.read()
+        await file.close()
+        if not data:
+            raise HTTPException(status_code=400, detail="empty frame")
+
+        import cv2
+        import numpy as np
+
+        img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
+        if img is None:
+            raise HTTPException(status_code=400, detail="could not decode that frame")
+
+        #One at a time. Perception takes ~1.2s and the browser posts on a
+        #timer, so without this a slow read would stack up behind itself and
+        #every answer would describe a moment that had already passed.
+        if frame_lock.locked():
+            return JSONResponse({"skipped": "still thinking about the last frame"})
+
+        async with frame_lock:
+            from ..capture.base import Observation
+
+            loop = asyncio.get_running_loop()
+            state = await loop.run_in_executor(
+                None, runtime.graph.tick,
+                Observation(frame=img, meta={"source": "live"}))
+
+        scene = state.get("scene")
+        decision = state.get("decision")
+        current = runtime.graph.dj.state.current
+        return JSONResponse({
+            "scene": None if scene is None else {
+                "setting": scene.setting,
+                "activity": scene.activity,
+                "mood": scene.mood_label,
+                "confidence": scene.confidence,
+                "colors": scene.dominant_colors,
+                "references": scene.references,
+                "latency_ms": scene.latency_ms,
+                "source": scene.source,
+            },
+            "action": None if decision is None else decision.action.value,
+            "reason": None if decision is None else decision.reason,
+            "playing": None if current is None else {
+                "title": current.track.title,
+                "artist": current.track.artist,
+                "strategy": current.strategy,
+                "quip": current.quip,
+            },
+        })
 
     @app.post("/api/analyze-video")
     async def analyze_video(file: UploadFile = File(...)):

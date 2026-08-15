@@ -110,6 +110,19 @@ def test_premium_account_passes():
     assert player(FakeSpotify()).check_account()["product"] == "premium"
 
 
+def test_an_unreadable_subscription_level_is_not_treated_as_free():
+    """`product` is absent unless the token carries `user-read-private`, and
+    that scope was missing from SCOPES entirely -- so the field was always
+    None and the check rejected every account, Premium included. Real setup
+    run, 14 Aug: "account 'Kaamil Mirza' is 'None', not premium".
+
+    Unknown must mean unknown. Playback itself fails loudly enough if the
+    account really can't be controlled.
+    """
+    me = player(FakeSpotify(product=None)).check_account()
+    assert me["product"] is None
+
+
 #Device behavior
 
 def test_no_devices_tells_you_what_to_do():
