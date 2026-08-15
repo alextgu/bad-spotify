@@ -53,7 +53,7 @@ export default function Home() {
         {/* 2 — the claim, then two worked examples that flood in from
             opposite sides. Pinned, so it is longer than one screen: the stops
             are the beats, and both examples are real recorded output. */}
-        <div data-stops="0,0.45,0.85,1">
+        <div data-stops="0,0.5,1">
           <SectionDescription />
         </div>
 
