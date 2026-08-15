@@ -45,6 +45,14 @@ the event, the setting and the social register. "wedding", "funeral",
 where you can see one -- "diwali celebration" and "graduation ceremony" are
 far more useful than "gathering".
 
+Build one setting-only semantic chain:
+  `setting_attributes`: 2-4 traits associated with the venue or occasion
+  `opposite_attributes`: the direct opposite of each setting trait
+  `opposite_genres`: 1-3 genres associated with those opposite traits
+Consider the venue's price level, formality, pace, scale and exclusivity. Use
+direct antonyms, then choose genres culturally associated with the complete
+opposite bundle. Describe the setting, never its visitors or presumed audience.
+
 DO name things that are RECOGNISABLE and public: landmarks ("the White House",
 "Camp Nou"), teams, brands, events, and public figures who are unmistakably
 identifiable and famous ("Taylor Swift", "a US president at a podium"). These
@@ -61,6 +69,12 @@ queue"), never what they appear to be.
 
 Set `confidence` honestly. A blurry or ambiguous frame should score low --
 downstream logic uses this to decide whether to act at all."""
+
+CONTEXT_GENRES = [
+    "ambient", "classical", "country", "dance", "disco", "electronic",
+    "eurodance", "folk", "funk", "hip hop", "jazz", "metal", "novelty",
+    "opera", "pop", "punk", "r&b", "reggae", "rock", "soul",
+]
 
 
 class ScenePerceiver(Protocol):
@@ -156,11 +170,16 @@ RESPONSE_SCHEMA = {
         "meter": {"type": "string", "enum": ["steady", "swung", "irregular", "unknown"]},
         "dominant_colors": {"type": "array", "items": {"type": "string"}},
         "references": {"type": "array", "items": {"type": "string"}},
+        "setting_attributes": {"type": "array", "items": {"type": "string"}},
+        "opposite_attributes": {"type": "array", "items": {"type": "string"}},
+        "opposite_genres": {"type": "array", "items": {
+            "type": "string", "enum": CONTEXT_GENRES}},
         "confidence": {"type": "number"},
         "notes": {"type": "string"},
     },
     "required": ["setting", "activity", "mood_label", "valence", "arousal",
-                 "density", "brightness", "organicness", "confidence"],
+                 "density", "brightness", "organicness", "setting_attributes",
+                 "opposite_attributes", "opposite_genres", "confidence"],
 }
 
 
@@ -178,8 +197,19 @@ _IDENTITY_TERMS = {
     "gay", "straight", "lgbt", "queer", "trans",
     "liberal", "conservative", "left-wing", "right-wing", "republican",
     "democrat", "immigrant", "refugee", "elderly", "old people", "young people",
-    "poor", "rich", "homeless", "disabled",
+    "poor", "rich", "homeless", "disabled", "lower class", "upper class",
+    "working class", "wealthy people",
 }
+
+
+def _contains_identity_term(text: str) -> bool:
+    normalized = " ".join(text.lower().replace("-", " ").split())
+    words = set(normalized.split())
+    for blocked in _IDENTITY_TERMS:
+        term = blocked.replace("-", " ")
+        if (" " in term and term in normalized) or term in words:
+            return True
+    return False
 
 
 def _clean_references(raw) -> list[str]:
@@ -193,14 +223,39 @@ def _clean_references(raw) -> list[str]:
         tag = " ".join(item.lower().split())[:40]
         if not tag:
             continue
-        words = set(tag.replace("-", " ").split())
-        if tag in _IDENTITY_TERMS or words & _IDENTITY_TERMS:
+        if _contains_identity_term(tag):
             print(f"[perceive] dropped reference {item!r}: describes people, "
                   "not the occasion")
             continue
         if tag not in out:
             out.append(tag)
     return out[:6]
+
+
+def _clean_setting_terms(raw) -> list[str]:
+    """Keep venue traits while rejecting anything that categorises people."""
+    if not isinstance(raw, list):
+        return []
+    out: list[str] = []
+    for item in raw:
+        if not isinstance(item, str):
+            continue
+        term = " ".join(item.lower().split())[:40]
+        if not term or _contains_identity_term(term):
+            continue
+        if term not in out:
+            out.append(term)
+    return out[:4]
+
+
+def _clean_opposite_genres(raw) -> list[str]:
+    """Constrain model output to genre labels the local scorer understands."""
+    if not isinstance(raw, list):
+        return []
+    allowed = set(CONTEXT_GENRES)
+    out = [str(item).lower().strip() for item in raw
+           if isinstance(item, str) and str(item).lower().strip() in allowed]
+    return list(dict.fromkeys(out))[:3]
 
 
 class GeminiPerceiver:
@@ -241,6 +296,12 @@ class GeminiPerceiver:
                 f"Derived hints (weak priors, override them if the image disagrees): "
                 f"{json.dumps(hints)}\n"
             )
+            description = str((meta or {}).get("description", "")).strip()
+            if description:
+                prompt += (
+                    "Typed scene description (treat as observed facts): "
+                    f"{json.dumps(description)}\n"
+                )
             parts = [types.Part.from_text(text=prompt)]
             if frame is not None and getattr(frame, "size", 0):
                 parts.append(types.Part.from_bytes(
@@ -253,7 +314,6 @@ class GeminiPerceiver:
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
                         response_schema=RESPONSE_SCHEMA,
-                        temperature=0.2,
                     ),
                 ),
                 self.timeout_s,
@@ -274,6 +334,9 @@ class GeminiPerceiver:
                 meter=Meter(d.get("meter", "unknown")),
                 dominant_colors=d.get("dominant_colors", []),
                 references=_clean_references(d.get("references")),
+                setting_attributes=_clean_setting_terms(d.get("setting_attributes")),
+                opposite_attributes=_clean_setting_terms(d.get("opposite_attributes")),
+                opposite_genres=_clean_opposite_genres(d.get("opposite_genres")),
                 audio_summary=audio_features.summary(),
                 confidence=float(d.get("confidence", 0.5)),
                 notes=d.get("notes", ""),
@@ -281,6 +344,10 @@ class GeminiPerceiver:
                 latency_ms=int((time.time() - t0) * 1000),
             )
         except Exception as e:
+            description = str((meta or {}).get("description", "")).strip()
+            if description:
+                print(f"[perceive] gemini failed ({e}) -> offline text read")
+                return scene_from_text(description)
             #Uses a fallback scene when reading fails so the loop can continue
             print(f"[perceive] gemini failed ({e}) -> reusing a canned read")
             return self._fallback.read(frame, audio_features, meta)
@@ -520,11 +587,7 @@ _TEXT_RULES = [
 
 
 def scene_from_text(text: str) -> SceneRead:
-    """Build a SceneRead from a typed description.
-
-    Powers the stage button: no camera, no network, fully deterministic,
-    and it exercises the exact same downstream graph as a real frame.
-    """
+    """Build an offline SceneRead when model-backed perception is unavailable."""
     low = text.lower()
     for keywords, vibe, mood, tempo, meter, colors, refs in _TEXT_RULES:
         if any(k in low for k in keywords):
@@ -542,3 +605,11 @@ def scene_from_text(text: str) -> SceneRead:
         audio_summary="(injected, no audio)", confidence=0.9,
         notes="scene injection (no rule matched)", source="mock",
     )
+
+
+def read_description(perceiver: ScenePerceiver, text: str) -> SceneRead:
+    """Use active semantic perception, with the offline reader as fallback."""
+    if getattr(perceiver, "backend", "") == "gemini":
+        return perceiver.read(
+            None, AudioFeatures(), {"description": text, "source": "text"})
+    return scene_from_text(text)

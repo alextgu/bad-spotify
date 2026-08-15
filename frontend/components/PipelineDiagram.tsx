@@ -10,9 +10,8 @@ import { steps } from "@/lib/brand";
  *   - **The gate short-circuits.** If nothing changed, Notice sends it back to
  *     Look without spending a model call. That's the arc over the top, and it
  *     is the single most common path through the system on calm footage.
- *   - **Antagonize fans out.** Three strategies run at once and a judge picks
- *     between them. Drawn as three lanes rather than one box, because "three
- *     that argue" is the design and a box labelled "choose" hides it.
+ *   - **Antagonize fans out.** Six strategies run at once and a judge picks
+ *     between them. Separate lanes show that they are competing theories.
  *
  * Inline SVG, no dependency, no runtime. One viewBox that scales to whatever
  * width the container gives it — `SectionProduct` wraps this in `min-w-diagram`
@@ -31,8 +30,8 @@ import { steps } from "@/lib/brand";
 const NODE_W = 132;
 const NODE_H = 64;
 const GAP = 40;
-/** The 04 -> 05 stretch is wide on purpose: the three lanes live in it. */
-const FAN_GAP = 210;
+/** The 04 -> 05 stretch is wide because the strategy lanes live in it. */
+const FAN_GAP = 330;
 const PAD = 24;
 
 /** Spine centre. Everything vertical is measured from here. */
@@ -52,7 +51,7 @@ const VIEW_W = LAST + PAD;
 
 /** Where the gate's "nothing changed" arc peaks, and where the loop returns. */
 const ARC_Y = 92;
-const RETURN_Y = 272;
+const RETURN_Y = 315;
 
 /* The viewBox is cropped to the marks rather than starting at 0: the arc and
    the return line are the topmost and bottommost things drawn, and anything
@@ -64,13 +63,16 @@ const VIEW_BOTTOM = RETURN_Y + 16;
 const centre = (i: number) => X[i] + NODE_W / 2;
 
 /**
- * The three strategies, named as they are in the code so the diagram and
+ * The six strategies, named as they are in the code so the diagram and
  * `music/strategies.py`'s REGISTRY can be checked against each other by eye.
  */
 const LANES = [
-  { name: "genre_antipode", offset: -46 },
-  { name: "tempo_clash", offset: 0 },
-  { name: "lyrical_irony", offset: 46 },
+  { name: "genre_antipode", offset: -75 },
+  { name: "tempo_clash", offset: -45 },
+  { name: "lyrical_irony", offset: -15 },
+  { name: "semantic_opposite", offset: 15 },
+  { name: "register_clash", offset: 45 },
+  { name: "catalogue_dive", offset: 75 },
 ];
 
 /** The colour each step is drawn in — see the note on tokens above. */
@@ -95,10 +97,9 @@ export default function PipelineDiagram() {
       <desc id="loop-desc">
         Six steps in sequence: {steps.map((s) => s.title).join(", ")}. If
         nothing has changed, step two returns to step one without calling a
-        model. Between Invert and Choose, three strategies run at once —
-        genre antipode, tempo clash and lyrical irony — and a judge picks one
-        of them. After Commit, the loop returns to Look, about every five
-        seconds.
+        model. Between Invert and Choose, six strategies run at once and a
+        judge picks one. After Commit, the loop returns to Look, about every
+        five seconds.
       </desc>
 
       <defs>
@@ -179,15 +180,14 @@ export default function PipelineDiagram() {
       )}
 
       {/* --------------------------------------------------------- the fan --
-          Three lanes out of Invert, three back into Choose. The middle one is
-          straight; the outer two bow away and return. */}
+          Six lanes out of Invert and six back into Choose. */}
       <text
         x={(fanFrom + fanTo) / 2}
         y={TOP - 34}
         textAnchor="middle"
         className="fill-ink-muted font-mono text-[11px]"
       >
-        three at once
+        six at once
       </text>
 
       {LANES.map((lane) => {
@@ -201,12 +201,12 @@ export default function PipelineDiagram() {
               fill="none"
               className="stroke-line"
               strokeWidth="1.5"
-              markerEnd={lane.offset === 0 ? "url(#loop-arrow)" : undefined}
+              markerEnd={lane.offset === -15 ? "url(#loop-arrow)" : undefined}
             />
             <rect
-              x={(fanFrom + fanTo) / 2 - 52}
+              x={(fanFrom + fanTo) / 2 - 68}
               y={y - 10}
-              width="104"
+              width="136"
               height="20"
               className="fill-plane"
             />

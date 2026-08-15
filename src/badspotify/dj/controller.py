@@ -35,6 +35,8 @@ class DJState:
     #The music target that justified `current`. The deadband is measured
     #against THIS, not against the raw scene -- see should_reconsider.
     current_target: Vibe | None = None
+    current_target_genres: tuple[str, ...] | None = None
+    pending_target_genres: tuple[str, ...] | None = None
     #Consecutive reads that agree the target has left the deadband.
     moved_count: int = 0
     #Set by should_reconsider when the move was big enough to act on one read.
@@ -92,6 +94,7 @@ class DJController:
         return True, f"{self.state.pending_count} agreeing reads"
 
     def should_reconsider(self, scene: SceneRead, target: Vibe,
+                          target_genres: list[str] | None = None,
                           now: float | None = None) -> tuple[bool, str]:
         """The cheap question, asked BEFORE the strategies and the judge run.
 
@@ -125,19 +128,34 @@ class DJController:
             return True, "no target on record for the current track"
 
         moved = s.current_target.distance(target)
+        genres = tuple(sorted(set(target_genres or [])))
         s.pending_jump = False
 
-        if moved < self.hold_threshold:
-            s.moved_count = 0          #re-arm: the world settled back down
-            return False, (f"target moved {moved:.2f} < {self.hold_threshold:.2f}; "
-                           f"still the right answer")
-
-        #Unmistakable change: don't make the room wait for a second opinion.
         if moved >= self.jump_threshold:
             s.pending_jump = True
             return True, f"target jumped {moved:.2f}, acting on one read"
 
         since = now - s.last_switch
+        if s.current_target_genres is not None and genres != s.current_target_genres:
+            if since < self.min_change_seconds:
+                return False, (f"genre target changed but last change was "
+                               f"{since:.0f}s ago (floor {self.min_change_seconds:.0f}s)")
+            if genres == s.pending_target_genres:
+                s.moved_count += 1
+            else:
+                s.pending_target_genres = genres
+                s.moved_count = 1
+            if s.moved_count < self.agreement:
+                return False, (f"genre target changed, {s.moved_count}/"
+                               f"{self.agreement} agreeing reads")
+            return True, f"genre target changed, {s.moved_count} agreeing reads"
+
+        if moved < self.hold_threshold:
+            s.moved_count = 0
+            s.pending_target_genres = None
+            return False, (f"target moved {moved:.2f} < {self.hold_threshold:.2f}; "
+                           f"still the right answer")
+
         if since < self.min_change_seconds:
             return False, (f"target moved {moved:.2f} but last change was "
                            f"{since:.0f}s ago (floor {self.min_change_seconds:.0f}s)")
@@ -251,7 +269,8 @@ class DJController:
 
     def commit(self, verdict: Verdict, scene: SceneRead | None = None,
                now: float | None = None, mode: PlayMode | None = None,
-               target: Vibe | None = None) -> None:
+               target: Vibe | None = None,
+               target_genres: list[str] | None = None) -> None:
         """Record what we just committed to.
 
         `started_at` is the clock the interrupt bounds read, so it may only
@@ -276,6 +295,7 @@ class DJController:
         s.last_switch = now
         s.pending_count = 0
         s.moved_count = 0
+        s.pending_target_genres = None
         s.pending_jump = False
         s.consecutive_failures = 0
         s.played_ids.add(verdict.track.id)
@@ -287,6 +307,8 @@ class DJController:
         #None means "unknown", and should_reconsider treats unknown as a reason
         #to look again. Fail towards deciding, never towards going quiet.
         s.current_target = target
+        s.current_target_genres = (None if target_genres is None else
+                                   tuple(sorted(set(target_genres))))
 
     def note_failure(self) -> None:
         self.state.consecutive_failures += 1

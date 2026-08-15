@@ -55,8 +55,8 @@ export const depth = [
     body: "Reflection through the vibe cube is defensible and instant, but “most distant in vibe space” is usually a noise record nobody knows. Only a language model knows the true opposite of a sunlit park is funeral doom, or a Christmas song in August. Distance gives the defence, the model gives the punchline, and neither runs alone.",
   },
   {
-    heading: "Three theories, not one score",
-    body: "genre_antipode is wrong on every axis. tempo_clash is wrong about energy and pulse. lyrical_irony is wrong in meaning regardless of sound. They genuinely disagree, which is what makes the judge between them worth having rather than parallelism theatre.",
+    heading: "Six theories, not one score",
+    body: "Mood, tempo, lyrics, setting attributes, occasion register, and catalogue discovery each propose a different kind of wrong answer. They genuinely disagree, which makes the judge between them useful rather than parallelism theatre.",
   },
   {
     heading: "Queueing is cheap, interrupting is earned",
@@ -102,7 +102,7 @@ export const roadmap = [
   },
   {
     title: "Checking the recognisability scores",
-    body: "Obscure isn't automatically funnier — the joke dies if nobody recognises the song, so every track already carries a recognisability score that weights all three strategies. Those 47 numbers were assigned by hand and never tested against an actual room, which is the part that would make them worth having.",
+    body: "Obscure isn't automatically funnier — the joke dies if nobody recognises the song, so every track already carries a recognisability score that weights all five corpus strategies. Those 47 numbers were assigned by hand and never tested against an actual room, which is the part that would make them worth having.",
     state: "next",
   },
   {

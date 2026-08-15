@@ -11,8 +11,8 @@ with no terminal.
 
 Three ways in, deliberately in this order:
 
-  1. Describe a scene   — types → the whole pipeline. No camera, no keys, no
-                          network. This is the one that cannot fail on stage.
+  1. Describe a scene   — text → active perception → the whole pipeline. It
+                          falls back offline when the model is unavailable.
   2. A photo            — one frame → one decision. Same call a Ray-Ban
                           companion app would make (`Engine.look`).
   3. A video            — sampled on a cadence *and* on cuts and bangs
@@ -48,6 +48,7 @@ from videofeed import BUILTIN_TRIGGERS                 # noqa: E402
 ENGINE: Engine | None = None
 
 EXAMPLE_SCENES = [
+    "inside a McDonald's fast food restaurant during lunch rush",
     "a sunlit park, people reading on the grass",
     "a hospital waiting room at 3am",
     "a toddler's birthday party, cake being cut",
@@ -93,6 +94,10 @@ def decision_markdown(d: Decision) -> str:
 
 **It sees** {d.scene.get('setting')}
 {d.scene.get('mood')}{f" · {round(confidence * 100)}% sure" if confidence else ""} · {d.scene.get('tempo')} · {colors}
+
+**Setting traits** {', '.join(d.scene.get('setting_attributes') or []) or '(none inferred)'}
+
+**Flipped traits** {', '.join(d.opposite.get('attributes') or []) or '(none inferred)'}
 
 **So it wants** {', '.join((d.opposite.get('looking_for') or [])[:6])}
 
@@ -207,8 +212,8 @@ def build_ui() -> gr.Blocks:
         # 1 --------------------------------------------------------------
         with gr.Tab("Describe a scene"):
             gr.Markdown(
-                "Type a situation. The real pipeline runs on it — no camera, "
-                "no keys, no network. This is the one that cannot fail."
+                "Type a situation. Active perception infers its semantics; "
+                "the offline fallback keeps the pipeline available."
             )
             with gr.Row():
                 scene_in = gr.Textbox(

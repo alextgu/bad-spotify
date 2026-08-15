@@ -138,10 +138,12 @@ class VideoAnalyzer:
                         "meter": scene.meter.value,
                         "colors": scene.dominant_colors,
                         "vibe": scene.vibe.model_dump(),
+                        "setting_attributes": scene.setting_attributes,
                     },
                     "opposite": {
                         "target_vibe": opposite.target.model_dump(),
                         "looking_for": opposite.target_genres,
+                        "attributes": scene.opposite_attributes,
                         "why": opposite.rationale,
                     },
                     "considered": considered,

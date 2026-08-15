@@ -76,6 +76,15 @@ class SceneRead(BaseModel):
         default_factory=list,
         description="occasion / setting / cultural register of the MOMENT, "
                     "never attributes of the people in it")
+    setting_attributes: list[str] = Field(
+        default_factory=list,
+        description="non-person traits associated with the setting, such as casual or fast")
+    opposite_attributes: list[str] = Field(
+        default_factory=list,
+        description="semantic opposites of setting_attributes, never traits of people")
+    opposite_genres: list[str] = Field(
+        default_factory=list,
+        description="music genres culturally associated with opposite_attributes")
 
     confidence: float = Field(0.5, ge=0, le=1)
     notes: str = ""

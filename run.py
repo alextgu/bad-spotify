@@ -23,7 +23,7 @@ from badspotify.bus import BUS                                #noqa: E402
 from badspotify.capture.base import build_capture             #noqa: E402
 from badspotify.console import attach as attach_console        #noqa: E402
 from badspotify.config import load_config                     #noqa: E402
-from badspotify.perceive.scene import build_perceiver, scene_from_text  #noqa: E402
+from badspotify.perceive.scene import build_perceiver, read_description  #noqa: E402
 from badspotify.players.base import build_player              #noqa: E402
 from badspotify.schemas import DJAction                       #noqa: E402
 from badspotify.voice.lines import DEFAULT_GREETING, greeting  #noqa: E402
@@ -58,7 +58,7 @@ class Runtime:
         deliberately pressing a button is not thrashing, so we force it --
         otherwise the demo looks broken while the cooldown ticks down.
         """
-        scene = scene_from_text(text)
+        scene = read_description(self.perceiver, text)
         BUS.emit("scene", scene.mood_label, setting=scene.setting,
                  activity=scene.activity, vibe=scene.vibe.model_dump(),
                  colors=scene.dominant_colors, confidence=scene.confidence,

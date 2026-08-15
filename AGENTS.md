@@ -8,21 +8,22 @@ Nothing below is aspiration or plan. If you can't verify a claim by running the
 command next to it, it does not belong here — put it in `README.md` (how it
 works) or `STATUS.md` (what's finished) instead.
 
-Last verified: **14 Aug 2026**, against `main`.
+Last verified: **15 Aug 2026**, against `main` plus the current working change.
 
 ---
 
 ## What this is
 
 A wearable-style agent whose only feature is playing the worst possible music
-for the moment it is in. It reads a scene, computes the musical opposite of that
-scene's mood, picks a track from a hand-curated corpus, and announces it.
+for the moment it is in. It reads a scene, inverts its mood and setting
+associations, picks a track from a hand-curated corpus, and announces it.
 
-**"Worst" means musically opposite in mood, and nothing else.** Five axes —
-`valence, arousal, density, brightness, organicness` (`schemas.py`). The system
-has no notion of anyone's race, sex, religion, politics or identity, and must
-never acquire one. There is no "how far to go" dial and there must not be one;
-a test asserts this (`tests/test_pipeline.py::test_reflection_has_no_dial`).
+**"Worst" means musically opposite to the moment.** Five mood axes —
+`valence, arousal, density, brightness, organicness` — plus a setting-only
+attribute chain (`schemas.py`). The system has no notion of anyone's race, sex,
+religion, politics or identity, and must never acquire one. There is no "how
+far to go" dial and there must not be one; a test asserts this
+(`tests/test_pipeline.py::test_reflection_has_no_dial`).
 
 ---
 
@@ -47,11 +48,11 @@ Plus one README beside each part that ships on its own: `frontend/`,
 Every one of these was run on 14 Aug 2026 and did what it says.
 
 ```bash
-# tests — 120 pass
+# tests — 192 pass
 source .venv/bin/activate && python -m pytest tests/ -q
 # on Windows: .venv\Scripts\python.exe -m pytest tests -q
 
-# the agent, bounded and headless (park -> Drowning Pool, library -> Sandstorm)
+# the agent, bounded and headless (stable mock scenes produce decisions)
 python run.py --ticks 6 --no-hud
 
 # the agent with its two screens
@@ -76,19 +77,25 @@ cd frontend && npx tsc --noEmit && npm run build
 `pytest` and `gradio` are in `requirements.txt`. `ffmpeg` on PATH is needed for
 video audio; without it the sampler runs vision-only rather than failing.
 
-### Test inventory (120, verified by `--collect-only`)
+### Test inventory (192, verified by `--collect-only`)
 
 | File | Count | Guards |
 |---|---|---|
-| `tests/test_videofeed.py` | 17 | sampling a real generated mp4: cadence, triggers, rate limiting, sinks |
+| `tests/test_discover.py` | 15 | discovery caching, zero Spotify calls during candidate generation, request budget |
+| `tests/test_dj_timing.py` | 18 | deadband, jumps, dwell floor, clocks, stable-scene reuse |
+| `tests/test_live_frames.py` | 6 | live frame endpoint, locking, image validation |
+| `tests/test_local_video_app.py` | 4 | local perception, upload validation, sampled analysis |
+| `tests/test_judge_temperature.py` | 3 | score-space sampling, greedy mode, weak-candidate suppression |
 | `tests/test_pipeline.py` | 15 | vibe reflection, antivibe, strategies, DJ bounds, fallback |
-| `tests/test_spotify_player.py` | 15 | the player against a stand-in Spotify |
+| `tests/test_register_clash.py` | 24 | occasion mismatch and identity-term filtering |
+| `tests/test_screen_capture.py` | 8 | screen capture lifecycle and frame metadata |
+| `tests/test_semantic_opposite.py` | 7 | model-inferred fast-food chain, no lookup, zero Spotify calls |
+| `tests/test_service.py` | 13 | `Engine`: describe / look / watch, no speakers by default, no bus leak |
 | `tests/test_spotify_match.py` | 13 | search-result matching (karaoke, tribute bands, wrong artists) |
-| `tests/test_service.py` | 12 | `Engine`: describe / look / watch, no speakers by default, no bus leak |
+| `tests/test_spotify_player.py` | 16 | player behavior against a stand-in Spotify |
 | `tests/test_video_and_session.py` | 7 | video-as-live and the recorded session format |
-| `tests/test_local_video_app.py` | 4 | local perception, upload validation, and sampled analysis |
+| `tests/test_videofeed.py` | 17 | sampling a real generated mp4: cadence, triggers, rate limiting, sinks |
 | `tests/test_voice_lines.py` | 26 | voice-line selection, startup behavior, renderer/site agreement |
-| `tests/test_dj_timing.py` | 11 | **when** the song changes: the deadband, the jump, the dwell floor, the clocks |
 
 ---
 
@@ -122,6 +129,7 @@ downstream.
 | `vibe` — 5 floats, 0–1 | Gets flipped to find the opposite. Must actually span the range; if everything comes back near 0.5 the inversion is meaningless |
 | `confidence` | Below 0.35 the system does nothing. **Be honest here.** Overconfidence on a blurry frame is worse than admitting you don't know |
 | `mood_label`, `tempo_feel`, `meter` | Feed the strategies |
+| `setting_attributes`, `opposite_attributes`, `opposite_genres` | The visible setting-only chain from scene semantics to genre |
 
 **The session file** — written by `session.py`, read by `frontend/lib/types.ts`.
 If you change the shape, change both, in the same commit. The one that bites:
@@ -146,7 +154,7 @@ scripts/io/*.py       one step each, JSON in and out, pipeable.
 |---|---|
 | `src/badspotify/capture/` | `base` (Observation + factory), `gate` (change gate), `replay`, `video`, `webcam`, `glasses` (stub) |
 | `src/badspotify/perceive/` | `scene` (mock + Gemini + Hugging Face perceivers, `scene_from_text`), `audio_features` (librosa) |
-| `src/badspotify/music/` | `vibe` (reflection, taboo rules), `corpus`, `strategies` (three) |
+| `src/badspotify/music/` | `vibe` (reflection, taboo rules), `corpus`, `discover`, six strategies |
 | `src/badspotify/agents/` | `graph` (LangGraph, two entry points), `judge` (mock + Gemini) |
 | `src/badspotify/dj/` | `controller`: hysteresis, cooldown, queue-vs-interrupt, fallback deck |
 | `src/badspotify/players/` | `mock`, `local`, `spotify`, `spotify_match` |
@@ -169,9 +177,10 @@ scripts/io/*.py       one step each, JSON in and out, pipeable.
 Same nodes, same edges. Without langgraph installed both fall back to a
 sequential executor with identical semantics.
 
-**The three strategies** are `genre_antipode`, `tempo_clash`, `lyrical_irony`
-(`music/strategies.py` → `REGISTRY`). They fan out concurrently and a judge
-picks between them.
+**The six strategies** are `genre_antipode`, `tempo_clash`,
+`lyrical_irony`, `semantic_opposite`, `register_clash`, and
+`catalogue_dive` (`music/strategies.py` → `REGISTRY`). They fan out
+concurrently and a judge picks between them.
 
 **The corpus** is 47 tracks (`data/corpus.seed.json`, verified by counting).
 
@@ -198,7 +207,7 @@ picks between them.
 Before you say you're done:
 
 ```bash
-pytest tests/ -q                      # all 120, not just yours
+pytest tests/ -q                      # all 192, not just yours
 python run.py --ticks 6 --no-hud      # the loop still runs on mocks
 ```
 
@@ -254,7 +263,7 @@ and there's a test asserting its absence.
 
 ---
 
-## Worked example: adding a fourth theory of wrongness
+## Worked example: adding another theory of wrongness
 
 The whole change is one function and one line.
 
@@ -380,7 +389,7 @@ says without checking:
 
 - **Recognisability is scored and used.** `Track.recognisability` exists, all 47
   corpus tracks carry a real hand-assigned value (0.12–0.98, none left at the
-  default), and `_recog_weight()` multiplies the score in *all three* strategies.
+  default), and `_recog_weight()` multiplies the score in all five corpus strategies.
   What does not exist is a separate "nicheness" concept, and nobody has checked
   whether the hand-assigned values are any good.
 - **Repeats are already prevented within a run.** `DJState.played_ids` is passed

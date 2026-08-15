@@ -27,7 +27,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--image")
     ap.add_argument("--audio", help="wav file of the surrounding sound")
-    ap.add_argument("--text", help="skip perception; describe the scene yourself")
+    ap.add_argument("--text", help="analyze a typed scene description")
     ap.add_argument("--backend", choices=["mock", "gemini"],
                     help="override config.yaml")
     args = ap.parse_args()
@@ -36,11 +36,13 @@ def main() -> None:
         log("error: pass --image or --text")
         raise SystemExit(2)
 
-    # Text mode short-circuits the model entirely. Handy for testing the rest
-    # of the pipeline, and for demos where you want a guaranteed scene.
+    cfg = load_config().section("perceive")
+    if args.backend:
+        cfg = {**cfg, "backend": args.backend}
+
     if args.text:
-        from badspotify.perceive.scene import scene_from_text
-        scene = scene_from_text(args.text)
+        from badspotify.perceive.scene import build_perceiver, read_description
+        scene = read_description(build_perceiver(cfg), args.text)
         log(f"[describe] from text: {scene.mood_label}")
         write_json(scene.model_dump())
         return
@@ -65,10 +67,6 @@ def main() -> None:
         audio = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
         feats = audio_features.extract(audio, rate)
         log(f"[describe] audio: {feats.summary()}")
-
-    cfg = load_config().section("perceive")
-    if args.backend:
-        cfg = {**cfg, "backend": args.backend}
 
     perceiver = build_perceiver(cfg)
     scene = perceiver.read(frame, feats, {"index": 0})

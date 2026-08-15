@@ -56,6 +56,7 @@ class SessionRecorder:
                     "meter": d.get("meter"),
                     "colors": d.get("colors", []),
                     "vibe": d.get("vibe", {}),
+                    "setting_attributes": d.get("setting_attributes", []),
                 },
             }
 
@@ -63,6 +64,7 @@ class SessionRecorder:
             self._pending["opposite"] = {
                 "target_vibe": d.get("target", {}),
                 "looking_for": d.get("target_genres", []),
+                "attributes": d.get("opposite_attributes", []),
                 "why": ev.label,
             }
 

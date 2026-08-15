@@ -302,7 +302,7 @@ def _suggest(scene: SceneRead, anti: AntiVibe) -> tuple[str, str, list[dict]]:
                                     parts=[types.Part.from_text(text=prompt)])],
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
-                response_schema=SUGGEST_SCHEMA, temperature=0.9))
+                response_schema=SUGGEST_SCHEMA))
         d = json.loads(resp.text) or {}
         return d.get("axis", ""), d.get("reading", ""), d.get("songs") or []
     except Exception as e:

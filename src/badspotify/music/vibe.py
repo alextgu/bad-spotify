@@ -165,6 +165,13 @@ def build_antivibe(scene: SceneRead,
         target = sharpen(target, axis)
 
     boost, ban, why = contextual_taboo(scene)
+    if scene.opposite_genres:
+        boost = list(scene.opposite_genres) + boost
+        chain = (f"setting traits {scene.setting_attributes} invert to "
+                 f"{scene.opposite_attributes}, associated with "
+                 f"{scene.opposite_genres}")
+        why = f"{chain}; {why}"
+        boost = list(dict.fromkeys(boost))
     return AntiVibe(
         target=target,
         target_genres=boost,

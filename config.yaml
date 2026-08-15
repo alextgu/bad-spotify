@@ -7,7 +7,7 @@ capture:
   # The reaction budget, end to end:
   #   up to frame_interval_s waiting for the next sample
   # + ~1.2s  perception (measured median, gemini-3.5-flash-lite)
-  # + <10ms  invert + three strategies + judge (all local)
+  # + local inversion + five local strategies; catalogue discovery is optional
   # At the old 5.0 the sampling wait DOMINATED -- a hard cut could take 6.2s to
   # answer, which reads as lag. At 2.0 the worst case is ~3.2s and the typical
   # case ~2.2s. This does not cost 2.5x the model calls: the change gate below
@@ -54,6 +54,9 @@ antagonize:
     - genre_antipode
     - tempo_clash
     - lyrical_irony
+    # Inverts setting traits, then selects locally from the associated genre.
+    # Candidate generation makes no Spotify request.
+    - semantic_opposite
     # Wrong about the OCCASION rather than the sound. Reads
     # `SceneRead.references` -- the event and register, never the people.
     - register_clash
@@ -67,8 +70,11 @@ antagonize:
 judge:
   backend: mock           # mock | gemini
   model: gemini-2.5-flash
-  timeout_s: 4.0          # give up after this and use the geometric top pick
+  timeout_s: 4.0          # give up after this and use local score sampling
   retries: 1
+  # Softmax is applied to candidate scores after mood inference.
+  selection_temperature: 0.20
+  shortlist_size: 8
 
 analysis:
   mood_change_threshold: 0.35   #Vibe distance needed for a new mood

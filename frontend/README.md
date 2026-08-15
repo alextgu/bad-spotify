@@ -83,7 +83,7 @@ wireframe. Everything else about how the page looks is open.
   agent runs server-side, this should fall back to the sample and say so.
 - **Losing candidates.** The session file records what it *considered* and
   rejected. Showing that makes the reasoning much more convincing — three
-  strategies competing is more interesting than one answer appearing.
+  competing strategies are more interesting than one answer appearing.
 
 ## Two things to keep
 

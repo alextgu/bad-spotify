@@ -11,7 +11,7 @@ Three states, and the middle one matters most:
 | **Built, unproven** | The code exists and runs on fake input. Nobody has pointed it at the real thing yet. **Assume it's broken until someone checks.** |
 | **Not started** | — |
 
-Last updated: 14 Aug 2026
+Last updated: 15 Aug 2026
 
 ---
 
@@ -25,7 +25,7 @@ Last updated: 14 Aug 2026
 | Finding songs on Spotify | Built, unproven | |
 | Playing songs on Spotify | Built, unproven | |
 | Reading a photo into a description | Gemini proven live 14 Aug on synthetic frames; **still unproven on real footage** | |
-| Working out the opposite | Built, unproven | |
+| Working out the opposite | Built, unproven — mood reflection plus setting attributes → opposite attributes → associated genres | |
 | The song list (47 songs) | Built, unproven | |
 | Picking the funniest one | Built, unproven | |
 | The voice | Scoped down 14 Aug | Nelson (`6OzrBCQf8cjERkYgzSg8`), listened to and approved. **Not in the live loop**: one greeting at startup, and pre-rendered clips on the site. That deletes the latency, ducking and mid-song-interrupt risks entirely — none of them can bite a line spoken before the music starts. Still needs a key to render the site's three clips |
@@ -34,7 +34,7 @@ Last updated: 14 Aug 2026
 | Screens — DJ face and engineering view | Built, unproven | |
 | Site — scaffold + demo ground | Built, unproven | |
 | Site — launch page | Built, unproven | |
-| Site — pipeline diagram | Done — watched it render at 1440px and at a 360px container; six steps, the gate's skip-back edge, and the three-strategy fan-out all draw. Inline SVG, no dependency. `tsc --noEmit` and `next build` pass | |
+| Site — pipeline diagram | Built, unproven — updated to the six-strategy fan-out; `tsc --noEmit` and `next build` pass, visual check pending | |
 | Local video upload and mood timeline | Built, unproven | |
 | Video sampler (`src/videofeed/`) | Done — 17 tests, incl. a real generated clip | |
 | Engine (`service.py`) — one decision, no loop | Built, unproven | |
@@ -58,11 +58,33 @@ the single biggest risk to the demo.
   off when the room really changed *and* the current song has had a fair run.
 - **Backup list.** If anything upstream dies, a pre-picked list of always-wrong
   songs plays anyway. It is never silent.
-- **Tests.** 83 of them, each guarding a specific way the demo could break.
+- **Tests.** 192 of them, each guarding a specific way the demo could break.
 - **Timeouts on the model calls.** A slow answer is abandoned and retried
   rather than freezing the loop. A late answer is worth less than a fast fallback.
 
 ## What just changed
+
+**Setting semantics now choose a musical opposite without scenario lookups.**
+The one perception call returns setting traits, direct opposites, and associated
+genres. Typed descriptions use that same model-backed contract when Gemini is
+active; the offline fallback leaves the semantic chain empty. The local
+`semantic_opposite` strategy, app, HUD, sessions, and site consume the result.
+*Proven by:* a fake structured Gemini response for fast food travels through
+one perception call, resolves to opera/classical candidates, and triggers the
+genre-aware DJ path. The offline reader returns no special fast-food answer.
+Seven focused tests cover the model boundary, identity filtering, Engine path,
+genre gating, and zero-Spotify-call candidate generation. All 192 tests pass.
+*Still unknown:* whether the live model reaches the useful chain from a real
+fast-food photo without an example in its prompt.
+
+**Song choice now varies among strong candidates.** A local softmax sampler
+uses the strategies' existing scores after mood inference. Temperature `0.20`
+allows nearby candidates to rotate, `0` is explicitly greedy, and an optional
+test seed makes runs reproducible. Gemini receives a sampled shortlist; the
+mock judge samples its winner directly. Neither path adds Spotify requests.
+*Proven by:* three focused tests show one unchanged mood selects at least three
+of four close-scoring songs over 30 decisions, temperature zero picks the top
+score, weak candidates remain suppressed, and the input scene is unchanged.
 
 **Gemini is real now, and the timeout was hiding it.** A key finally existed, so
 the perception path ran against the live API for the first time. It works — it
@@ -79,7 +101,7 @@ benchmarked, 3 calls each), timeout 3.0s.
 frame it has seen was synthetic.
 
 **The song stops changing when nothing changes.** The DJ used to ask "should I
-act?" *after* paying for perception, three strategies and a judge — and then
+act?" *after* paying for perception, every strategy and a judge — and then
 acted anyway, because `played_ids` excludes whatever is playing, so the judge was
 forced to propose a new track every pass and the "already playing" guard could
 never fire. It now gates on the **antivibe target** rather than the raw scene,
@@ -87,7 +109,7 @@ and asks before the expensive work: two rooms that invert to the same music
 don't cost a track.
 *Proven by:* a scene held perfectly constant for 62s went from **6 tracks to 1**,
 and a hard cut is still answered within one read (2.5s). 11 new tests in
-`tests/test_dj_timing.py`; 120 pass.
+`tests/test_dj_timing.py`; 192 pass.
 *Thresholds are measured, not taste:* jitter moves the target ≤0.23 and flips
 the top pick 37% of the time; the smallest real scene change moves it 0.56.
 The deadband sits in that gap at 0.30.
@@ -103,7 +125,7 @@ aren't declared on the TypedDict.
 video, samples it through the current video source, and returns a mood and music
 timeline to `/demo`. Stable mood samples keep the current song choice. A new
 choice needs a different mood and enough vibe distance, and carries a two-second
-crossfade marker. Four focused tests pass, all 83 project tests pass, and the
+crossfade marker. Four focused tests pass, all 192 project tests pass, and the
 frontend type check and production build pass. It has been tried with rain footage.
 
 ## Built, but nobody has run it for real
@@ -207,6 +229,16 @@ problem entirely — no visitor login, no licensing mess, no live playback to fa
 
 Don't re-open these without a reason.
 
+- **15 Aug** — **Scenario conclusions are inferred, never looked up.** Perception
+  produces venue traits, their opposites, and genres in one structured call.
+  Offline fallbacks leave that chain empty when they cannot infer it.
+- **15 Aug** — **Temperature varies winners, not moods.** Score-space softmax is
+  applied after inference and inversion. It does not weaken the full opposite,
+  change DJ timing, or create another Spotify lookup.
+- **14 Aug** — **Setting associations are inverted without classifying people.**
+  Perception emits venue/occasion traits, their direct opposites, and canonical
+  genres in its existing structured call. Candidate selection is local; Spotify
+  only resolves the final winner through the existing cache and request budget.
 - **14 Aug** — **When to change the song is decided on the music target, not the
   scene.** Two rooms that invert to the same music keep the same song. The
   numbers (`hold_threshold` 0.30, `jump_threshold` 0.85, `min_change_seconds` 20)

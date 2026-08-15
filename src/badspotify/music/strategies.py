@@ -1,4 +1,4 @@
-"""Three candidate generators that disagree with each other on purpose.
+"""Candidate generators that disagree with each other on purpose.
 
 THIS is where fan-out earns its keep. Not one agent per output field --
 one generator per *theory of what makes music wrong*:
@@ -6,6 +6,7 @@ one generator per *theory of what makes music wrong*:
   genre_antipode : wrong on every axis at once (geometric opposition)
   tempo_clash    : wrong specifically in energy/pulse (rhythmic sabotage)
   lyrical_irony  : wrong in meaning, regardless of sound (semantic sabotage)
+  semantic_opposite: wrong by inverting setting traits into a genre
 
 They produce genuinely different shortlists. A judge then picks the funniest.
 That is a judge-panel pattern with real diversity, not parallelism theatre.
@@ -14,7 +15,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from ..schemas import AntiVibe, Candidate, SceneRead, Track
+from ..schemas import MAX_VIBE_DISTANCE, AntiVibe, Candidate, SceneRead, Track
 from . import discover
 from .corpus import Corpus
 from .vibe import TEMPO_TO_AROUSAL, meter_clash
@@ -99,8 +100,44 @@ def lyrical_irony(scene: SceneRead, anti: AntiVibe, corpus: Corpus,
     return scored[:n]
 
 
+def _genre_affinity(targets: set[str], track: Track) -> float:
+    genres = {genre.lower() for genre in track.genres}
+    if targets & genres:
+        return 1.0
+    if any(target in genre or genre in target
+           for target in targets for genre in genres):
+        return 0.85
+    if targets & {tag.lower() for tag in track.tags}:
+        return 0.7
+    return 0.0
+
+
+def semantic_opposite(scene: SceneRead, anti: AntiVibe, corpus: Corpus,
+                      exclude: set, n: int) -> list[Candidate]:
+    """Map observed setting traits through their opposites to a local genre."""
+    targets = {genre.lower() for genre in scene.opposite_genres}
+    if not targets:
+        return []
+
+    observed = ", ".join(scene.setting_attributes) or "setting"
+    opposite = ", ".join(scene.opposite_attributes) or "its opposite"
+    scored = []
+    for track in corpus.filter(exclude, anti.banned_genres):
+        affinity = _genre_affinity(targets, track)
+        if not affinity:
+            continue
+        distance = track.vibe.distance(scene.vibe) / MAX_VIBE_DISTANCE
+        score = (1.05 + 0.20 * affinity + 0.12 * distance) * _recog_weight(track)
+        scored.append(Candidate(
+            track=track, strategy="semantic_opposite", raw_distance=score,
+            notes=f"{observed} -> {opposite} -> {', '.join(sorted(targets))}",
+        ))
+    scored.sort(key=lambda candidate: candidate.raw_distance, reverse=True)
+    return scored[:n]
+
+
 #What music belongs at an occasion. Being wrong needs a notion of right, and
-#the other three strategies have none -- they only know acoustics, so the
+#the acoustic strategies have none, so the
 #worst they can manage is "loud where it should be quiet". This is what lets
 #the agent be wrong about the EVENT.
 #
@@ -149,7 +186,7 @@ def register_clash(scene: SceneRead, anti: AntiVibe, corpus: Corpus,
                    exclude: set, n: int) -> list[Candidate]:
     """Wrong about the OCCASION, not about the sound.
 
-    The other three ask "what does this moment sound like?". This one asks
+    The acoustic strategies ask "what does this moment sound like?". This asks
     "what does this moment MEAN, and what would be unforgivable at it?" --
     which is why it can find a children's song for a funeral, a track the
     acoustic strategies would never rank highly because a nursery rhyme is
@@ -249,7 +286,7 @@ def catalogue_dive(scene: SceneRead, anti: AntiVibe, corpus: Corpus,
         #capped these below genre_antipode's range and a discovered track won
         #1 scene in 12, which made the whole catalogue decoration.
         #Pitched to compete with the corpus strategies, not to replace them.
-        #At 1.15 it won all 12 scenes in testing and the other three stopped
+        #At 1.15 it won all 12 scenes in testing and the other strategies stopped
         #mattering -- and their disagreement is half of why the reasoning is
         #worth showing. This overlaps genre_antipode's range instead, so the
         #corpus still wins when it has a genuinely better answer.
@@ -268,6 +305,7 @@ REGISTRY: dict[str, Strategy] = {
     "genre_antipode": genre_antipode,
     "tempo_clash": tempo_clash,
     "lyrical_irony": lyrical_irony,
+    "semantic_opposite": semantic_opposite,
     "register_clash": register_clash,
     "catalogue_dive": catalogue_dive,
 }

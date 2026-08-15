@@ -8,7 +8,7 @@ Shape:
                  v
              perceive            (1 Gemini call, all scene fields)
                  v
-            antagonize           (fan-out: 3 theories of wrongness, in parallel)
+            antagonize           (fan-out: configured theories, in parallel)
                  v
               judge              (1 Gemini call, picks the funniest + writes quip)
                  v
@@ -135,6 +135,9 @@ class BadSpotifyGraph:
                  vibe=scene.vibe.model_dump(), colors=scene.dominant_colors,
                  confidence=scene.confidence, tempo=scene.tempo_feel.value,
                  meter=scene.meter.value, audio=scene.audio_summary,
+                 setting_attributes=scene.setting_attributes,
+                 opposite_attributes=scene.opposite_attributes,
+                 opposite_genres=scene.opposite_genres,
                  latency_ms=scene.latency_ms, source=scene.source)
         self._last_scene = scene
         return {**state, "scene": scene}
@@ -145,6 +148,8 @@ class BadSpotifyGraph:
         BUS.emit("antivibe", anti.rationale,
                  target=anti.target.model_dump(),
                  target_genres=anti.target_genres[:8],
+                 setting_attributes=scene.setting_attributes,
+                 opposite_attributes=scene.opposite_attributes,
                  banned=anti.banned_genres)
 
         #The cheap question first. Inverting a mood is local arithmetic; the
@@ -152,7 +157,8 @@ class BadSpotifyGraph:
         #deadband there is nothing to decide, so don't pay to decide it.
         approved = False
         if not state.get("force"):
-            go, why = self.dj.should_reconsider(scene, anti.target)
+            go, why = self.dj.should_reconsider(
+                scene, anti.target, target_genres=anti.target_genres)
             if not go:
                 BUS.emit("dj", "hold", reason=why, mode="queue",
                          scene_delta=round(self.dj.scene_delta(scene), 3), wait=0.0)
@@ -160,7 +166,7 @@ class BadSpotifyGraph:
                         "approved": False}
             approved = True
 
-        #Build candidates with three music picking strategies
+        #Build candidates with the configured music-picking strategies
         futures = {
             name: self._pool.submit(
                 strategies.generate, scene, anti, self.corpus,
@@ -243,7 +249,8 @@ class BadSpotifyGraph:
             anti = state.get("anti")
             self.dj.commit(verdict, scene=state.get("scene"),
                            mode=decision.mode,
-                           target=anti.target if anti is not None else None)
+                           target=anti.target if anti is not None else None,
+                           target_genres=anti.target_genres if anti is not None else None)
             BUS.emit("play", f"{verdict.track.title} - {verdict.track.artist}",
                      video_time=(state.get("obs").meta or {}).get("video_time")
                      if state.get("obs") is not None else None,
@@ -293,7 +300,7 @@ class BadSpotifyGraph:
         #local arithmetic, and it means the deadband is the ONE thing deciding
         #on every path. This branch used to jump straight to `dj`, which left
         #the twitchy raw-signature gate as the only bound on quiet ticks -- and
-        #ran three strategies and a judge on a scene nobody had re-read.
+        #ran every strategy and a judge on a scene nobody had re-read.
         g.add_conditional_edges(
             "stable",
             lambda s: "antagonize" if s.get("scene") is not None else "stop",

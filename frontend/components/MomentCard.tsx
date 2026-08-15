@@ -40,6 +40,12 @@ export default function MomentCard({ moment }: { moment: Moment }) {
 
       {opposite && (
         <>
+          {!!scene.setting_attributes?.length && (
+            <p className="mt-3 text-sm text-ink-muted">
+              {scene.setting_attributes.join(", ")} ?{" "}
+              {(opposite.attributes ?? []).join(", ")}
+            </p>
+          )}
           <p className="mt-5 text-xs uppercase tracking-widest text-ink-muted">
             So it wants
           </p>

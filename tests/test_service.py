@@ -51,7 +51,7 @@ def test_nothing_plays_out_loud_by_default(engine):
     assert engine.backends()["player"] == "mock"
 
 
-def test_a_real_player_in_config_does_not_arm_the_engine():
+def test_a_real_player_in_config_does_not_arm_the_engine(monkeypatch):
     """The guard above passed for the wrong reason: it only held while
     config.yaml happened to say "mock". `Engine` used `setdefault`, which never
     fires because that key is always present -- so the day the live loop was
@@ -63,9 +63,18 @@ def test_a_real_player_in_config_does_not_arm_the_engine():
 
     assert Engine().backends()["player"] == "mock"
     assert Engine(player=None).backends()["player"] == "mock"
-    #...and the explicit opt-in still reaches the configured backend.
-    assert Engine(player=FROM_CONFIG).backends()["player"] == \
-        (load_config(None).get_path("player.backend") or "mock")
+
+    configured = load_config(None).get_path("player.backend") or "mock"
+    captured = {}
+
+    def capture_player(cfg):
+        from badspotify.players.mock import MockPlayer
+        captured.update(cfg)
+        return MockPlayer(cfg)
+
+    monkeypatch.setattr("badspotify.service.build_player", capture_player)
+    Engine(player=FROM_CONFIG)
+    assert captured["backend"] == configured
 
 
 def test_describe_returns_a_full_decision(engine):

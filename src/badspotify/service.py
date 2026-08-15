@@ -48,7 +48,7 @@ from .agents.graph import BadSpotifyGraph          # noqa: E402
 from .bus import BUS                               # noqa: E402
 from .capture.base import Observation              # noqa: E402
 from .config import load_config                    # noqa: E402
-from .perceive.scene import build_perceiver, scene_from_text  # noqa: E402
+from .perceive.scene import build_perceiver, read_description  # noqa: E402
 from .players.base import build_player             # noqa: E402
 from .schemas import DJAction, SceneRead           # noqa: E402
 
@@ -168,15 +168,11 @@ class Engine:
     # ------------------------------------------------------- one decision --
 
     def describe(self, text: str) -> Decision:
-        """A typed scene. No camera, no keys, fully deterministic.
-
-        The reliable demo: it exercises the exact same downstream graph as a
-        real frame, and it cannot fail because of a webcam or a network.
-        """
+        """Read a typed scene through active perception, then the shared graph."""
         text = (text or "").strip()
         if not text:
             raise ValueError("describe() needs a scene to describe")
-        return self._decide(scene_from_text(text))
+        return self._decide(read_description(self.perceiver, text))
 
     def look(self, frame, audio=None, *, sample_rate: int = 16000,
              meta: Optional[dict] = None) -> Decision:
@@ -314,10 +310,12 @@ class Engine:
                 "vibe": scene.vibe.model_dump(),
                 "audio": scene.audio_summary,
                 "source": scene.source,
+                "setting_attributes": list(scene.setting_attributes),
             },
             opposite={
                 "target_vibe": anti.target.model_dump() if anti else {},
                 "looking_for": list(anti.target_genres[:8]) if anti else [],
+                "attributes": list(scene.opposite_attributes),
                 "why": anti.rationale if anti else "",
             },
             considered={k: v[:3] for k, v in considered.items()},

@@ -18,6 +18,7 @@ starts being a person doing a bit.
 from __future__ import annotations
 
 import json
+import math
 import random
 
 from ..config import resolve_backend
@@ -71,25 +72,62 @@ _MOCK_QUIPS = [
     "Chosen to fit the occasion.",
 ]
 
+DEFAULT_SELECTION_TEMPERATURE = 0.20
+
+
+def _random_source(cfg: dict):
+    seed = cfg.get("random_seed")
+    return random.Random(seed) if seed is not None else random.SystemRandom()
+
+
+def _temperature_pick(candidates: list[Candidate], temperature: float, rng):
+    if not candidates:
+        raise ValueError("no candidates")
+    if temperature <= 0:
+        return max(candidates, key=lambda candidate: candidate.raw_distance)
+    peak = max(candidate.raw_distance for candidate in candidates)
+    weights = [
+        math.exp((candidate.raw_distance - peak) / temperature)
+        for candidate in candidates
+    ]
+    return rng.choices(candidates, weights=weights, k=1)[0]
+
+
+def _temperature_shortlist(
+    candidates: list[Candidate], size: int, temperature: float, rng,
+) -> list[Candidate]:
+    remaining = list(candidates)
+    chosen = []
+    while remaining and len(chosen) < size:
+        candidate = _temperature_pick(remaining, temperature, rng)
+        chosen.append(candidate)
+        remaining.remove(candidate)
+    return chosen
+
 
 class MockJudge:
     backend = "mock"
 
     def __init__(self, cfg: dict | None = None):
-        self._rng = random.Random(0xBADBEEF)
+        cfg = cfg or {}
+        self.selection_temperature = max(
+            0.0, float(cfg.get(
+                "selection_temperature", DEFAULT_SELECTION_TEMPERATURE)))
+        self._rng = _random_source(cfg)
 
     def judge(self, scene: SceneRead, anti: AntiVibe,
               candidates: list[Candidate]) -> Verdict:
-        if not candidates:
-            raise ValueError("no candidates")
-        top = candidates[0]
+        top = _temperature_pick(
+            candidates, self.selection_temperature, self._rng)
         return Verdict(
             track=top.track,
             strategy=top.strategy,
             mismatch=mismatch(scene.vibe, top.track.vibe),
             quip=self._rng.choice(_MOCK_QUIPS),
-            reasoning=f"highest wrongness score via {top.strategy}: {top.notes}",
-            runner_ups=[c.track.title for c in candidates[1:4]],
+            reasoning=f"score-weighted choice via {top.strategy}: {top.notes}",
+            runner_ups=[
+                c.track.title for c in candidates if c.track.id != top.track.id
+            ][:3],
             source="mock",
         )
 
@@ -102,8 +140,13 @@ class GeminiJudge:
         self.model = cfg.get("model", "gemini-2.5-flash")
         self.timeout_s = float(cfg.get("timeout_s", 4.0))
         self.retries = int(cfg.get("retries", 1))
+        self.selection_temperature = max(
+            0.0, float(cfg.get(
+                "selection_temperature", DEFAULT_SELECTION_TEMPERATURE)))
+        self.shortlist_size = max(1, int(cfg.get("shortlist_size", 8)))
+        self._rng = _random_source(cfg)
         self.client = genai.Client()
-        self._fallback = MockJudge()
+        self._fallback = MockJudge(cfg)
 
     def judge(self, scene: SceneRead, anti: AntiVibe,
               candidates: list[Candidate]) -> Verdict:
@@ -112,6 +155,9 @@ class GeminiJudge:
         try:
             from google.genai import types
 
+            sampled = _temperature_shortlist(
+                candidates, self.shortlist_size,
+                self.selection_temperature, self._rng)
             shortlist = [
                 {
                     "track_id": c.track.id,
@@ -123,7 +169,7 @@ class GeminiJudge:
                     "proposed_by": c.strategy,
                     "why": c.notes,
                 }
-                for c in candidates[:12]
+                for c in sampled
             ]
             payload = {
                 "scene": {
@@ -152,7 +198,6 @@ class GeminiJudge:
                             },
                             "required": ["track_id", "quip", "reasoning"],
                         },
-                        temperature=1.0,  #Allows more varied jokes
                     ),
                 ),
                 self.timeout_s,
@@ -160,7 +205,8 @@ class GeminiJudge:
                 label="judge",
             )
             d = json.loads(resp.text)
-            chosen = next((c for c in candidates if c.track.id == d["track_id"]), candidates[0])
+            chosen = next(
+                (c for c in sampled if c.track.id == d["track_id"]), sampled[0])
             return Verdict(
                 track=chosen.track,
                 strategy=chosen.strategy,

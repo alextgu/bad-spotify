@@ -83,7 +83,7 @@ def create_app(runtime=None):
 
     @app.post("/api/inject")
     async def inject(payload: dict):
-        """Deterministic demo mode: describe a scene, run the real pipeline."""
+        """Describe a scene through active perception and the shared pipeline."""
         if not runtime:
             return JSONResponse({"ok": False, "error": "no runtime"}, status_code=400)
         text = payload.get("scene", "").strip()
@@ -151,6 +151,9 @@ def create_app(runtime=None):
                 "confidence": scene.confidence,
                 "colors": scene.dominant_colors,
                 "references": scene.references,
+                "setting_attributes": scene.setting_attributes,
+                "opposite_attributes": scene.opposite_attributes,
+                "opposite_genres": scene.opposite_genres,
                 "latency_ms": scene.latency_ms,
                 "source": scene.source,
             },

@@ -2,8 +2,9 @@
 
 **A wearable agent whose only feature is playing the worst possible music for the moment.**
 
-It watches what's around you, works out what the moment feels like, computes the
-opposite, and plays that. It talks to you, but only to announce what it has done.
+It watches what's around you, works out what the moment feels like and what the
+setting implies, computes the opposites, and plays that. It talks to you, but
+only to announce what it has done.
 It will not take requests. It does not help with anything else.
 
 Sunlit park with people reading → Drowning Pool, *Bodies*.
@@ -54,11 +55,14 @@ the door opening at second three. When something like that fires, we already
 know the world changed, so we skip the checking and go straight to thinking.
 
 **3. Understand the moment.** Describe what's happening: where we are, what
-people are doing, how it feels. One description covering everything, in one go.
+people are doing, how it feels, and traits of the setting. One description
+covering everything, in one go.
 
-**4. Flip it.** Work out the opposite of that feeling. This is the whole point.
+**4. Flip it.** Invert both the feeling and the setting traits, then associate
+those opposite traits with genres. Fast food can become inexpensive and casual
+→ luxurious and formal → opera or classical.
 
-**5. Pick the song.** Three different ideas of "worst" each propose candidates.
+**5. Pick the song.** Six different ideas of "worst" each propose candidates.
 Then one final choice picks the funniest, and writes a line to say out loud.
 
 **6. Queue it, or cut in.** Usually it lines the song up to play next. But if the
@@ -94,9 +98,11 @@ A result, not a request. A test asserts the dial can't come back.
 
 ### What "worst" means, and what it doesn't
 
-**Musically opposite in mood, and nothing else.** Five axes: valence, arousal,
-density, brightness, organicness. The system has no notion of anyone's race,
-sex, religion, politics or identity, and must never acquire one.
+**Musically opposite to the moment.** Five mood axes — valence, arousal,
+density, brightness, organicness — plus setting-only semantic opposites. It can
+label a venue casual or formal; it never labels the people in it. The system
+has no notion of anyone's race, sex, religion, politics or identity, and must
+never acquire one.
 
 It takes two things to be funny, and it needs both:
 
@@ -109,6 +115,16 @@ record nobody has heard of. A genuinely funny choice has to be *specific* and
 Only something that understands culture spots that.
 
 So the maths makes a shortlist and taste picks the winner. Never one alone.
+
+The setting chain is inferred in the same structured perception call as the
+mood; there is no fast-food, gallery, or other scenario lookup table. When the
+model backend is unavailable, the offline fallback leaves those semantic fields
+empty instead of pretending it inferred them.
+
+The shortlist is sampled by score before the final judge chooses. A softmax
+temperature of `0.20` keeps weak matches unlikely while allowing several strong
+songs to rotate for the same mood. This happens after perception and inversion,
+so it cannot change the scene mood, and it makes no Spotify request.
 
 ### How it's stopped from going haywire
 
@@ -152,8 +168,7 @@ python run.py --video clip.mp4 --realtime       # ...at its true speed
 python run.py --video clip.mp4 --record demo1   # + write data/sessions/demo1.json
 python run.py --source webcam                   # real camera + mic
 python run.py --ticks 10 --no-hud               # bounded headless run
-python run.py --cruelty 1.0                     # maximum hostility
-pytest tests/ -q                                # 52 tests
+pytest tests/ -q                                # 192 tests
 ```
 
 ## Free local video upload app
@@ -206,7 +221,7 @@ and they should be tested with representative demo footage before presentation.
 | | |
 |---|---|
 | `/dj` | **The presentation face.** An orb that takes on the room's colours, the spoken line in big type, now-playing with a queued/cut-in badge, and a compact reasoning ticker. This is what judges see. |
-| `/` | **The engineering view.** Vibe-gap chart, cruelty dial, scene injection, full event trace. This is what we debug with. |
+| `/` | **The engineering view.** Vibe-gap chart, scene injection, full event trace. This is what we debug with. |
 
 Keep both. The reasoning being visible is what separates this from a shuffle
 button, and it's most of why the technical work reads as serious.
@@ -354,7 +369,7 @@ still happening. The DJ decides per moment — it isn't a setting.
 |---|---|
 | `src/badspotify/capture/` | `CaptureSource` interface — webcam, **video file**, replay, glasses stub — plus the change gate |
 | `src/badspotify/perceive/` | Gemini scene read, local librosa audio features, text injection |
-| `src/badspotify/music/` | **the antipode engine**, corpus, three candidate strategies |
+| `src/badspotify/music/` | **the antipode engine**, corpus, six candidate strategies |
 | `src/badspotify/agents/` | LangGraph wiring, the judge |
 | `src/badspotify/dj/` | bounds, queue-vs-interrupt, the fallback ladder |
 | `src/badspotify/players/` | mock / local files / Spotify + the search matcher |
@@ -383,7 +398,7 @@ calls.
 
 **2. The joke engine** — `music/`
 The highest-leverage work in the repo. Own `TABOO_RULES`, the corpus, and the
-strategies. Grow the corpus past 47 tracks, add nicheness scores, maybe a fourth
+strategies. Grow the corpus past 47 tracks or add a genuinely disagreeing
 strategy. Success is whether the room laughs, not any metric in this file.
 
 **3. Reliability** — `dj/`, `agents/`

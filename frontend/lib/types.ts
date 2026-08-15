@@ -27,11 +27,13 @@ export interface Scene {
   meter: string | null;
   colors: string[];     // hex, straight from the frame -- good for theming
   vibe: Partial<Vibe>;
+  setting_attributes?: string[];
 }
 
 export interface Opposite {
   target_vibe: Partial<Vibe>;
   looking_for: string[];   // the genres/tags it decided would be worst
+  attributes?: string[];
   why: string;
 }
 
@@ -42,7 +44,7 @@ export interface CandidatePick {
   why?: string;
 }
 
-/** Keyed by strategy name: genre_antipode | tempo_clash | lyrical_irony */
+/** Keyed by strategy name. */
 export type Considered = Record<string, CandidatePick[]>;
 
 export interface Chosen {
