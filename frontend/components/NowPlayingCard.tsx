@@ -1,41 +1,51 @@
 /**
- * The now-playing sticker, built like the one Instagram puts on a story.
- *
- * Square, translucent, blurred over whatever is behind it, with the artwork on
- * the left and the track beside it. The form is doing the work: everybody has
- * seen a music sticker on a story, so it reads as "this is playing, right now,
- * over this scene" without a caption explaining it.
+ * The now-playing bar: long, rectangular, and actually playable.
  *
  * ---------------------------------------------------------------------------
- * What is real here
+ * Why this is an embed and not an image plus an <audio>
  * ---------------------------------------------------------------------------
- * The track is not decorative. Bodies by Drowning Pool at 0.911 is the actual
- * output of the recorded run in `public/sessions/sample.json`, against the
- * park the hero is showing — the same decision the try-it screen replays. A
- * placeholder song would have been easier and would have made the sticker a
- * lie the moment anyone compared the two screens.
+ * The two things asked for here — the real cover art and a sample you can play
+ * — are both Drowning Pool's copyrighted work. Shipping the artwork as a file
+ * and the recording as an mp3 would be redistributing them from our own
+ * server, which is not something a hackathon page gets a pass on.
+ *
+ * Spotify's own embed is the sanctioned route and happens to be the better
+ * one: it serves the genuine album art, gives a real preview under their
+ * licence, handles attribution, and costs us no assets at all. It is also
+ * rectangular by default, which is the shape that was wanted.
+ *
+ * The track id is not typed out from a search — it is
+ * `spotify:track:7CpbhqKUedOIrcvc94p60Y` from `data/spotify_uris.json`, the
+ * file the agent itself resolves against, so the bar plays exactly the track
+ * the recorded run chose.
  *
  * ---------------------------------------------------------------------------
- * No Spotify mark
+ * It degrades
  * ---------------------------------------------------------------------------
- * It says "Spotify" in text and stops there. Their logo is a trademark, and
- * the page already names them once as a comparison; shipping the mark itself
- * on a product page turns nominative use into something that looks like
- * endorsement. Text is the whole benefit and none of the risk.
+ * An iframe is a network dependency on a page whose first rule is that nothing
+ * may fail live. So the card states the track, the artist and the reason in
+ * our own markup, underneath. Offline, or with the embed blocked, the bar
+ * still says what is playing and why — it simply cannot play it.
  */
+
+/** From data/spotify_uris.json — `bodiesdrowning`. */
+const TRACK = "7CpbhqKUedOIrcvc94p60Y";
+
 export default function NowPlayingCard() {
   return (
     <div
-      className="w-[min(232px,30vw)] overflow-hidden rounded-[1.4rem] border border-paper/15
-                 bg-[rgba(10,10,12,.55)] p-4 backdrop-blur-md
+      className="w-[min(440px,48vw)] overflow-hidden rounded-[1.25rem] border border-paper/15
+                 bg-[rgba(10,10,12,.55)] backdrop-blur-md
                  shadow-[0_20px_60px_-20px_rgba(0,0,0,.7)]"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-4 pt-3">
         <span className="font-mono text-label uppercase text-paper/55">
           Now playing
         </span>
 
-        {/* Four bars, four periods, deliberately not in step. */}
+        {/* Four bars, four periods, deliberately not in step — the same rule
+            as the logo's sparkles. Synchronised motion reads as a loading
+            indicator, and this has to read as audio. */}
         <span aria-hidden className="flex h-3.5 items-end gap-[3px]">
           {["1.1s", "1.7s", "0.9s", "1.4s"].map((duration, i) => (
             <span
@@ -53,28 +63,25 @@ export default function NowPlayingCard() {
         </span>
       </div>
 
-      <div className="mt-4 flex items-center gap-3">
-        {/* The artwork square. A gradient rather than a fake cover: inventing
-            album art for a real track is the one thing on this card that would
-            actually be dishonest. */}
-        <span
-          aria-hidden
-          className="h-12 w-12 shrink-0 rounded-lg bg-[linear-gradient(135deg,#1CA85C,#0C7A40_55%,#14304A)]
-                     ring-1 ring-paper/15"
+      {/* Spotify's compact player: real cover, real preview, their licence.
+          `lazy` so the hero never waits on a third-party frame. */}
+      <div className="px-3 pt-3">
+        <iframe
+          title="Bodies by Drowning Pool on Spotify"
+          src={`https://open.spotify.com/embed/track/${TRACK}?utm_source=generator&theme=0`}
+          width="100%"
+          height="80"
+          loading="lazy"
+          frameBorder="0"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
+          className="rounded-xl"
         />
-
-        <span className="min-w-0">
-          <span className="block truncate font-display text-[0.95rem] font-semibold text-paper">
-            Bodies
-          </span>
-          <span className="block truncate text-[0.8125rem] text-paper/55">
-            Drowning Pool
-          </span>
-        </span>
       </div>
 
-      <p className="mt-4 border-t border-paper/10 pt-3 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-paper/40">
-        Spotify · matched to a sunlit park
+      {/* Ours, not theirs — so the bar still says what is playing and why when
+          the embed cannot load. */}
+      <p className="px-4 pb-3 pt-3 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-paper/40">
+        Bodies · Drowning Pool · matched to a sunlit park
       </p>
     </div>
   );
