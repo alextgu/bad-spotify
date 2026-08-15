@@ -32,8 +32,13 @@ export default function SectionEvidence() {
         <Label>{evidence.filmCaption.right}</Label>
       </div>
 
-      {/* ----------------------------------------------------- the moments -- */}
-      <div className="mx-auto max-w-content px-gutter pt-section-sm md:pt-section">
+      {/* ----------------------------------------------------- the moments --
+          `pt-rest`, not `pt-section`. Section-sized padding here opened a gap
+          big enough that a scroll stop landed inside it, so there was a blank
+          screen of paper between the film and the moments that read as a page
+          nobody had finished. The two halves are one argument — they should
+          arrive close enough together to be read as one. */}
+      <div className="mx-auto max-w-content px-gutter pt-rest">
         <div className="grid gap-rest md:grid-cols-3 md:gap-gutter">
           {evidence.moments.map((m, i) => (
             <Reveal as="article" key={m.title} delay={i * 0.12}>

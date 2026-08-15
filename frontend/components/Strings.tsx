@@ -120,10 +120,14 @@ export default function Strings() {
     const lines: StringLine[] = Array.from({ length: COUNT }, (_, i) => ({
       // Spread through the band, each nudged so they are not evenly ruled.
       base: (i + 0.7) / (COUNT + 0.4) + between(-0.035, 0.035),
+      // Wavelengths under one screen-width, so each line actually bends
+      // several times across the window rather than bowing once. The first
+      // pass used 1.5-2.1 widths at 2-4px, which is a straight line with a
+      // slight lean on it — technically curved, not visibly so.
       waves: [
-        { length: between(1.5, 2.1), amp: between(2.4, 4.0), speed: between(0.17, 0.27), phase: between(0, Math.PI * 2) },
-        { length: between(0.8, 1.15), amp: between(1.2, 2.1), speed: between(0.3, 0.46), phase: between(0, Math.PI * 2) },
-        { length: between(0.45, 0.62), amp: between(0.5, 1.1), speed: between(0.5, 0.78), phase: between(0, Math.PI * 2) },
+        { length: between(1.0, 1.5), amp: between(7, 11), speed: between(0.15, 0.24), phase: between(0, Math.PI * 2) },
+        { length: between(0.5, 0.8), amp: between(3.5, 6), speed: between(0.28, 0.44), phase: between(0, Math.PI * 2) },
+        { length: between(0.26, 0.42), amp: between(1.5, 3), speed: between(0.46, 0.72), phase: between(0, Math.PI * 2) },
       ],
       breathSpeed: between(0.07, 0.14),
       breathPhase: between(0, Math.PI * 2),
@@ -170,7 +174,10 @@ export default function Strings() {
         ctx.lineWidth = 1 + loud * 0.7;
 
         ctx.beginPath();
-        const step = 10;
+        // Finer sampling than before: at 10px the shortest wave was being
+        // drawn with about four points per period and came out as a
+        // zigzag rather than a curve.
+        const step = 6;
         for (let x = 0; x <= width; x += step) {
           let y = y0;
 
