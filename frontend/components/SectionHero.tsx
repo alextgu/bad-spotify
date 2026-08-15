@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Label from "@/components/Label";
+import LogoMark from "@/components/LogoMark";
 import Slot from "@/components/Slot";
 import { brand } from "@/lib/brand";
 import { hero } from "@/lib/site";
@@ -46,14 +46,7 @@ export default function SectionHero() {
                 watermark is tiled across the artwork itself and is part of the
                 joke rather than something to remove — at 36px it reads as
                 texture, which is the only size it has to survive. */}
-            <Image
-              src="/logo.png"
-              alt=""
-              width={36}
-              height={36}
-              priority
-              className="h-9 w-9 object-contain"
-            />
+            <LogoMark size={36} />
             {/* Set in the display face, not the mono label. It is the
                 product's name, and rendering it at caption weight made it the
                 least considered thing on a page about it. */}

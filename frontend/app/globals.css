@@ -113,6 +113,58 @@ video {
 }
 
 /* ---------------------------------------------------------------------------
+   THE LOGO'S SPARKLES
+
+   The icon is deliberate AI slop — misspelt wordmark, gradient bubble, four
+   pointed stars, a watermark baked into the art. The animation commits to the
+   bit rather than apologising for it: the stars twinkle and the mark bobs,
+   exactly the way every generated app icon on the internet does.
+
+   Three separate periods, none of them a multiple of another, so the sparkles
+   never fire together and it never resolves into a beat. That is the one piece
+   of restraint here — synchronised twinkling reads as a loading spinner.
+--------------------------------------------------------------------------- */
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.35) rotate(-20deg);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1) rotate(10deg);
+  }
+  70% {
+    opacity: 0.55;
+    transform: scale(0.8) rotate(24deg);
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-2.5px) rotate(-1.5deg);
+  }
+}
+
+/* A slow bloom behind the mark. Barely visible, and the reason the thing reads
+   as lit rather than pasted on. */
+@keyframes halo {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.12);
+  }
+}
+
+/* ---------------------------------------------------------------------------
    The clip picker's entrance. Two keyframes rather than a library: the modal
    is the only thing on the page that opens, so a transition system for it
    would be one consumer of a lot of machinery.
