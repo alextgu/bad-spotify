@@ -45,7 +45,7 @@ export default function SectionFAQ() {
                   aria-expanded={isOpen}
                   aria-controls={answerId}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="flex w-full cursor-pointer items-baseline gap-gutter py-5 text-left font-display text-title"
+                  className="flex w-full cursor-pointer items-baseline gap-gutter py-4 text-left font-display text-title"
                 >
                   <span>{item.q}</span>
                   <span
@@ -76,7 +76,7 @@ export default function SectionFAQ() {
                   <div className="overflow-hidden">
                     <p
                       className={[
-                        "max-w-measure pb-5 text-body text-graphite",
+                        "max-w-measure pb-4 text-body text-graphite",
                         "transition-transform duration-interaction ease-calm",
                         "motion-reduce:transition-none",
                         isOpen ? "translate-y-0" : "-translate-y-1",

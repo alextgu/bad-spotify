@@ -222,34 +222,46 @@ export const results = {
 } as const;
 
 /* --------------------------------------------------------------- 7 · faq -- */
+/**
+ * Answers, not punchlines.
+ *
+ * These were one-liners reaching for a laugh — "everyone who tried it left it
+ * on Cursed" — and they cost the section its job. This is the last screen, it
+ * is where a sceptic goes to find out whether the thing is real, and a joke
+ * there reads as not having an answer. The page is funny enough by then; the
+ * FAQ is where it stops performing and shows its working.
+ *
+ * Every number below is measured and lives somewhere in the repo. Do not add
+ * one that isn't.
+ */
 export const faq = [
   {
     q: "Is it watching me all day?",
-    a: "It samples a frame every four seconds, turns it into a sentence, and throws the image away.",
+    a: "It takes one frame about every five seconds, gets a sentence back from the model, and discards the image. Nothing is stored — the read it keeps is text like “sunlit public park, people reading on the grass”. Most ticks never reach a model at all: a local change gate drops the frame when the room hasn't moved.",
   },
   {
-    q: "Why would I want the wrong song?",
-    a: "Everyone who tried it left it on Cursed.",
+    q: "Why would anyone want the wrong song?",
+    a: "Because deliberately wrong is the only version you can check. A recommender aiming to be right hides its failures in taste; when the goal is the opposite of the room, every pick is falsifiable — you can see the read, the inversion, and whether it followed. Flip one sign and the same machinery hunts for the best song instead.",
   },
   {
     q: "Doesn't Spotify already do this?",
-    a: "From your history, not from the room you're standing in.",
+    a: "Spotify recommends from listening history. The input here is the physical scene in front of a camera: setting, activity, light, and how confident the read is. Spotify is playback only — their audio-features endpoints closed to new apps in 2024, so scoring runs on our own hand-built corpus of 47 tracks.",
   },
   {
     q: "Why is the logo the opposite?",
-    a: "Some of the biggest music apps go dark, round, and green. Ours goes light, square, and purple for the same reason the music does: it flips what the moment expects.",
+    a: "The big music apps converge on dark, round, and green; ours is light, square, and purple for the same reason the music is wrong — it turns round what the moment expects. It is also deliberate AI slop, gradient and sparkles and watermark included. Naming the tells is the point.",
   },
   {
-    q: "What's faked for the demo?",
-    a: "The vision step ran on all three real sample clips, and the site replays those recorded sessions. The Spotify player is built and tested against a stand-in, and nobody has yet heard it come out of a real speaker. Your own upload only works when the local agent is running.",
+    q: "What's real and what isn't?",
+    a: "Perception has run live on three filmed clips, and the site replays those recorded sessions with the losing candidates and scores. Unproven: the Spotify player is tested only against a stand-in, and nobody has heard a track from a real speaker yet. Your own upload needs the local agent running, and says so.",
   },
   {
     q: "Isn't this one prompt in a trenchcoat?",
-    a: "The prompt is the cheapest part and we're not pretending otherwise. What's around it: a change gate that refuses to spend a model call when nothing moved, six strategies that disagree, a judge, and a DJ that won't thrash.",
+    a: "The prompt is the cheapest part — two model calls per decision at most. Around it: a change gate that skips perception when nothing moved, six strategies that genuinely disagree about what “wrong” means, a judge that picks between them, and a sampler at temperature 0.20 so one room doesn't produce one answer forever.",
   },
   {
-    q: "What broke?",
-    a: "A four-second timeout sat below the model's real 5–8s latency, so every call silently fell back to a canned read and looked like it was working. Two safety mechanisms deadlocked and nothing played on calm footage. And librosa removed the function we used for tempo, zeroing every audio feature for days without an error.",
+    q: "What broke along the way?",
+    a: "A four-second timeout sat below the model's real 5–8s latency, so every call silently fell back to a canned read and looked fine. Two safety mechanisms deadlocked and nothing played on calm footage. And the DJ changed track every other tick on a static scene until it gated on the inverted target — 62 seconds went from six tracks to one.",
   },
 ] as const;
 
