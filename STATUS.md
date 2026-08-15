@@ -34,7 +34,7 @@ Last updated: 15 Aug 2026
 | Screens — DJ face and engineering view | Built, unproven | |
 | Live camera/shared-screen HUD | Built, unproven — chosen song and playback errors reach the live response; browser not exercised | |
 | Site — scaffold + demo ground | Built, unproven | |
-| Site — launch page | Built, visual check pending — real example photos plus a first-viewport forest/rock/notes hero collage; runtime sources and production build verified 15 Aug | |
+| Site — launch page | Built, visual check pending — real example photos plus a first-viewport forest/notes hero collage (the rock photo was never shot; its slot was removed); runtime sources and production build verified 15 Aug | |
 | Site — pipeline diagram | Built, unproven — updated to the six-strategy fan-out; `tsc --noEmit` and `next build` pass, visual check pending | |
 | Local video upload and mood timeline | Built, unproven | |
 | Video sampler (`src/videofeed/`) | Done — 17 tests, incl. a real generated clip | |

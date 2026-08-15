@@ -168,7 +168,7 @@ python run.py --video clip.mp4 --realtime       # ...at its true speed
 python run.py --video clip.mp4 --record demo1   # + write data/sessions/demo1.json
 python run.py --source webcam                   # real camera + mic
 python run.py --ticks 10 --no-hud               # bounded headless run
-pytest tests/ -q                                # 192 tests
+pytest tests/ -q                                # 215 tests
 ```
 
 ## Free local video upload app
@@ -311,7 +311,7 @@ Copy `.env.example` to `.env`, fill in what you have, and flip the matching
      └── yes ───▶  PERCEIVE         1 Gemini call → the whole SceneRead
                         │
                         ▼
-                   ANTAGONIZE       fan-out: 3 competing theories of wrongness
+                   ANTAGONIZE       fan-out: 6 competing theories of wrongness
                         │
                         ▼
                    JUDGE            1 Gemini call: picks the funniest, writes
@@ -476,7 +476,7 @@ the site are how the agent's mind is made legible).
 |---|---|
 | Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 30 tests guarding specific live-demo failures |
 | UX & intuition | A DJ character with a reacting orb, onboarding, one honest control, and a site that walks judges through the reasoning |
-| Creativity | Geometric opposition *plus* a cultural judge; three competing theories of wrongness rather than one similarity score |
+| Creativity | Geometric opposition *plus* a cultural judge; six competing theories of wrongness rather than one similarity score |
 | Originality | An assistant that is deliberately useless. The failure mode and the feature are the same thing, which is why it holds up live |
 
 ---

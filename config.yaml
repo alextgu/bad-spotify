@@ -179,3 +179,4 @@ hud:
   enabled: true
   host: 127.0.0.1
   port: 8420
+  max_upload_mb: 200      # /api/analyze-video size cap; server.py defaulted to this silently
