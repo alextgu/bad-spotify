@@ -103,10 +103,10 @@ export default function SectionDescription() {
     <section
       ref={root}
       id="what"
-      className="relative flex h-svh flex-col justify-center overflow-hidden px-gutter"
+      className="relative flex h-svh flex-col justify-center overflow-hidden"
     >
       {/* ------------------------------------------------------ the claim -- */}
-      <div ref={intro} className="mx-auto w-full max-w-content">
+      <div ref={intro} className="mx-auto w-full max-w-content px-gutter">
         <h2 className="mx-auto max-w-statement text-center font-display text-headline">
           {description.statement}
         </h2>
@@ -117,42 +117,56 @@ export default function SectionDescription() {
       </div>
 
       {/* ----------------------------------------------------- the examples --
+          Half the screen each, edge to edge and floor to ceiling. The image
+          was a 16:10 card sitting inside the content column, which made the
+          scene look like an illustration of the example rather than the thing
+          being reacted to. Full-bleed, it IS the room, and the verdict sits
+          next to it at the same scale.
+
           Absolutely placed and stacked, because they occupy the same screen at
-          different times. On mobile (no pin, no scrub) they fall back to being
-          stacked in flow — see the `lg:` prefixes. */}
+          different times. On mobile — no pin, no scrub — they fall back to
+          stacked blocks in flow; see the `lg:` prefixes. */}
       {description.examples.map((example, i) => (
         <div
           key={example.id}
           ref={(el) => {
             panels.current[i] = el;
           }}
-          className="mx-auto w-full max-w-content lg:absolute lg:inset-x-0 lg:px-gutter lg:opacity-0"
+          className="lg:absolute lg:inset-0 lg:opacity-0"
         >
           <div
-            className={`grid items-center gap-rest lg:grid-cols-2 ${
+            className={`grid h-full lg:grid-cols-2 ${
               // The library sits image-right, so the two examples are mirror
               // images of each other rather than the same slide twice.
               i === 1 ? "lg:[&>*:first-child]:order-2" : ""
             }`}
           >
-            <Slot shot={example.shot} className="aspect-[16/10] rounded-card" />
+            {/* No rounding and no inset: it runs into the corners of the
+                window, which is the only way half a screen reads as a wall
+                rather than as a large picture. */}
+            <Slot shot={example.shot} className="h-[38vh] w-full lg:h-full" />
 
-            <div>
-              <Label tone="offset">{example.scene}</Label>
-              <p className="mt-2 font-mono text-label lowercase tracking-normal text-graphite">
-                {example.read}
-              </p>
+            <div className="flex items-center px-gutter py-rest lg:px-rest">
+              <div>
+                <Label tone="offset">{example.scene}</Label>
+                <p className="mt-2 font-mono text-label lowercase tracking-normal text-graphite">
+                  {example.read}
+                </p>
 
-              {/* The verdict, at headline size. This is the punchline of the
-                  beat and everything else on the panel is support for it. */}
-              <p className="mt-block font-display text-headline leading-none">
-                {example.track}
-              </p>
-              <p className="mt-2 text-body text-graphite">{example.artist}</p>
+                {/* The verdict, at display size now that it has half a screen
+                    to sit in. This is the punchline of the beat; everything
+                    else on this side is support for it. */}
+                <p className="mt-block font-display text-display leading-none">
+                  {example.track}
+                </p>
+                <p className="mt-3 text-subheading text-graphite">
+                  {example.artist}
+                </p>
 
-              <p className="mt-block max-w-measure text-caption text-graphite">
-                {example.why}
-              </p>
+                <p className="mt-block max-w-measure text-body text-graphite">
+                  {example.why}
+                </p>
+              </div>
             </div>
           </div>
         </div>
