@@ -341,9 +341,13 @@ export default function SectionTryIt() {
             <Label>What it sees</Label>
             <p className="mt-2 text-body leading-snug">{cue.sees}</p>
 
+            {/* Everything on this line comes off the scene read. It used to
+                end "10ms via gemini", which was `played.latency_ms` -- how
+                long the PLAYER took, not the model. A precise number in the
+                wrong place is worse than no number. */}
             <p className="mt-3 font-mono text-label lowercase tracking-normal text-graphite">
-              {cue.register} · confidence {cue.confidence.toFixed(2)} ·{" "}
-              {cue.latency}ms via {cue.model}
+              {cue.register} · confidence {cue.confidence.toFixed(2)} · tempo{" "}
+              {cue.tempo} · {cue.meter}
             </p>
 
             {/* The palette pulled out of the frame. */}
@@ -359,6 +363,16 @@ export default function SectionTryIt() {
             </div>
           </div>
 
+          {/* What it was hunting for, straight out of the inversion. */}
+          {cue.lookingFor.length > 0 && (
+            <div className="shrink-0 border-t border-hairline px-4 py-3">
+              <Label>Looking for</Label>
+              <p className="mt-1.5 font-mono text-[0.6875rem] leading-relaxed tracking-normal text-graphite">
+                {cue.lookingFor.join(" · ")}
+              </p>
+            </div>
+          )}
+
           {/* The decision log, newest first, exactly as the HUD prints it. */}
           <div className="min-h-0 flex-1 overflow-y-auto border-t border-hairline px-4 py-3">
             <ul className="space-y-1.5">
@@ -371,6 +385,39 @@ export default function SectionTryIt() {
                 </li>
               ))}
             </ul>
+
+            {/* The candidates that LOST, with their scores.
+                This is the most convincing thing in the panel and it costs
+                nothing — the session file already records everything each
+                strategy proposed. One answer appearing looks like a lookup;
+                nine answers ranked, with the winner two points clear, looks
+                like a decision. */}
+            {cue.considered.length > 0 && (
+              <table className="mt-4 w-full border-t border-hairline pt-3 text-left">
+                <caption className="pb-2 text-left">
+                  <Label>Also considered</Label>
+                </caption>
+                <tbody>
+                  {cue.considered.slice(0, 6).map((c, i) => (
+                    <tr key={c.title + c.strategy} className="align-baseline">
+                      <td className="py-0.5 pr-2 font-mono text-[0.6875rem] tracking-normal text-graphite">
+                        {c.score.toFixed(3)}
+                      </td>
+                      <td
+                        className={`py-0.5 pr-2 text-caption ${
+                          i === 0 ? "text-ink" : "text-graphite"
+                        }`}
+                      >
+                        {c.title}
+                      </td>
+                      <td className="py-0.5 font-mono text-[0.625rem] tracking-normal text-graphite/70">
+                        {c.strategy}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
 
           {/* ------------------------------------------------- now playing --

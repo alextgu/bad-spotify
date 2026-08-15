@@ -1,17 +1,22 @@
 /**
  * The clips on offer in the picker.
  *
- * **All three currently resolve to the same file.** `public/videos/sample.mp4`
- * is the synthetic green test clip the repo ships, and the other two moments
- * have not been filmed. They are listed anyway, flagged `placeholder`, because
- * the alternative is a picker with one option in it — and because the flag is
- * the only switch: it drives the tag in the picker and the note in the
- * workbench, so shooting the footage and pointing `src` at it removes every
- * reminder at once.
+ * There is one, because there is one recorded run: `public/sessions/
+ * sample.json`, a park read at 0s that gets Drowning Pool five seconds later.
+ * The three invented options that used to be here — a kitchen, a bus, a
+ * ceiling — were removed once the panel started showing real session data,
+ * because picking "Dinner for one" and then reading "sunlit public park" in
+ * the reasoning column is exactly the kind of mismatch that costs the whole
+ * screen its credibility.
  *
- * Written this way on purpose. The failure being designed out is someone
- * swapping in real footage and leaving "placeholder" showing in two other
- * places they didn't know about.
+ * `placeholder` is still true: the *decision* is real, the *footage* is not.
+ * `sample.mp4` is the synthetic test clip, because nobody has filmed the park.
+ * That flag drives the tag in the picker and the note under the video, so
+ * dropping in real footage and clearing it removes both reminders at once.
+ *
+ * To add another: `python run.py --video yourclip.mp4 --record yourclip`, put
+ * the JSON in `public/sessions/` and the footage in `public/videos/`, and give
+ * `lib/cues.ts` the new import.
  */
 export interface Sample {
   id: string;
@@ -21,32 +26,17 @@ export interface Sample {
   /** Timecode range, for the card. */
   length: string;
   src: string;
-  /** Honest flag: this is not the footage it claims to be. */
+  /** Honest flag: the footage is not what it claims to be. */
   placeholder?: boolean;
 }
 
 export const samples: Sample[] = [
   {
-    id: "kitchen",
-    title: "Dinner for one",
-    blurb: "A small kitchen at night. One pan, one plate, nobody else.",
-    length: "01:12",
-    src: "/videos/sample.mp4",
-    placeholder: true,
-  },
-  {
-    id: "rain",
-    title: "Running for the 44",
-    blurb: "Rain on glass, motion blur, somebody late for something.",
-    length: "00:48",
-    src: "/videos/sample.mp4",
-    placeholder: true,
-  },
-  {
-    id: "ceiling",
-    title: "Ceiling, again",
-    blurb: "A dark room, a phone glow, and no intention of sleeping.",
-    length: "01:30",
+    id: "park",
+    title: "Sunlit park",
+    blurb:
+      "People reading on the grass, someone walking slowly on a path. Read as peaceful at 0.90 confidence — then answered with nu metal.",
+    length: "00:30",
     src: "/videos/sample.mp4",
     placeholder: true,
   },

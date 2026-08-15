@@ -6,7 +6,6 @@ import SectionHero from "@/components/SectionHero";
 import SectionPipeline from "@/components/SectionPipeline";
 import SectionResults from "@/components/SectionResults";
 import SectionTryIt from "@/components/SectionTryIt";
-import Strings from "@/components/Strings";
 
 /**
  * The launch page. Seven screens, no navbar.
@@ -44,7 +43,6 @@ export default function Home() {
   return (
     <>
       <ScrollController />
-      <Strings />
 
       <main>
         {/* 1 */}
@@ -55,7 +53,7 @@ export default function Home() {
         {/* 2 — the sentence poses the problem, the three moves answer it.
             One screen, because splitting them put a scroll between a question
             and its answer. */}
-        <div data-strings="off">
+        <div>
           <SectionDescription />
         </div>
 
@@ -68,15 +66,15 @@ export default function Home() {
 
             The only block that is longer than one screen, and it has to be:
             it pins itself and spends that scroll moving the clip. `data-stops`
-            are the cue fractions from lib/cues.ts, so a gesture lands on a
-            moment the agent did something rather than on an arbitrary
-            screenful — see ScrollController.
+            are the moments the agent did something, so a gesture lands on a
+            decision rather than on an arbitrary screenful — see
+            ScrollController. Three of them, because the recorded run in
+            public/sessions/sample.json contains exactly one decision: the read,
+            the commit five seconds later, and the end of the clip.
 
-            Strings off, and it carries its own opaque background: this is the
-            one screen with fine detail and a moving control on it, and
-            drifting lines behind a timeline is noise exactly where precision
-            is wanted. */}
-        <div data-strings="off" data-stops="0,0.26,0.45,0.68,0.92,1">
+            It carries its own opaque background because this is the one screen
+            with fine detail and a moving control on it. */}
+        <div data-stops="0,0.2,1">
           <SectionTryIt />
         </div>
 
@@ -91,8 +89,8 @@ export default function Home() {
           <SectionResults />
         </div>
 
-        {/* 7 — strings out; the one screen anybody reads at length. */}
-        <div data-strings="off">
+        {/* 7 — the one screen anybody reads at length. */}
+        <div>
           <SectionFAQ />
         </div>
       </main>
