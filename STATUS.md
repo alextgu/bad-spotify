@@ -303,6 +303,9 @@ Don't re-open these without a reason.
   The collage transforms are 3.5–4% scale with 1.5–2.5-degree rotation,
   while the notes also float through a reduced-motion-safe six-pixel cycle.
   The frontend lint and production build passed 15 Aug.
+- **15 Aug** — **The hero states the joke in the headline.** “Life” uses the
+  logo-and-notes pink, followed by “in the worst possible way”; the supporting
+  line turns a peaceful trail into a metal rock concert.
 - **13 Aug** — No inversion dial. Always fully invert; measure and report the
   mismatch instead. `Verdict.mismatch` is an outcome, never an input.
 - **13 Aug** — One decision path. Anything holding a scene already enters the

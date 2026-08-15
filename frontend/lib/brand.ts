@@ -26,7 +26,7 @@ export const brand = {
    */
   positioning: "No history · No requests · Only vibes",
 
-  tagline: "Music that narrates your life.",
+  tagline: "Music that narrates your life, in the worst possible way.",
 
   description:
     "A DJ that reads the moment and picks the song that narrates it — usually the worst possible one.",

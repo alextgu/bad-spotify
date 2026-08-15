@@ -29,6 +29,7 @@ export const hero = {
   headline: "Music that",
   headlineRest: "narrates your",
   headlineAccent: "life",
+  headlineTail: "in the worst possible way",
   /**
    * The caption under the headline, and the punchline of the screen.
    *
@@ -37,7 +38,7 @@ export const hero = {
    * so it stays a single deadpan line — explaining it here would spend the
    * whole hero, and the FAQ is where the reasoning lives.
    */
-  sub: "Picks the worst possible song for every scene.",
+  sub: "A peaceful trail becomes a metal rock concert.",
   shot: {
     file: "hero.mp4",
     note: [

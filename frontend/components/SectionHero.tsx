@@ -45,16 +45,19 @@ export default function SectionHero() {
             </div>
           </header>
 
-          <div className="my-auto max-w-[52rem] pb-[2vh]">
-            <h1 className="font-display text-[clamp(3.15rem,5.25vw,4.8rem)] font-semibold leading-[0.96] tracking-[-0.045em]">
+          <div className="my-auto max-w-[44rem] pb-[1vh]">
+            <h1 className="font-display text-[clamp(3.05rem,5vw,4.65rem)] font-semibold leading-[0.96] tracking-[-0.045em]">
               <span className="block">{hero.headline}</span>
               <span className="mt-1 block">
                 {hero.headlineRest}{" "}
-                <span className="text-offset">{hero.headlineAccent}</span>.
+                <span className="text-brand-pink">{hero.headlineAccent}</span>,
+              </span>
+              <span className="mt-3 block text-[0.58em] leading-[1.08] tracking-[-0.025em] text-paper/90 sm:mt-4">
+                {hero.headlineTail}.
               </span>
             </h1>
 
-            <p className="mt-7 max-w-[34rem] text-[clamp(1rem,1.45vw,1.1875rem)] leading-relaxed text-paper/70">
+            <p className="mt-5 max-w-[32rem] text-[clamp(1rem,1.4vw,1.15rem)] leading-relaxed text-paper/70 sm:mt-6">
               {hero.sub}
             </p>
           </div>

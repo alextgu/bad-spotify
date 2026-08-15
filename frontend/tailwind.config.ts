@@ -33,6 +33,8 @@ export default {
         bone: "#F2EFE9",
         hairline: "#E3DED4",
         graphite: "#79736A",
+        /* The pink shared by the canonical mark and the hero's notes layer. */
+        "brand-pink": "#DE20BE",
 
         /* `ink` has a DEFAULT so `text-ink` is the new near-black, while
            `text-ink-muted` and friends keep working for /demo. */
