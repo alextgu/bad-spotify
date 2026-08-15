@@ -64,16 +64,6 @@ the single biggest risk to the demo.
 
 ## What just changed
 
-**The “cruelty” dial is gone.** It was a knob labelled *how far past
-inappropriate to go*, and it described something the system doesn't do — the
-product reads a mood and inverts a mood, full stop. How wrong the result turned
-out is now **measured** afterwards and reported as `mismatch` (0–1), rather than
-requested up front. Gone from the config, the CLI, the HUD, the JSON and the
-site's types. The HUD now shows mismatch as a read-out with no slider.
-
-An agent whose entire premise is that it ignores you should not take a
-parameter for how much to ignore you.
-
 **Three gaps that made the repo fail its own tests are closed.**
 `EventBus.unsubscribe` (without it every `watch()` leaked a recorder onto a
 module-level bus), `graph.decide_from_scene` (so the Gradio app runs the real
@@ -133,10 +123,11 @@ Tested against a generated clip, never against real footage.
 
 **7. The site**
 `frontend/` — Next.js, TypeScript, Tailwind. Builds clean.
-The launch page is done: minimal, deadpan, one idea per screen.
+The launch page has its sections in the agreed order; the visual layer is being
+restarted and is not described anywhere on purpose.
 The demo ground works: it replays a recorded run against the video and pops up
 each decision where the song lands.
-Still missing: the real name.
+Still missing: the real name, and the new look.
 *To prove it:* drop in real footage and a real recording, and walk someone through it.
 
 **8. Recording a run**
@@ -215,8 +206,10 @@ Don't re-open these without a reason.
   people to recognise the song.
 - **Earlier** — No training our own model. No time, no need.
 - **13 Aug** — Tagline: “The worst music for the best moments. And vice versa.”
-- **13 Aug** — The site looks like a minimal product launch, played straight.
-  The gap between the polish and what's being announced is the joke.
+- **~~13 Aug~~ — Reopened 14 Aug.** There was a decision here about how the site
+  should look. The visual layer is being restarted, so it no longer holds and
+  has been removed rather than left to be read as current. The section ordering
+  in `frontend/app/page.tsx` is the part that survives.
 - **13 Aug** — Name is a placeholder in `frontend/lib/brand.ts` until we pick
   one. It should play off “DJ”. Note: Spotify's terms forbid “Spotify” in a
   product name, so the current working title can't ship publicly.

@@ -311,17 +311,19 @@ doc as though it were agreed.
   implements it.
 - **The name.** `bad spotify` is a working title in `frontend/lib/brand.ts`.
   Spotify's terms forbid "Spotify" in a product name, so it cannot ship as is.
-- **The site's visual design.** Being restarted, and deliberately undescribed
-  here. The previous pass's specifications — `DESIGN_RULES.md`,
-  `SITE_PROMPT.md`, `PREMIUM_SITE_PROMPT.md` — were moved to `_review/` and out
-  of the repo, so a new direction isn't arguing with a spec nobody chose any
-  more. What survives is code, not doctrine: the tokens in
-  `frontend/tailwind.config.ts` and the classes in `frontend/app/globals.css`
-  are the old pass's leftovers and may be replaced wholesale. Nothing outside
-  `frontend/` depends on either.
+- **The site's visual design.** Being restarted. Every document that described
+  the previous one has been deleted, so that a new direction isn't arguing with
+  a specification nobody chose any more — **don't write another one here.**
 
-  Two things that are *not* visual choices and do carry over: the look and feel
-  is a DJ character rather than a dashboard (`STATUS.md`, 13 Aug), and the
+  What is kept is the **section ordering**, and it lives in
+  `frontend/app/page.tsx`: the imports, and the comment above them naming what
+  each section is for. That is the wireframe, and it is the only part of the
+  page anyone has agreed on. Everything else — tokens, spacing, colour, type,
+  motion — is open, and the values currently in `frontend/tailwind.config.ts`
+  and `frontend/app/globals.css` are leftovers rather than decisions. Nothing
+  outside `frontend/` depends on either.
+
+  One constraint that is *not* a visual choice and does carry over: the
   reasoning stays visible — see "What to optimise for" at the end of this file.
 
 ---

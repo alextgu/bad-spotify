@@ -68,16 +68,13 @@ working title needs replacing before this goes public alongside their API.
 
 ## The look
 
-**Being restarted. Nothing here describes it yet.**
+**Not described anywhere, on purpose.** It is being restarted, and every
+document that specified the previous one has been removed so a new direction
+isn't arguing with a specification nobody chose any more.
 
-The previous pass's rules lived in `DESIGN_RULES.md`, `SITE_PROMPT.md` and
-`PREMIUM_SITE_PROMPT.md`, which are now in `_review/` and out of the repo, so
-that a new direction isn't arguing with a specification nobody chose any more.
-The tokens still in `tailwind.config.ts` are what that pass left behind, not a
-decision — replace them freely.
-
-The one thing that is a *decision* rather than a visual choice, recorded in
-`STATUS.md`: the look and feel is a DJ character, not a dashboard.
+The one thing to preserve is the **section ordering**, and it lives in
+`app/page.tsx` — the imports and the comment above them, in order. That's the
+wireframe. Everything else about how the page looks is open.
 
 ## What's left
 
