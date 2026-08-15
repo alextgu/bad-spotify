@@ -44,14 +44,28 @@ export default function SectionHero() {
           <div className="flex items-center gap-3">
             {/* Cropped out of the icon sheet in Downloads. The "amde by AI"
                 watermark is tiled across the artwork itself and is part of the
-                joke rather than something to remove — at 36px it reads as
-                texture, which is the only size it has to survive. */}
-            <LogoMark size={36} />
-            {/* Set in the display face, not the mono label. It is the
-                product's name, and rendering it at caption weight made it the
-                least considered thing on a page about it. */}
-            <span className="font-display text-[1.0625rem] font-semibold tracking-[-0.03em] text-paper">
-              {brand.name}
+                joke rather than something to remove — at this size it reads as
+                texture, which is the only size it has to survive.
+
+                Mark and name react separately, not as one `group`. LogoMark
+                owns a `group` of its own for its stars and blooms, and a
+                wrapper group would not reach inside it — Tailwind binds
+                `group-hover:` to the nearest marked ancestor. Two independent
+                hovers is the honest version; faking a shared one would mean
+                the mark reaching out for a class name its parent happens to
+                set. */}
+            <span className="flex items-center gap-3">
+              <LogoMark size={44} />
+              {/* Set in the display face, not the mono label. It is the
+                  product's name, and rendering it at caption weight made it
+                  the least considered thing on a page about it. */}
+              <span
+                className="cursor-default font-display text-[1.6rem] font-semibold leading-none
+                           tracking-[-0.035em] text-paper transition-[letter-spacing,opacity]
+                           duration-interaction ease-calm hover:tracking-[-0.015em] hover:opacity-90"
+              >
+                {brand.name}
+              </span>
             </span>
           </div>
 
