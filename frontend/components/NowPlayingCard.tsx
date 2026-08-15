@@ -41,7 +41,7 @@ export default function NowPlayingCard() {
       loading="lazy"
       frameBorder="0"
       allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
-      className="w-[min(420px,46vw)] rounded-xl"
+      className="w-[min(340px,30vw)] rounded-xl"
     />
   );
 }

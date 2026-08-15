@@ -36,16 +36,15 @@ export default function HeroCollage() {
           frame around nothing is worse than one less frame. If the photo turns
           up, this is where it goes. */}
 
-      {/* The track, straddling the bottom edge of the walk.
-          It hangs half off the photograph rather than sitting inside it: on
-          the image it reads as a caption belonging to the picture, and beside
-          it in the footer it read as a widget belonging to the page. Across
-          the edge it reads as the thing playing OVER that scene, which is the
-          entire claim of the product.
+      {/* The track, sitting ON the walk, lower right.
+          The forest figure occupies left 0 to 82% across and 4% to 82% down,
+          so these offsets put the bar inside that box with a margin rather
+          than hanging off it — measured against the photo, not eyeballed
+          against the section, which is why they are odd numbers.
 
           `pointer-events-auto` because the wrapper turns them off — the
           collage is decoration, this one is not. `z-40` to clear the notes. */}
-      <div className="pointer-events-auto absolute -bottom-[7%] left-[6%] z-40">
+      <div className="pointer-events-auto absolute bottom-[22%] right-[21%] z-40">
         <NowPlayingCard />
       </div>
 
