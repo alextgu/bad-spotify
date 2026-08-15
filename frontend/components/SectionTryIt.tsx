@@ -3,8 +3,10 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import ClipPicker from "@/components/ClipPicker";
 import Label from "@/components/Label";
 import { cueAt, cues } from "@/lib/cues";
+import { samples, type Sample } from "@/lib/samples";
 import { tryIt } from "@/lib/site";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -79,7 +81,74 @@ export default function SectionTryIt() {
    */
   const [started, setStarted] = useState(false);
 
+  const [picking, setPicking] = useState(false);
+  const [clip, setClip] = useState<Sample>(samples[0]);
+
+  /** The card the clip was chosen from, so it can fly out of it. */
+  const origin = useRef<DOMRect | null>(null);
+  const stage = useRef<HTMLDivElement>(null);
+
   const cue = cueAt(progress);
+
+  /* ------------------------------------------------------------- the FLIP --
+     The chosen card becomes the video panel rather than being replaced by it.
+
+     First and Last are both known — the card's rect was captured on click, and
+     the panel's rect can be read once it has rendered — so Invert is a
+     transform from one to the other and Play is a single tween back to
+     identity. No clone, no portal, no measuring twice.
+
+     It matters more than it looks: cutting from a grid of three cards to a
+     completely different layout makes the reader re-find what they picked. If
+     it travels, they never lose it. */
+  useLayoutEffect(() => {
+    const from = origin.current;
+    const panel = stage.current;
+    if (!started || !from || !panel) return;
+
+    origin.current = null;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const to = panel.getBoundingClientRect();
+
+    gsap.fromTo(
+      panel,
+      {
+        // Scale about the top-left so the two rects can be matched with a
+        // translate and a scale alone.
+        transformOrigin: "top left",
+        x: from.left - to.left,
+        y: from.top - to.top,
+        scaleX: from.width / to.width,
+        scaleY: from.height / to.height,
+      },
+      {
+        x: 0,
+        y: 0,
+        scaleX: 1,
+        scaleY: 1,
+        duration: 0.85,
+        ease: "power3.inOut",
+        clearProps: "transform",
+      },
+    );
+
+    // The rest of the workbench arrives just behind the video, so the picture
+    // leads and the panels settle around it.
+    gsap.fromTo(
+      panel.parentElement?.children ?? [],
+      { autoAlpha: 0 },
+      { autoAlpha: 1, duration: 0.6, delay: 0.22, ease: "power2.out", stagger: 0.06 },
+    );
+  }, [started]);
+
+  const choose = (sample: Sample, from: DOMRect) => {
+    origin.current = from;
+    setClip(sample);
+    setPicking(false);
+    setStarted(true);
+  };
 
   useLayoutEffect(() => {
     if (!started) return;
@@ -131,10 +200,7 @@ export default function SectionTryIt() {
   }, [started]);
 
   /* ------------------------------------------------------------ chooser --
-     One screen, three ways out: take the sample, bring your own, or leave.
-     The skip is a plain text link rather than a third button on purpose —
-     it should be findable and not competitive. A demo you cannot decline is
-     a demo people resent. */
+     Two ways in: take the sample, or bring your own (not wired yet). */
   if (!started) {
     return (
       <section
@@ -154,12 +220,12 @@ export default function SectionTryIt() {
           <div className="mt-section-sm flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
-              onClick={() => setStarted(true)}
+              onClick={() => setPicking(true)}
               className="rounded-full bg-ink px-8 py-4 font-mono text-label uppercase text-paper
                          transition-[transform,background-color] duration-interaction ease-calm
                          hover:-translate-y-0.5 hover:bg-offset-ink"
             >
-              Use the sample clip
+              Use a sample clip
             </button>
 
             {/* Gated, and gated visibly. It could have been wired to start the
@@ -183,16 +249,13 @@ export default function SectionTryIt() {
           <p className="mt-block font-mono text-label uppercase text-graphite/70">
             Uploading is not wired up yet
           </p>
-
-          <p className="mt-rest">
-            <a
-              href="#pipeline"
-              className="font-mono text-label uppercase text-graphite underline decoration-hairline underline-offset-4 transition-colors duration-interaction ease-calm hover:text-ink"
-            >
-              Skip this →
-            </a>
-          </p>
         </div>
+
+        <ClipPicker
+          open={picking}
+          onClose={() => setPicking(false)}
+          onPick={choose}
+        />
       </section>
     );
   }
@@ -211,12 +274,12 @@ export default function SectionTryIt() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Goes back to the chooser. That is also the way out of the
-              section, which is why there is no separate close: two controls
-              that both mean "stop looking at this" is one too many. */}
+          {/* Reopens the picker over the workbench rather than unwinding back
+              to the chooser: changing clip is a change of subject, not a
+              change of mind about being here at all. */}
           <button
             type="button"
-            onClick={() => setStarted(false)}
+            onClick={() => setPicking(true)}
             className="rounded-full border border-hairline px-4 py-2 font-mono text-label uppercase text-graphite transition-colors duration-interaction ease-calm hover:border-ink hover:text-ink"
           >
             Change sample clip
@@ -240,17 +303,24 @@ export default function SectionTryIt() {
           barely half and then centred the result, which made it look like an
           illustration of a video rather than one. */}
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[2.05fr_1fr]">
-        <div className="relative min-h-0 overflow-hidden rounded-card bg-ink">
+        <div
+          ref={stage}
+          className="relative min-h-0 overflow-hidden rounded-card bg-ink"
+        >
           <video
             ref={video}
+            key={clip.id}
             className="h-full w-full object-cover"
-            src="/videos/sample.mp4"
+            src={clip.src}
             muted
             playsInline
             preload="auto"
           />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between p-4">
-            <Label className="!text-paper/70">sample.mp4</Label>
+            <Label className="!text-paper/70">
+              {clip.title}
+              {clip.placeholder && " · placeholder footage"}
+            </Label>
             <Label className="!text-paper/70">{stamp}</Label>
           </div>
         </div>
@@ -368,6 +438,12 @@ export default function SectionTryIt() {
           </div>
         </div>
       </div>
+
+      <ClipPicker
+        open={picking}
+        onClose={() => setPicking(false)}
+        onPick={choose}
+      />
     </section>
   );
 }

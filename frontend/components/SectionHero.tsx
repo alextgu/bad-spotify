@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Label from "@/components/Label";
 import Slot from "@/components/Slot";
 import { brand } from "@/lib/brand";
@@ -41,9 +42,18 @@ export default function SectionHero() {
             whatever is left over, and it can never go negative. */}
         <div className="absolute inset-0 z-10 flex flex-col justify-between p-[38px] text-paper">
           <div className="flex items-center gap-3">
-            <span className="rounded border border-dashed border-paper/40 px-3 py-2 font-mono text-label uppercase text-paper/70">
-              logo
-            </span>
+            {/* Cropped out of the icon sheet in Downloads. The "amde by AI"
+                watermark is tiled across the artwork itself and is part of the
+                joke rather than something to remove — at 36px it reads as
+                texture, which is the only size it has to survive. */}
+            <Image
+              src="/logo.png"
+              alt=""
+              width={36}
+              height={36}
+              priority
+              className="h-9 w-9 object-contain"
+            />
             {/* Set in the display face, not the mono label. It is the
                 product's name, and rendering it at caption weight made it the
                 least considered thing on a page about it. */}
