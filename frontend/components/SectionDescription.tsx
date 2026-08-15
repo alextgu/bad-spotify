@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import GlassesRig from "@/components/GlassesRig";
 import Label from "@/components/Label";
 import Slot from "@/components/Slot";
 import { description } from "@/lib/site";
@@ -165,15 +166,44 @@ export default function SectionDescription() {
       id="what"
       className="relative flex h-svh flex-col justify-center overflow-hidden"
     >
-      {/* ------------------------------------------------------ the claim -- */}
-      <div ref={intro} className="mx-auto w-full max-w-content px-gutter">
-        <h2 className="mx-auto max-w-statement text-center font-display text-headline">
-          {description.statement}
-        </h2>
-        <p className="mx-auto mt-block max-w-measure-sub text-center text-body text-graphite">
-          Never at random — random isn&rsquo;t funny. Here are two it actually
-          made.
-        </p>
+      {/* The line grid. Behind everything, masked so it fades out toward the
+          edges rather than ending on a hard rectangle, and pointer-inert. */}
+      <div aria-hidden className="line-grid pointer-events-none absolute inset-0" />
+
+      {/* ------------------------------------------------------ the claim --
+          The object on the left, the chain on the right. It is the first thing
+          on the page that says what physically goes in and what comes out, so
+          it is laid out as a sequence rather than as prose: glasses, read,
+          invert, song. */}
+      <div
+        ref={intro}
+        className="relative mx-auto grid w-full max-w-content items-center gap-rest px-gutter lg:grid-cols-[0.85fr_1fr]"
+      >
+        <div className="hidden lg:block">
+          <GlassesRig />
+        </div>
+
+        <div>
+          <h2 className="max-w-[18ch] font-display text-headline">
+            {description.statement}
+          </h2>
+
+          <ol className="mt-rest space-y-4">
+            {description.chain.map((link) => (
+              <li key={link.step} className="flex gap-4 border-t border-hairline pt-3">
+                <Label tone="offset" className="w-12 shrink-0 pt-1">
+                  {link.step}
+                </Label>
+                <div>
+                  <p className="font-display text-title">{link.title}</p>
+                  <p className="mt-1 max-w-measure text-caption text-graphite">
+                    {link.body}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
       </div>
 
       {/* ----------------------------------------------------- the examples --

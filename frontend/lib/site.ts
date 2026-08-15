@@ -63,6 +63,37 @@ export const hero = {
 export const description = {
   statement:
     "Your phone knows what you played last Tuesday. It has never once looked up.",
+
+  /**
+   * What goes in and what comes out, as a chain rather than a paragraph.
+   *
+   * The glasses are the input and a Spotify track is the output, and the three
+   * steps between them are the only claim the section makes. Each line is
+   * short on purpose: this sits beside a rotating object and has to be
+   * readable at a glance, not studied.
+   */
+  chain: [
+    {
+      step: "In",
+      title: "Camera glasses",
+      body: "A frame every few seconds, and the last few seconds of sound.",
+    },
+    {
+      step: "Read",
+      title: "One look at the room",
+      body: "Setting, activity, mood, and how sure it is. Below 0.35 confidence it does nothing at all.",
+    },
+    {
+      step: "Invert",
+      title: "The exact opposite",
+      body: "That mood, reflected through the centre. Six strategies argue over what fits it worst.",
+    },
+    {
+      step: "Out",
+      title: "A song, on Spotify",
+      body: "Queued, or cut straight in if the room really changed. Then it tells you what it did.",
+    },
+  ],
   /** Three moves. Any more and this stops fitting one screen. */
   points: [
     { title: "Reads the room", body: "Light, motion, reverb, who else is here" },

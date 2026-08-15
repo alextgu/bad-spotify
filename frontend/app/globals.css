@@ -220,3 +220,125 @@ video {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   THE GLASSES, and the grid behind them — section 2.
+
+   Built out of divs and CSS 3D rather than a downloaded model, and that is a
+   decision rather than a shortcut. A Meta Ray-Ban model off the internet is
+   somebody else's trademarked product design with an unverifiable licence, it
+   is a megabyte of external asset that can fail on a projector, and the first
+   rule in this repo is that nothing may fail live. This is a few hundred
+   bytes, it is ours, it stays sharp at any resolution, and it cannot 404.
+
+   Restored from `ProductRotator`, which the seven-screen rebuild deleted, and
+   retinted from the old orange to the current green.
+--------------------------------------------------------------------------- */
+.rig-scene {
+  --rig-lens-w: 132px;
+  --rig-lens-h: 78px;
+  --rig-temple-l: 150px;
+  perspective: 900px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+}
+
+.rig {
+  position: relative;
+  transform-style: preserve-3d;
+  animation: rig-spin 18s linear infinite;
+}
+
+.rig-front {
+  display: flex;
+  align-items: center;
+  transform-style: preserve-3d;
+}
+
+.rig-lens {
+  position: relative;
+  width: var(--rig-lens-w);
+  height: var(--rig-lens-h);
+  border: 2px solid #8e877c;
+  border-radius: 22px;
+  background: linear-gradient(140deg, rgba(28, 168, 92, 0.16), rgba(20, 20, 22, 0.72));
+}
+
+.rig-bridge {
+  width: 34px;
+  height: 12px;
+  border-top: 2px solid #8e877c;
+  border-radius: 6px 6px 0 0;
+}
+
+.rig-temple {
+  position: absolute;
+  top: 14px;
+  width: var(--rig-temple-l);
+  height: 10px;
+  border-radius: 5px;
+  background: #8e877c;
+}
+
+.rig-temple-left {
+  left: 0;
+  transform-origin: left center;
+  transform: rotateY(-84deg);
+}
+
+.rig-temple-right {
+  right: 0;
+  transform-origin: right center;
+  transform: rotateY(84deg);
+}
+
+/* The camera. The only part of the hardware the agent actually needs, so it is
+   the only part that gets the accent colour. */
+.rig-camera {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #1ca85c;
+}
+
+.rig-camera-pulse {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #1ca85c;
+  animation: rig-pulse 5s ease-out infinite;   /* one look every ~5s */
+}
+
+@keyframes rig-spin {
+  from { transform: rotateX(-8deg) rotateY(0deg); }
+  to   { transform: rotateX(-8deg) rotateY(360deg); }
+}
+
+@keyframes rig-pulse {
+  0%        { transform: scale(1);   opacity: 0.9; }
+  40%, 100% { transform: scale(3.6); opacity: 0; }
+}
+
+/* The line grid behind section 2. Two repeating gradients, masked so it fades
+   toward the edges instead of stopping at a hard rectangle. */
+.line-grid {
+  background-image:
+    linear-gradient(to right, rgba(26, 25, 23, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(26, 25, 23, 0.06) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(125% 95% at 50% 45%, #000 38%, transparent 84%);
+  -webkit-mask-image: radial-gradient(125% 95% at 50% 45%, #000 38%, transparent 84%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rig { animation: none; transform: rotateX(-8deg) rotateY(-24deg); }
+  .rig-camera-pulse { animation: none; opacity: 0; }
+}
