@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import asyncio
 import time
+
+from .log import notice
 from collections import deque
 from typing import Callable
 
@@ -45,8 +47,12 @@ class EventBus:
         for fn in self._subs:
             try:
                 fn(ev)
-            except Exception:
-                pass
+            except Exception as e:
+                # A broken subscriber must not take the pipeline down — but a
+                # silent one nearly cost us the session recorder: any bug in a
+                # subscriber vanished without a line anywhere. Say what died.
+                notice(f"[bus] subscriber {getattr(fn, '__qualname__', fn)!r} "
+                       f"failed on {ev.kind}/{ev.label}: {type(e).__name__}: {e}")
         for q in list(self._queues):
             try:
                 q.put_nowait(ev)
