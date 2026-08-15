@@ -1,49 +1,44 @@
-import SectionBroke from "@/components/SectionBroke";
-import SectionDay from "@/components/SectionDay";
-import SectionEvidence from "@/components/SectionEvidence";
+import ScrollController from "@/components/ScrollController";
+import SectionDemo from "@/components/SectionDemo";
+import SectionDescription from "@/components/SectionDescription";
 import SectionFAQ from "@/components/SectionFAQ";
 import SectionHero from "@/components/SectionHero";
-import SectionInvite from "@/components/SectionInvite";
-import SectionStatement from "@/components/SectionStatement";
-import SectionTrio from "@/components/SectionTrio";
-import SectionUnderHood from "@/components/SectionUnderHood";
-import ScrollController from "@/components/ScrollController";
+import SectionPipeline from "@/components/SectionPipeline";
+import SectionResults from "@/components/SectionResults";
+import SectionTryIt from "@/components/SectionTryIt";
 import Strings from "@/components/Strings";
 
 /**
- * The launch page. Nine sections, no navbar.
+ * The launch page. Seven screens, no navbar.
  *
  * ---------------------------------------------------------------------------
- * THE ORDER IS THE WIREFRAME. It is the one part of this page that has been
- * agreed, and it survived the visual restart. Everything else — type, colour,
- * spacing, motion — is open; this is not.
+ * SEVEN SECTIONS, AND EACH ONE IS EXACTLY ONE VIEWPORT
  * ---------------------------------------------------------------------------
  *
- *   1  Hero        the film, framed in paper       one image carries the pitch
- *   2  Statement   one sentence, alone             the turn
- *   3  Trio        what it does, in three moves
- *   4  Evidence    the film, then three moments    proof
- *   5  Day         one day, six cues, pinned       the argument at length
- *   6  Under hood  the numbers, on dark            rest, and precision
- *   7  Broke       what failed, struck through     credibility
- *   8  Invite      the ask
- *   9  FAQ         the awkward questions
+ *   1  Hero          one image, and the promise
+ *   2  Description   what it is — the statement, then the three moves
+ *   3  Demo          the film, full bleed
+ *   4  Try it        hand it over; the whole screen is one link
+ *   5  Pipeline      a closer look at the actual mechanism
+ *   6  Results       the numbers, and three things worth being pleased about
+ *   7  FAQ           the awkward questions, and the end of the page
  *
- * **Sections 4 and 5 of the original mockup are section 4 here.** They were a
- * full-bleed film and then a separate three-up grid; grouped, they read as one
- * piece of evidence rather than as a film followed by an unexplained grid.
+ * This order is the wireframe and is not open. The one-viewport rule is not
+ * open either, and it is enforced by `Screen` rather than by good intentions:
+ * a section that outgrows a screen clips visibly instead of quietly pushing
+ * the page back out to nine-and-a-half screens.
  *
- * The film sits at 4, after the statement and the trio but before anything is
- * argued at length. It is the hook, not the proof — a page that explains
- * before it shows has already lost the reader.
+ * The page got here by losing things, and it is worth knowing what, because
+ * every one of them was built and works and is still in git: a pinned
+ * horizontal timeline of six cues across one day, a three-up grid of moments
+ * under the film, a struck-through list of what broke in the first six hours,
+ * and a full-bleed closing ask. They were cut because they are not among the
+ * seven, not because they failed. If one comes back, something here goes.
  *
- * Nine is a ceiling, not a target. Each screen holds one idea; if something
- * new goes in, something here comes out.
- *
- * Scrolling is discrete — one gesture, one screenful — and `ScrollController`
- * owns it. The wrapping `<div>`s around each section are not decorative: the
- * controller measures the direct children of `<main>` to work out where the
- * stops are, so each child is one block of the page.
+ * `ScrollController` moves one screen per gesture; because every block is now
+ * exactly one viewport, every stop is a section boundary and nothing lands in
+ * the middle of anything. The wrapping `<div>`s are what it measures, so they
+ * are structural rather than decorative.
  */
 export default function Home() {
   return (
@@ -52,44 +47,40 @@ export default function Home() {
       <Strings />
 
       <main>
-        {/* 1 — one image, and the promise. */}
+        {/* 1 */}
         <div>
           <SectionHero />
         </div>
 
-        {/* 2 — the turn. One sentence, and a lot of nothing around it.
-            The strings go out here: the emptiness around the sentence is the
-            whole point of the screen, and a moving line in it is company. */}
+        {/* 2 — the sentence poses the problem, the three moves answer it.
+            One screen, because splitting them put a scroll between a question
+            and its answer. */}
         <div data-strings="off">
-          <SectionStatement />
+          <SectionDescription />
         </div>
 
-        {/* 3 — what it actually does. */}
-        <SectionTrio />
-
-        {/* 4 — proof. The film and the three moments are one section now. */}
+        {/* 3 */}
         <div>
-          <SectionEvidence />
+          <SectionDemo />
         </div>
 
-        {/* 5 — the long argument. Pins itself; marks its own snap point. */}
-        <SectionDay />
-
-        {/* 6 — the eye rests, and the claims get precise. */}
+        {/* 4 — letting someone run it is worth more than describing it. */}
         <div>
-          <SectionUnderHood />
+          <SectionTryIt />
         </div>
 
-        {/* 7 — and here is what didn't work. */}
-        <SectionBroke />
-
-        {/* 8 — the ask. */}
+        {/* 5 — the screen that decides whether this reads as an agent or as a
+            shuffle button, so it shows the mechanism rather than claiming it. */}
         <div>
-          <SectionInvite />
+          <SectionPipeline />
         </div>
 
-        {/* 9 — the questions a sceptic is already forming. Strings out; this
-            is the one screen someone actually reads at length. */}
+        {/* 6 */}
+        <div>
+          <SectionResults />
+        </div>
+
+        {/* 7 — strings out; the one screen anybody reads at length. */}
         <div data-strings="off">
           <SectionFAQ />
         </div>

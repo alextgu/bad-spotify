@@ -16,7 +16,8 @@ import { hero } from "@/lib/site";
  * third to be dark. `hero-feather` is a gradient rather than a flat scrim
  * because a uniform overlay dulls the whole frame to protect a corner of it.
  *
- * The only italic on the page lands on one word here.
+ * Already exactly one viewport, so it doesn't use `Screen` — it needs the
+ * 15px of paper around the card, which `Screen`'s padding scale doesn't do.
  */
 export default function SectionHero() {
   return (

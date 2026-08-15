@@ -1,13 +1,13 @@
 /**
  * Every word on the landing page, in one file.
  *
- * The page's rule is that the picture is the argument and the text is a
- * caption under it — so there is deliberately not much here, and any section
- * that grows a paragraph has probably lost its image.
+ * The page is seven screens and each screen is exactly one viewport — so the
+ * real constraint on everything here is that it has to FIT. If a section grows
+ * a second paragraph it stops being one page, and the whole structure goes
+ * with it. Cut rather than shrink the type.
  *
- * The shoot list lives here too, as the `shot` and `note` on each slot: the
- * page renders what it is waiting for, so there is no separate document to
- * keep in sync.
+ * The shoot list lives here too, as the `shot` on each slot: the page renders
+ * what it is waiting for, so there is no separate document to keep in sync.
  */
 
 /** A photograph or film that has not been shot yet. */
@@ -24,12 +24,10 @@ export interface Shot {
   readonly note: readonly string[];
 }
 
+/* -------------------------------------------------------------- 1 · hero -- */
 export const hero = {
   headline: "Music for the room you're",
-  /** Set in italic serif — the only emphasis on the page. */
   headlineAccent: "in",
-  /* Deliberately does not repeat "last Tuesday" — the statement section two
-     screens down uses that line, and it lands harder there. */
   sub: "Everything else picks from what you have already played. This picks from the room you are standing in.",
   shot: {
     file: "hero.mp4",
@@ -46,21 +44,20 @@ export const hero = {
   } satisfies Shot,
 };
 
-export const statement =
-  "Your phone knows what you played last Tuesday. It has never once looked up.";
+/* ------------------------------------------------------- 2 · description -- */
+export const description = {
+  statement:
+    "Your phone knows what you played last Tuesday. It has never once looked up.",
+  /** Three moves. Any more and this stops fitting one screen. */
+  points: [
+    { title: "Reads the room", body: "Light, motion, reverb, who else is here" },
+    { title: "Scores it", body: "Energy, valence, tension" },
+    { title: "Drops the needle", body: "Perfect, or exactly wrong" },
+  ],
+} as const;
 
-export const trio = [
-  { title: "Reads the room", body: "Light, motion, reverb, who else is here" },
-  { title: "Scores it", body: "Energy, valence, tension" },
-  { title: "Drops the needle", body: "Perfect, or exactly wrong" },
-] as const;
-
-/* --------------------------------------------------------------------------
-   Sections 4 and 5 of the mockup are one section now: the film, then the
-   three moments underneath it, read as a single piece of evidence rather than
-   as a film followed by an unrelated grid.
--------------------------------------------------------------------------- */
-export const evidence = {
+/* -------------------------------------------------------------- 3 · demo -- */
+export const demo = {
   film: {
     file: "demo.mp4",
     note: [
@@ -69,127 +66,51 @@ export const evidence = {
       "keep under 60s",
     ],
   } satisfies Shot,
-  filmCaption: { left: "Live capture", right: "1.4s, scene to sound" },
-  moments: [
-    {
-      time: "18:30",
-      title: "Dinner for one",
-      shot: {
-        file: "moment-kitchen.jpg",
-        note: ["4:5 · one pan, warm light", "no face"],
-      } satisfies Shot,
-    },
-    {
-      time: "08:41",
-      title: "Running for the 44",
-      shot: {
-        file: "moment-bus.jpg",
-        note: ["4:5 · rain on glass, motion blur", "shot from the seat"],
-      } satisfies Shot,
-    },
-    {
-      time: "23:47",
-      title: "Ceiling, again",
-      shot: {
-        file: "moment-ceiling.jpg",
-        note: ["4:5 · dark room, phone glow", "ceiling from the bed"],
-      } satisfies Shot,
-    },
-  ],
+  caption: { left: "Live capture", right: "1.4s, scene to sound" },
 };
 
-/** The three panels that change as the day scrolls past. */
-export const dayPanels = [
-  { index: "01", label: "Sense", title: "It reads the room." },
-  { index: "02", label: "Score", title: "Space becomes three numbers." },
-  { index: "03", label: "Cue", title: "Then it drops the needle." },
-] as const;
+/* ------------------------------------------------------------ 4 · try it -- */
+export const tryIt = {
+  title: "Try it on your own footage.",
+  body: "Drop in a video. It reads the mood every few seconds and shows you which track it would have put on, and where.",
+  /** The demo ground is a real route in this app — see app/demo/page.tsx. */
+  action: { label: "Open the demo", href: "/demo" },
+  note: "Runs against a local model. Ships with a sample clip, so it works with nothing plugged in.",
+} as const;
 
-/** One day, six cues. Image first; the song is the caption. */
-export const day = [
-  {
-    time: "07:12",
-    title: "Third snooze",
-    track: "Ride of the Valkyries",
-    artist: "Wagner",
-    shot: { file: "cue-01-bed.jpg", note: ["4:5", "dark bedroom, phone face down"] },
-  },
-  {
-    time: "08:41",
-    title: "Running for the 44",
-    track: "The Sound of Silence",
-    artist: "Simon & Garfunkel",
-    shot: { file: "cue-02-rain.jpg", note: ["4:5", "rain, motion blur, running"] },
-  },
-  {
-    time: "11:20",
-    title: "Camera off",
-    track: "Careless Whisper",
-    artist: "George Michael",
-    shot: { file: "cue-03-desk.jpg", note: ["4:5", "laptop, grid of faces, muted"] },
-  },
-  {
-    time: "13:05",
-    title: "Dumped, by text",
-    track: "Celebration",
-    artist: "Kool & The Gang",
-    shot: { file: "cue-04-pavement.jpg", note: ["4:5", "wet pavement, phone in hand"] },
-  },
-  {
-    time: "18:30",
-    title: "Dinner for one",
-    track: "Duel of the Fates",
-    artist: "John Williams",
-    shot: { file: "cue-05-kitchen.jpg", note: ["4:5", "one pan, warm light"] },
-  },
-  {
-    time: "23:47",
-    title: "Ceiling, again",
-    track: "Macarena",
-    artist: "Los del Río",
-    shot: { file: "cue-06-ceiling.jpg", note: ["4:5", "ceiling, phone glow"] },
-  },
-] as const;
+/* ---------------------------------------------------------- 5 · pipeline -- */
+export const pipeline = {
+  title: "A closer look.",
+  body: "Six steps, about every five seconds. The two that matter are the ones where the line bends: nothing changes, so it doesn't spend a model call — and six theories of the right wrong answer, argued out by a judge.",
+} as const;
 
-/**
- * Four numbers, printed rather than counted up.
- *
- * The mockup animated these from zero. A number that spins is a number
- * asking to be admired — and two of these are interesting precisely because
- * they are small. `0 images stored` loses everything by arriving as a
- * flourish; it should just be sitting there, already true.
- */
-export const metrics = [
-  { value: "1.4", unit: "s", label: "Scene to sound" },
-  { value: "40", unit: "kb", label: "Per sample" },
-  { value: "0", unit: "", label: "Images stored" },
-  { value: "6", unit: "", label: "Cues per day" },
-] as const;
-
-export const broke = {
-  title: "What broke in the first six hours.",
-  items: [
-    "Spotify audio features",
-    "Always-on camera",
-    "Cursed mode as the side joke",
+/* ----------------------------------------------------------- 6 · results -- */
+export const results = {
+  title: "What came out of it.",
+  metrics: [
+    { value: "1.4", unit: "s", label: "Scene to sound" },
+    { value: "40", unit: "kb", label: "Per sample" },
+    { value: "0", unit: "", label: "Images stored" },
+    { value: "6", unit: "", label: "Cues per day" },
+  ],
+  /** Things that are true, and checkable in the repo. Keep it to three. */
+  proud: [
+    {
+      title: "It is never silent",
+      body: "Every model, player and voice degrades to a stand-in, and under all of them sits a pre-picked fallback deck.",
+    },
+    {
+      title: "Six theories, not one score",
+      body: "Mood, tempo, lyrics, setting, occasion and catalogue each propose a different wrong answer. A judge picks between them.",
+    },
+    {
+      title: "192 tests",
+      body: "Each one guarding a specific way the demo could break, including the three that already had.",
+    },
   ],
 } as const;
 
-export const invite = {
-  lines: ["Twenty people.", "One week each."],
-  shot: {
-    file: "prefooter.jpg",
-    note: [
-      "full bleed · 88vh · the product held, in daylight",
-      "warmest frame you have",
-    ],
-  } satisfies Shot,
-  actions: [
-    { label: "Get the build", href: "#", primary: true },
-    { label: "Repo", href: "#", primary: false },
-  ],
-};
-
+/* --------------------------------------------------------------- 7 · faq -- */
 export const faq = [
   {
     q: "Is it watching me all day?",

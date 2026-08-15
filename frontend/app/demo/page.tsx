@@ -148,8 +148,8 @@ export default function DemoPage() {
           </div>
         )}
 
-        <div className="flex min-h-0 flex-1 flex-col justify-end lg:flex-row lg:items-end lg:justify-end">
-          <div className="pointer-events-auto max-h-[45%] w-full overflow-y-auto px-6 pb-2 lg:max-h-full lg:w-[24rem] lg:shrink-0">
+        <div className="flex min-h-0 flex-1 flex-col justify-end lg:flex-row lg:items-start lg:justify-end">
+          <div className="pointer-events-auto max-h-[45%] w-full overflow-y-auto px-6 py-2 lg:max-h-full lg:w-[24rem] lg:shrink-0 lg:pt-0">
             {moment ? (
               <MomentCard moment={moment} />
             ) : (
@@ -162,7 +162,7 @@ export default function DemoPage() {
           </div>
         </div>
 
-        <div className="pointer-events-auto px-6 pb-16">
+        <div className="pointer-events-auto mx-6 mb-16">
           {videoBroken && (
             <p className="mb-2 text-sm text-ink-muted">
               This browser could not play the video codec. The mood timeline is
