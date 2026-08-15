@@ -157,8 +157,62 @@ export const cues: Cue[] = [
 export const source = raw.source.split("/").pop() ?? raw.source;
 
 /** The cue in force at a given fraction through the clip. */
-export function cueAt(progress: number): Cue {
-  let current = cues[0];
-  for (const cue of cues) if (progress >= cue.at) current = cue;
+export function cueAt(progress: number, list: Cue[] = cues): Cue {
+  let current = list[0];
+  for (const cue of list) if (progress >= cue.at) current = cue;
   return current;
+}
+
+/**
+ * The same conversion, for a session the visitor produced themselves.
+ *
+ * `POST /api/analyze-video` returns the shape `session.py --record` writes, so
+ * an uploaded clip and the shipped recording become the same thing here and
+ * the panel cannot tell them apart. That is the point: the screen has to show
+ * the agent's own output either way, or it is a mock-up with an upload button.
+ *
+ * Unlike the recording above, an uploaded clip's real duration IS known, so
+ * the marks land where they belong rather than against an assumed 30s.
+ */
+export function cuesFromSession(raw: unknown, durationS: number): Cue[] {
+  const doc = raw as { moments?: RawMoment[] };
+  const moments = doc.moments ?? [];
+  const length = durationS > 0 ? durationS : ASSUMED_LENGTH_S;
+
+  return moments.map((m) => {
+    const ranked = Object.entries(m.considered ?? {})
+      .flatMap(([strategy, list]) =>
+        (list ?? []).map((c) => ({
+          strategy,
+          title: c.title,
+          artist: c.artist,
+          score: c.score,
+        })),
+      )
+      .sort((a, b) => b.score - a.score);
+
+    const at = (m.played?.at_video_time ?? m.video_time) / length;
+    return {
+      at: Math.min(Math.max(at, 0), 0.999),
+      time: clock(m.played?.at_video_time ?? m.video_time),
+      label: `Cuts in — ${m.chosen.title}`,
+      sees: [m.scene.setting, m.scene.activity].filter(Boolean).join(", "),
+      register: m.scene.mood,
+      confidence: m.scene.confidence,
+      tempo: m.scene.tempo,
+      meter: m.scene.meter,
+      palette: m.scene.colors ?? [],
+      track: m.chosen.title,
+      artist: m.chosen.artist,
+      why: m.chosen.quip || m.chosen.why || "",
+      log: [
+        `PLAY  — ${m.chosen.strategy} won`,
+        `JUDGE — ${m.chosen.why}`,
+        `INVERT — looking for ${(m.opposite?.looking_for ?? []).slice(0, 3).join(", ")}`,
+        `READ  — ${m.scene.mood} · confidence ${Number(m.scene.confidence).toFixed(2)}`,
+      ],
+      considered: ranked,
+      lookingFor: m.opposite?.looking_for ?? [],
+    };
+  });
 }

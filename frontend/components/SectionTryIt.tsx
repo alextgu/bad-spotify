@@ -5,7 +5,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ClipPicker from "@/components/ClipPicker";
 import Label from "@/components/Label";
-import { cueAt, cues } from "@/lib/cues";
+import { AnalyzeError, analyze, durationOf } from "@/lib/analyze";
+import { cueAt, cues, cuesFromSession, type Cue } from "@/lib/cues";
 import { samples, type Sample } from "@/lib/samples";
 import { tryIt } from "@/lib/site";
 
@@ -45,11 +46,17 @@ gsap.registerPlugin(ScrollTrigger);
  * nowhere else to get it.
  *
  * ---------------------------------------------------------------------------
- * Still placeholder
+ * Two sources, one of them yours
  * ---------------------------------------------------------------------------
- * The cue data is `lib/cues.ts`, not `public/sessions/sample.json`. The shape
- * mirrors the session file and the live HUD, so wiring it is a swap rather
- * than a rewrite. The two source buttons are inert.
+ * The sample clip reads `lib/cues.ts`, which is the real recorded session.
+ * "Upload your own" sends a file to the agent running on this machine and
+ * replaces BOTH halves -- the video and the cues beside it -- because a panel
+ * reasoning about a park next to somebody's kitchen is exactly the failure
+ * that kept this button switched off for so long.
+ *
+ * It never silently falls back to the sample. With no agent running it says
+ * so, and says how to start one. That rule is why the button can be trusted
+ * now that it does something.
  */
 
 /** Screens of scrolling spent inside the section. */
@@ -84,11 +91,55 @@ export default function SectionTryIt() {
   const [picking, setPicking] = useState(false);
   const [clip, setClip] = useState<Sample>(samples[0]);
 
+  /* ---------------------------------------------------------- your footage --
+     An uploaded clip replaces both halves at once: the video, and the cues
+     beside it. They have to move together -- a panel reasoning about the park
+     next to somebody's kitchen is the exact failure the disabled button was
+     protecting against, and it costs the whole screen its credibility. */
+  const [ownCues, setOwnCues] = useState<Cue[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState<{ what: string; hint?: string } | null>(null);
+  const file = useRef<HTMLInputElement>(null);
+
+  async function useOwnClip(chosen: File) {
+    setProblem(null);
+    setBusy(true);
+    try {
+      const [{ session }, seconds] = await Promise.all([
+        analyze(chosen),
+        durationOf(chosen),
+      ]);
+      const built = cuesFromSession(session, seconds);
+      if (!built.length) {
+        throw new AnalyzeError(
+          "The agent watched it and decided nothing.",
+          "Too short, too dark, or too still -- it holds when it is not sure.",
+        );
+      }
+      setOwnCues(built);
+      setClip({
+        id: "yours",
+        title: chosen.name.replace(/\.[^.]+$/, ""),
+        blurb: "Your footage, read by the agent running on this machine.",
+        length: clock(seconds),
+        src: URL.createObjectURL(chosen),
+        placeholder: false,
+      });
+      setProgress(0);
+      setStarted(true);
+    } catch (e) {
+      const err = e as AnalyzeError;
+      setProblem({ what: err.message ?? String(e), hint: err.hint });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   /** The card the clip was chosen from, so it can fly out of it. */
   const origin = useRef<DOMRect | null>(null);
   const stage = useRef<HTMLDivElement>(null);
 
-  const cue = cueAt(progress);
+  const cue = cueAt(progress, ownCues ?? cues);
 
   /* ------------------------------------------------------------- the FLIP --
      The chosen card becomes the video panel rather than being replaced by it.
@@ -228,27 +279,50 @@ export default function SectionTryIt() {
               Use a sample clip
             </button>
 
-            {/* Gated, and gated visibly. It could have been wired to start the
-                sample run so the button did *something*, but a control that
-                silently does the other thing is worse than one that is plainly
-                switched off — the first time someone uploads a clip and
-                watches the kitchen footage play, they stop trusting the rest
-                of the screen. */}
+            {/* Wired now, and wired honestly. The rule that kept this
+                disabled still holds -- a control that silently does the OTHER
+                thing is worse than one plainly switched off -- so it never
+                falls back to the sample. It either shows your footage with
+                your reasoning beside it, or it says exactly why it cannot. */}
             <button
               type="button"
-              disabled
-              aria-disabled
-              title="Not wired up yet"
-              className="cursor-not-allowed rounded-full border border-ink/15 px-8 py-4
-                         font-mono text-label uppercase text-graphite/60"
+              onClick={() => file.current?.click()}
+              disabled={busy}
+              className="rounded-full border border-ink/25 px-8 py-4 font-mono
+                         text-label uppercase transition hover:border-ink/60
+                         disabled:cursor-wait disabled:text-graphite/60"
             >
-              Upload your own
+              {busy ? "Watching it…" : "Upload your own"}
             </button>
+            <input
+              ref={file}
+              type="file"
+              accept="video/*"
+              hidden
+              onChange={(e) => {
+                const chosen = e.target.files?.[0];
+                e.target.value = "";
+                if (chosen) void useOwnClip(chosen);
+              }}
+            />
           </div>
 
-          <p className="mt-block font-mono text-label uppercase text-graphite/70">
-            Uploading is not wired up yet
-          </p>
+          {problem ? (
+            <p className="mt-block max-w-prose font-mono text-label uppercase text-graphite">
+              {problem.what}
+              {problem.hint && (
+                <span className="mt-2 block normal-case tracking-normal text-graphite/70">
+                  {problem.hint}
+                </span>
+              )}
+            </p>
+          ) : (
+            <p className="mt-block font-mono text-label uppercase text-graphite/70">
+              {busy
+                ? "Reading your clip — one model call per moment it notices"
+                : "Uploading needs the agent running on this machine"}
+            </p>
+          )}
         </div>
 
         <ClipPicker
@@ -285,14 +359,15 @@ export default function SectionTryIt() {
             Change sample clip
           </button>
 
+          {/* The same control inside the workbench, so you can keep trying
+              clips without scrolling back out to the chooser. */}
           <button
             type="button"
-            disabled
-            aria-disabled
-            title="Not wired up yet"
-            className="cursor-not-allowed rounded-full border border-hairline/60 px-4 py-2 font-mono text-label uppercase text-graphite/50"
+            onClick={() => file.current?.click()}
+            disabled={busy}
+            className="rounded-full border border-hairline px-4 py-2 font-mono text-label uppercase text-graphite transition-colors duration-interaction ease-calm hover:border-ink hover:text-ink disabled:cursor-wait disabled:opacity-60"
           >
-            Upload your own
+            {busy ? "Watching it…" : "Upload your own"}
           </button>
         </div>
       </header>
