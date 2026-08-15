@@ -254,4 +254,4 @@ export const faq = [
   },
 ] as const;
 
-export const footer = { right: "Built in 24 hours" };
+export const footer = { right: "Built in 48~ish hours" };

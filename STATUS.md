@@ -306,6 +306,11 @@ Don't re-open these without a reason.
 - **15 Aug** — **The hero states the joke in the headline.** “Life” uses the
   logo-and-notes pink, followed by “in the worst possible way”; the supporting
   line turns a peaceful trail into a metal rock concert.
+- **15 Aug** — **The awkward questions use one controlled accordion.** Answers
+  animate their height and opacity, and opening one question closes the previous
+  answer. Buttons expose expanded state and answer relationships to assistive
+  technology.
+- **15 Aug** — **The footer records the build as 48~ish hours.**
 - **13 Aug** — No inversion dial. Always fully invert; measure and report the
   mismatch instead. `Verdict.mismatch` is an outcome, never an input.
 - **13 Aug** — One decision path. Anything holding a scene already enters the
