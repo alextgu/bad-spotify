@@ -1,6 +1,6 @@
 # AGENTS.md — the rules, the seams, and the traps
 
-`CLAUDE.md` is a symlink to this file. Same rules for every agent and every
+`CLAUDE.md` is a symlink to this file. Reviewer tour with verification commands: [EVALUATOR.md](EVALUATOR.md). Same rules for every agent and every
 human. If you change how the project works, change this file in the same commit.
 
 **The rule that matters most: everything in here is checkable, and was checked.**

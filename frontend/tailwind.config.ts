@@ -32,7 +32,10 @@ export default {
         paper: "#FBFAF8",
         bone: "#F2EFE9",
         hairline: "#E3DED4",
-        graphite: "#79736A",
+        /* 4.5:1 was true on paper and false on bone — #79736A measured 4.09:1
+           on the try-it screen's own background. #6F6960 clears WCAG AA on
+           both grounds (5.21 paper, 4.73 bone), one perceptual step darker. */
+        graphite: "#6F6960",
         /* The pink shared by the canonical mark and the hero's notes layer. */
         "brand-pink": "#DE20BE",
 

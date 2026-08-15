@@ -1,6 +1,6 @@
 # Slopify
 
-**A wearable agent whose only feature is playing the worst possible music for the moment.**
+**A wearable-style agent whose only feature is playing the worst possible music for the moment.** (No hardware exists; a camera, a screen share, or a video file stands in for the glasses.)
 
 It watches what's around you, works out what the moment feels like and what the
 setting implies, computes the opposites, and plays that. It talks to you, but
@@ -10,6 +10,26 @@ It will not take requests. It does not help with anything else.
 Sunlit park with people reading → Drowning Pool, *Bodies*.
 Toddler's birthday party → Johnny Cash, *Hurt*.
 Silent library during exam week → Darude, *Sandstorm*.
+
+---
+
+## See it work in three commands
+
+No API keys, no accounts. Everything below runs on the built-in mocks.
+
+```bash
+python -m venv .venv && .venv/bin/pip install -r requirements.txt   # one-time, ~2 min
+.venv/bin/pytest -q                                                  # 215 tests, ~10 s
+PYTHONPATH=src .venv/bin/python run.py --source replay --ticks 8 --no-hud
+```
+
+The third command replays canned scenes through the real pipeline and prints
+each verdict with its reasoning — the park, the library and the birthday party
+from the top of this file, decided live by the same graph the demo uses. With
+no credentials set it says so and downgrades out loud:
+`[config] player: 'spotify' requested but SPOTIFY_CLIENT_ID is unset -> using mock`.
+
+For the full tour aimed at reviewers, see [EVALUATOR.md](EVALUATOR.md).
 
 ---
 
@@ -472,9 +492,14 @@ Submitting into **Workflows** (the agent graph is the product), **Media** (the
 output is a generated audiovisual experience) and **Design** (the DJ face and
 the site are how the agent's mind is made legible).
 
+The three tracks meet in one artefact: the recorded session file
+(`src/badspotify/session.py` writes it, `frontend/lib/cues.ts` reads it). A
+workflow's decisions, over media, rendered as the site's try-it screen — the
+same JSON is all three tracks at once.
+
 | Criterion | Where it's answered |
 |---|---|
-| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 30 tests guarding specific live-demo failures |
+| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 215 tests guarding specific live-demo failures |
 | UX & intuition | A DJ character with a reacting orb, onboarding, one honest control, and a site that walks judges through the reasoning |
 | Creativity | Geometric opposition *plus* a cultural judge; six competing theories of wrongness rather than one similarity score |
 | Originality | An assistant that is deliberately useless. The failure mode and the feature are the same thing, which is why it holds up live |

@@ -148,7 +148,7 @@ export const demo = {
       "keep under 60s",
     ],
   } satisfies Shot,
-  caption: { left: "Live capture", right: "1.4s, scene to sound" },
+  caption: { left: "Live capture", right: "vision read: 1.17s median" },
 };
 
 /* ------------------------------------------------------------ 4 · try it -- */
