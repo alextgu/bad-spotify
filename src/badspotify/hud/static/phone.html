@@ -122,12 +122,17 @@
 
 <footer>
   <button class="go" id="start">Start</button>
+  <!-- On a phone this opens the camera roll, which is the most natural way to
+       hand it footage you already shot. Same pipeline as the live camera. -->
+  <button id="pick">Video</button>
+  <input type="file" id="file" accept="video/*" hidden>
   <button id="stop" disabled>Stop</button>
 </footer>
 
 <script>
 const $ = id => document.getElementById(id);
 let stream = null, timer = null, busy = false;
+let playingFile = false, fileURL = null;
 
 function setStatus(t, cls) {
   $("status").textContent = t;
@@ -159,9 +164,31 @@ async function start() {
   tick();
 }
 
+function playFile(file) {
+  stop();
+  fileURL = URL.createObjectURL(file);
+  const v = $("v");
+  v.srcObject = null;
+  v.src = fileURL;
+  v.loop = true;
+  v.muted = true;           // the agent's music is the point, not the clip's
+  v.play().catch(() => { $("err").textContent = "the browser would not play that file"; });
+  playingFile = true;
+  $("tag").textContent = file.name.slice(0, 28);
+  $("stop").disabled = false;
+  $("start").disabled = true;
+  setStatus("watching", "on");
+  timer = setInterval(tick, 2000);
+  tick();
+}
+
 function stop() {
   clearInterval(timer); timer = null;
   if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  const vf = $("v");
+  if (playingFile) { vf.pause(); vf.removeAttribute("src"); vf.load(); }
+  if (fileURL) { URL.revokeObjectURL(fileURL); fileURL = null; }
+  playingFile = false;
   $("v").srcObject = null;
   $("tag").textContent = "camera off";
   $("stop").disabled = true;
@@ -171,7 +198,7 @@ function stop() {
 
 async function tick() {
   const v = $("v");
-  if (!stream || !v.videoWidth || busy) return;      // never stack requests
+  if ((!stream && !playingFile) || !v.videoWidth || busy) return;  // never stack
   busy = true;
   const w = 960, h = Math.round(v.videoHeight * w / v.videoWidth);
   const c = Object.assign(document.createElement("canvas"), {width: w, height: h});
@@ -190,7 +217,7 @@ async function tick() {
     $("err").textContent = "cannot reach the agent: " + e.message;
   }
   busy = false;
-  if (stream) setStatus("watching", "on");
+  if (stream || playingFile) setStatus("watching", "on");
 }
 
 function render(d) {
@@ -215,5 +242,7 @@ function render(d) {
 }
 
 $("start").onclick = start;
+$("pick").onclick = () => $("file").click();
+$("file").onchange = e => { const f = e.target.files[0]; if (f) playFile(f); };
 $("stop").onclick = stop;
 </script>
