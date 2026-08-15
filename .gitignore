@@ -33,6 +33,11 @@ _review/
 .cache/
 *.log
 
+#The Spotify OAuth cache. This is a CREDENTIAL -- it holds a refresh token that
+#grants playback control of whoever logged in, and it is written the first time
+#anyone runs scripts/spotify_setup.py. It was not ignored before.
+.spotify-token
+
 #Operating system metadata
 .DS_Store
 Thumbs.db
@@ -50,3 +55,4 @@ data/sessions/
 # writes three files, git ignores all three without a word, and the deployed
 # page is silent with nothing anywhere to explain why.
 !frontend/public/audio/*.mp3
+data/discovered_uris.json

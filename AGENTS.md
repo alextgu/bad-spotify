@@ -47,8 +47,9 @@ Plus one README beside each part that ships on its own: `frontend/`,
 Every one of these was run on 14 Aug 2026 and did what it says.
 
 ```bash
-# tests — 109 pass
+# tests — 120 pass
 source .venv/bin/activate && python -m pytest tests/ -q
+# on Windows: .venv\Scripts\python.exe -m pytest tests -q
 
 # the agent, bounded and headless (park -> Drowning Pool, library -> Sandstorm)
 python run.py --ticks 6 --no-hud
@@ -75,7 +76,7 @@ cd frontend && npx tsc --noEmit && npm run build
 `pytest` and `gradio` are in `requirements.txt`. `ffmpeg` on PATH is needed for
 video audio; without it the sampler runs vision-only rather than failing.
 
-### Test inventory (109, verified by `--collect-only`)
+### Test inventory (120, verified by `--collect-only`)
 
 | File | Count | Guards |
 |---|---|---|
@@ -87,6 +88,7 @@ video audio; without it the sampler runs vision-only rather than failing.
 | `tests/test_video_and_session.py` | 7 | video-as-live and the recorded session format |
 | `tests/test_local_video_app.py` | 4 | local perception, upload validation, and sampled analysis |
 | `tests/test_voice_lines.py` | 26 | voice-line selection, startup behavior, renderer/site agreement |
+| `tests/test_dj_timing.py` | 11 | **when** the song changes: the deadband, the jump, the dwell floor, the clocks |
 
 ---
 
@@ -196,7 +198,7 @@ picks between them.
 Before you say you're done:
 
 ```bash
-pytest tests/ -q                      # all 109, not just yours
+pytest tests/ -q                      # all 120, not just yours
 python run.py --ticks 6 --no-hud      # the loop still runs on mocks
 ```
 
@@ -230,6 +232,15 @@ before it acts. Together they deadlocked on calm footage — nothing ever played
 A quiet tick now counts as positive evidence that the scene is *stable*. If you
 add another optimisation that skips work, ask what downstream was counting on
 that work happening.
+
+**A field you never asked for reads as a field that says no.** `/v1/me` only
+returns `product` (the subscription level) when the token carries
+`user-read-private` — and that scope wasn't in `SCOPES`. So `product` was
+always `None`, and `check_account()` compared it to `"premium"` and rejected
+**every** account, Premium included, with "account 'X' is 'None', not premium".
+Nobody had run it, so nobody knew. If you gate on an API field, check that you
+requested the scope that populates it, and treat missing as *unknown* rather
+than as *no*.
 
 **Library versions move under you.** `librosa.beat.tempo` was removed in 1.0 and
 the exception aborted the whole feature block, so tempo, centroid, flatness and
@@ -290,22 +301,29 @@ doc as though it were agreed.
   the Gradio app, and the static site replaying a recording. `STATUS.md` records
   a 13 Aug decision to demo a video file through `/dj`; the Gradio app arrived
   after that and no decision has been recorded about it.
-- **Holding a song while the mood is unchanged.** Being built now. As of this
-  commit, on a *completely stable* scene the DJ still commits a new queued track
-  roughly every other tick — measured: 4 tracks across 35s of identical library
-  footage, each one reporting `scene shifted 0.00`. Two things to know before
-  changing it: `commit()` sets `started_at` and `state.current` for a *queued*
-  track that hasn't started playing yet, so the timing bounds measure the wrong
-  thing; and nothing anywhere knows when a track ends — no `Track.duration_s` is
-  populated in the corpus, and no player surfaces playback progress.
+- ~~**Holding a song while the mood is unchanged.**~~ **Settled 14 Aug.** The
+  DJ now gates on the **antivibe target**, not the raw scene, and asks before
+  the strategies run rather than after — `DJController.should_reconsider`.
+  Measured on a scene that never changes: **6 tracks in 62s → 1**. Two rooms
+  that invert to the same music no longer cost a track. `commit()` no longer
+  stamps `started_at` for a *queued* track, so the interrupt bounds finally
+  measure playing time. Still true, and still the limit: **nothing knows when a
+  track ends** — no `Track.duration_s`, no player progress — so the dwell floor
+  is enforced on commit time, which is the one clock we can trust.
 - **Whether `videofeed` becomes the agent's sampler.** `service.Engine.watch()`
   uses it. `run.py` still uses `capture/video.py`, which samples on a fixed
   interval only. The adapter is six lines and documented in
   `src/videofeed/README.md`, but nobody has run the agent off it.
-- **The Gemini prompt and its output schema.** Written in `perceive/scene.py`
-  and `agents/judge.py`, never once run against the real API — there has been no
-  `GOOGLE_API_KEY` on any machine that ran this. Timeout is 4s in `config.yaml`
-  and that number is a guess.
+- **The Gemini prompt and its output schema.** ~~Never once run against the real
+  API.~~ **Run 14 Aug**, in `perceive/scene.py`: it returns schema-valid JSON
+  and is honest about what it can't see — pointed at unreadable frames it
+  reported "obstructed or blocked camera view" at confidence 0.10 and the DJ
+  correctly did nothing. `agents/judge.py` is still unrun against the real API.
+  The 4s timeout was **wrong, not just a guess**: `gemini-2.5-flash` took
+  5–8s, so every call timed out and silently fell back to a canned read. Now
+  `gemini-3.5-flash-lite` at a measured 1.17s median, timeout 3.0s. What is
+  still unknown: whether the descriptions are any good on **real footage** —
+  every frame it has seen so far was synthetic.
 - **The "best song" mode.** The site's FAQ says the same machinery would find the
   best song with the sign flipped. That is a design claim, not code — nothing
   implements it.

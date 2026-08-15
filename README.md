@@ -115,7 +115,15 @@ So the maths makes a shortlist and taste picks the winner. Never one alone.
 - Lining up the next song is cheap. Cutting one off has to be earned: the room
   must have genuinely changed **and** the current song must have had a fair run.
 - A song is safe from being cut for its first stretch, whatever happens.
-- It has to see the same change twice before acting.
+- **It asks whether the *music* should change, not whether the room did.** Two
+  rooms that call for the same wrong song keep the same wrong song. This is what
+  stops it shuffling: before, a room that never changed still got a new track
+  every ten seconds, because the picker was never allowed to re-pick what was
+  already playing.
+- **How sure it needs to be depends on how big the change is.** A moderate shift
+  has to show up in two readings in a row. A dramatic one — the party ends, the
+  lights come up — is acted on immediately, because waiting for a second opinion
+  is how the joke arrives after the moment has gone.
 - If it isn't sure what it's looking at, it does nothing.
 - If any part breaks, a backup list of always-wrong songs plays anyway.
 

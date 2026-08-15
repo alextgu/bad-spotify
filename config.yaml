@@ -4,7 +4,16 @@
 
 capture:
   source: replay          # replay | video | webcam | glasses
-  frame_interval_s: 5.0
+  # The reaction budget, end to end:
+  #   up to frame_interval_s waiting for the next sample
+  # + ~1.2s  perception (measured median, gemini-3.5-flash-lite)
+  # + <10ms  invert + three strategies + judge (all local)
+  # At the old 5.0 the sampling wait DOMINATED -- a hard cut could take 6.2s to
+  # answer, which reads as lag. At 2.0 the worst case is ~3.2s and the typical
+  # case ~2.2s. This does not cost 2.5x the model calls: the change gate below
+  # only escalates when the frame actually moved, and the DJ deadband drops
+  # what survives that.
+  frame_interval_s: 2.0
   audio_window_s: 3.0
   replay_dir: data/replay/park_afternoon
 
@@ -21,10 +30,21 @@ gate:
   force_escalate_after_s: 45     # never go fully blind
 
 perceive:
-  backend: huggingface    #Choose huggingface, mock, or gemini
-  model: openai/clip-vit-base-patch32
+  backend: gemini         #Choose huggingface, mock, or gemini
+  model: openai/clip-vit-base-patch32   # used by the huggingface backend
+  # Measured 14 Aug against the live API, 3 calls each, same frame and prompt:
+  #   gemini-2.5-flash                     4937 ms median  (thinking on)
+  #   gemini-2.5-flash  thinking_budget=0  1572 ms
+  #   gemini-3.5-flash-lite                1168 ms  <- and the MOST specific
+  #   gemini-flash-lite-latest             1262 ms
+  # gemini-2.5-flash-lite is retired (404). -lite rejects thinking_budget=0
+  # and does not need it. Pinned rather than -latest: an alias that moves the
+  # night before a demo is not a feature.
+  gemini_model: gemini-3.5-flash-lite   # used by the gemini backend
   device: -1              #Negative one uses the CPU
-  timeout_s: 4.0          # give up after this and reuse the last read
+  # Was 4.0, which was below the 5-8s the old model actually took -- every call
+  # timed out and fell back to a canned read, silently. Median is now 1.17s.
+  timeout_s: 3.0          # give up after this and reuse the last read
   retries: 1              # ...after retrying once
 
 antagonize:
@@ -34,6 +54,14 @@ antagonize:
     - genre_antipode
     - tempo_clash
     - lyrical_irony
+    # Wrong about the OCCASION rather than the sound. Reads
+    # `SceneRead.references` -- the event and register, never the people.
+    - register_clash
+    # The only one not limited to the 47 hand-picked tracks: searches the live
+    # Spotify catalogue for whatever the antivibe is hunting for. Needs
+    # credentials; silently contributes nothing without them. This is what
+    # stops a long session repeating itself.
+    - catalogue_dive
   candidates_per_strategy: 4
 
 judge:
@@ -51,6 +79,19 @@ dj:
   agreement_reads: 2            # hysteresis: N consecutive agreeing scene reads
   max_consecutive_failures: 3
 
+  # --- when to reconsider at all -------------------------------------------
+  # Measured against the real corpus on 14 Aug. Random jitter on a scene moves
+  # the music target by up to ~0.23 and flips the top pick 37% of the time;
+  # the SMALLEST genuine scene change moves it 0.56 (median 0.84). The gap
+  # between those two numbers is where the deadband belongs.
+  hold_threshold: 0.30          # below this the current track is still right
+  # Set to the smallest genuine scene change in the measurement. It was 0.85,
+  # which sat ABOVE the median real change (0.84) -- so most true changes fell
+  # into the slow band and waited out the dwell floor for nothing.
+  jump_threshold: 0.55          # above this, act on ONE read -- don't be late
+  min_change_seconds: 20        # floor between two tracks; a jump bypasses it
+  min_confidence: 0.35          # below this the system does nothing
+
   # Queue or interrupt? Queueing is the default and is nearly always allowed
   # -- it doesn't disturb what's playing. Cutting the music off has to be
   # earned: the scene must have moved at least this far, AND the current
@@ -60,7 +101,11 @@ dj:
   min_track_seconds: 25         # ...and only interruptible after this
 
 player:
-  backend: mock           # mock | local | spotify
+  # Proven 14 Aug: setup ran end to end against a real Premium account,
+  # 46/47 tracks resolved, and Sandstorm came out of a real speaker.
+  # `app.py` is unaffected -- it forces the mock unless you pass --play, so a
+  # hosted surface still never makes noise on its own.
+  backend: spotify        # mock | local | spotify
   local_library: data/library
   volume: 0.7
 

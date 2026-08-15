@@ -20,11 +20,11 @@ Last updated: 14 Aug 2026
 | Part | State | Who |
 |---|---|---|
 | The loop holding it all together | Done | |
-| Deciding when to change the song | Done | |
+| Deciding when to change the song | Done — reworked 14 Aug, see below | |
 | Backup list when things break | Done | |
 | Finding songs on Spotify | Built, unproven | |
 | Playing songs on Spotify | Built, unproven | |
-| Reading a photo into a description | Built, unproven | |
+| Reading a photo into a description | Gemini proven live 14 Aug on synthetic frames; **still unproven on real footage** | |
 | Working out the opposite | Built, unproven | |
 | The song list (47 songs) | Built, unproven | |
 | Picking the funniest one | Built, unproven | |
@@ -63,6 +63,34 @@ the single biggest risk to the demo.
   rather than freezing the loop. A late answer is worth less than a fast fallback.
 
 ## What just changed
+
+**Gemini is real now, and the timeout was hiding it.** A key finally existed, so
+the perception path ran against the live API for the first time. It works — it
+returns schema-valid JSON and is honest about what it can't see (pointed at
+unreadable frames it said "obstructed or blocked camera view" at confidence 0.10
+and the DJ correctly did nothing). But `timeout_s: 4.0` was **below what the old
+model actually took**: `gemini-2.5-flash` measured 5–8s, so every call would have
+timed out and fallen back to a canned read, silently, and looked like it was
+working. Now on `gemini-3.5-flash-lite` at a measured **1.17s median** (4 models
+benchmarked, 3 calls each), timeout 3.0s.
+*Proven by:* running `run.py --ticks 12` and watching `via gemini` with
+1525–1950ms latencies in the tick output.
+*Still unknown:* whether the descriptions are any good on real footage. Every
+frame it has seen was synthetic.
+
+**The song stops changing when nothing changes.** The DJ used to ask "should I
+act?" *after* paying for perception, three strategies and a judge — and then
+acted anyway, because `played_ids` excludes whatever is playing, so the judge was
+forced to propose a new track every pass and the "already playing" guard could
+never fire. It now gates on the **antivibe target** rather than the raw scene,
+and asks before the expensive work: two rooms that invert to the same music
+don't cost a track.
+*Proven by:* a scene held perfectly constant for 62s went from **6 tracks to 1**,
+and a hard cut is still answered within one read (2.5s). 11 new tests in
+`tests/test_dj_timing.py`; 120 pass.
+*Thresholds are measured, not taste:* jitter moves the target ≤0.23 and flips
+the top pick 37% of the time; the smallest real scene change moves it 0.56.
+The deadband sits in that gap at 0.30.
 
 **Three gaps that made the repo fail its own tests are closed.**
 `EventBus.unsubscribe` (without it every `watch()` leaked a recorder onto a
@@ -179,6 +207,14 @@ problem entirely — no visitor login, no licensing mess, no live playback to fa
 
 Don't re-open these without a reason.
 
+- **14 Aug** — **When to change the song is decided on the music target, not the
+  scene.** Two rooms that invert to the same music keep the same song. The
+  numbers (`hold_threshold` 0.30, `jump_threshold` 0.85, `min_change_seconds` 20)
+  were measured against the corpus, and the reasoning is recorded next to them in
+  `config.yaml` — don't retune them by feel without re-running that measurement.
+- **14 Aug** — **A big change acts on one read; a moderate one waits for two.**
+  Uniform confirmation forced a choice between thrashing and lagging. Making the
+  confirmation requirement depend on how far the target moved buys both.
 - **14 Aug** — **The voice is not part of the running product.** It says one
   line at startup ("Hello. I'm your [name]. I'll help you choose the perfect
   music for any moment.") and then stays quiet. Everything else people hear is
