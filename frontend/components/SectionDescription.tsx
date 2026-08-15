@@ -85,18 +85,40 @@ export default function SectionDescription() {
                holding, which is what makes it read as one page thinking rather
                than as three pages in a row. */
 
-            const opened = ramp(p, 0.14, 0.34);
+            /* Three separate ramps, not one, for the same reason the swap
+               doesn't crossfade: two blocks of type at half opacity are
+               unreadable. The statement clears first, the panel slides in over
+               the space it left, and only then does the example's copy arrive.
+               Sharing one ramp put the statement and "Bodies" on top of each
+               other at 50% each. */
+            const introOut = ramp(p, 0.06, 0.2);
+            const opened = ramp(p, 0.12, 0.34);
+            const wordsIn = ramp(p, 0.3, 0.44);
             const swap = ramp(p, 0.46, 0.84);
 
+            /* The statement doesn't fade out on its own — it is pushed. The
+               scene panel slides in from off the left edge and shoves the
+               centred type to the right as it arrives, so one movement ends
+               the intro and begins the examples. Fading the two independently
+               is what made the join feel like a cut between unrelated screens:
+               nothing that left was connected to anything that arrived. */
             gsap.set(intro.current, {
-              autoAlpha: 1 - opened,
-              y: -24 * opened,
+              autoAlpha: 1 - introOut,
+              x: 90 * opened,
             });
 
-            // The halves are only built once and then moved. `xPercent: 100`
-            // on a half-width element is exactly the other half.
-            gsap.set(scene.current, { autoAlpha: opened, xPercent: 100 * swap });
-            gsap.set(words.current, { autoAlpha: opened, xPercent: -100 * swap });
+            /* The halves are built once and then moved. `xPercent: 100` on a
+               half-width element is exactly the other half, and -100 is
+               exactly off-screen — so the same property does the entrance and
+               the swap without a second mechanism. */
+            gsap.set(scene.current, {
+              autoAlpha: 1,
+              xPercent: -100 * (1 - opened) + 100 * swap,
+            });
+            gsap.set(words.current, {
+              autoAlpha: wordsIn,
+              xPercent: -100 * swap,
+            });
 
             /* The two halves pass through each other, so at the midpoint they
                are both in the centre. The scene is opaque and sits above the
@@ -117,7 +139,7 @@ export default function SectionDescription() {
             gsap.set(blocks.current[0], { autoAlpha: 1 - ramp(p, 0.48, 0.6) });
             gsap.set(blocks.current[1], { autoAlpha: ramp(p, 0.72, 0.84) });
 
-            setActive(p < 0.34 ? -1 : swap < 0.5 ? 0 : 1);
+            setActive(p < 0.3 ? -1 : swap < 0.5 ? 0 : 1);
           },
         });
       }, root);
@@ -199,9 +221,13 @@ export default function SectionDescription() {
                 {example.read}
               </p>
 
-              {/* The verdict, at display size now that it has half a screen to
-                  sit in. Everything else on this side supports it. */}
-              <p className="mt-block font-display text-display leading-none">
+              {/* The verdict. Sized against HALF the window, not the whole
+                  one: `text-display` clamps to 5.75rem because it was written
+                  for a full-width hero, and in a half with the section
+                  clipping overflow it ran "Bodies" off its own panel. 4.5vw
+                  against a 50% column with `rest` padding either side leaves
+                  room for the longest track name in the corpus. */}
+              <p className="mt-block font-display text-[clamp(2.25rem,4.5vw,4rem)] font-semibold leading-[0.95] tracking-[-0.035em] [overflow-wrap:anywhere]">
                 {example.track}
               </p>
               <p className="mt-3 text-subheading text-graphite">
@@ -218,7 +244,9 @@ export default function SectionDescription() {
 
       {/* Which of the two you are on. Two marks, so the section says how long
           it is rather than leaving you to find out by scrolling. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-8 hidden justify-center gap-2 lg:flex">
+      {/* z-20: the scene panel rides at z-10 and was swallowing the left-hand
+          dot as it crossed the centre. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-8 z-20 hidden justify-center gap-2 lg:flex">
         {description.examples.map((example, i) => (
           <span
             key={example.id}
