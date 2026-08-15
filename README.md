@@ -19,7 +19,7 @@ No API keys, no accounts. Everything below runs on the built-in mocks.
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -r requirements.txt   # one-time, ~2 min
-.venv/bin/pytest -q                                                  # 215 tests, ~10 s
+.venv/bin/pytest -q                                                  # 222 tests, ~10 s
 PYTHONPATH=src .venv/bin/python run.py --source replay --ticks 8 --no-hud
 ```
 
@@ -188,7 +188,7 @@ python run.py --video clip.mp4 --realtime       # ...at its true speed
 python run.py --video clip.mp4 --record demo1   # + write data/sessions/demo1.json
 python run.py --source webcam                   # real camera + mic
 python run.py --ticks 10 --no-hud               # bounded headless run
-pytest tests/ -q                                # 215 tests
+pytest tests/ -q                                # 222 tests
 ```
 
 ## Free local video upload app
@@ -499,7 +499,7 @@ same JSON is all three tracks at once.
 
 | Criterion | Where it's answered |
 |---|---|
-| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 215 tests guarding specific live-demo failures |
+| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 222 tests guarding specific live-demo failures |
 | UX & intuition | A DJ character with a reacting orb, onboarding, one honest control, and a site that walks judges through the reasoning |
 | Creativity | Geometric opposition *plus* a cultural judge; six competing theories of wrongness rather than one similarity score |
 | Originality | An assistant that is deliberately useless. The failure mode and the feature are the same thing, which is why it holds up live |

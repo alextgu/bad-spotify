@@ -1,0 +1,65 @@
+{
+  "README": "Typed scenes fed to the agent by scripts/run_samples.py. These are INPUTS ONLY -- no expected answers live here, because the point of the gallery is to show what the pipeline actually returns, not to check it against a wish list. Tests are where expectations belong. Chosen for spread across the five axes rather than for laughs: two of these (the funeral, the hospital) exist to show the taboo rules and the confidence floor doing their jobs.",
+  "scenes": [
+    {
+      "id": "funeral",
+      "text": "a funeral service in a church, mourners dressed in black",
+      "why_this_one": "the clearest test of the taboo rules -- the mood inverts to euphoric, and the rules have to stop it landing somewhere indefensible"
+    },
+    {
+      "id": "first-date",
+      "text": "a first date at a candlelit restaurant, two people talking quietly",
+      "why_this_one": "warm, low-arousal, intimate. The opposite of intimate is public, and that is a different axis from loud"
+    },
+    {
+      "id": "hospital-3am",
+      "text": "a hospital waiting room at 3am under fluorescent lights",
+      "why_this_one": "low valence AND low arousal at once, which most scenes never are"
+    },
+    {
+      "id": "toddler-birthday",
+      "text": "a toddler's birthday party, cake being cut, children shouting",
+      "why_this_one": "the specificity case from AGENTS.md -- 'indoor event' produces nothing, this produces a joke"
+    },
+    {
+      "id": "nightclub",
+      "text": "a packed nightclub at 1am, strobe lights and bass",
+      "why_this_one": "the top corner of arousal and density. Inversion has nowhere to go but down, and down is not automatically funny"
+    },
+    {
+      "id": "library-exams",
+      "text": "a silent university library reading room during exam week",
+      "why_this_one": "the scene the live model already read from real footage, typed instead -- the two runs can be compared"
+    },
+    {
+      "id": "beach-sunset",
+      "text": "a beach at sunset, warm light and slow waves",
+      "why_this_one": "high valence, high organicness, low density -- the corner the corpus is thinnest in"
+    },
+    {
+      "id": "subway-commute",
+      "text": "a crowded subway train on a weekday morning commute",
+      "why_this_one": "dense and artificial but emotionally flat, so density has to carry the inversion on its own"
+    },
+    {
+      "id": "yoga-class",
+      "text": "a yoga class in a warm studio, mats on the floor, slow breathing",
+      "why_this_one": "the most deliberately curated soundtrack in real life, which makes the wrong answer land hardest"
+    },
+    {
+      "id": "job-interview",
+      "text": "a job interview in a glass meeting room, two people across a table",
+      "why_this_one": "formal and tense -- the pair of traits that invert in opposite directions"
+    },
+    {
+      "id": "snowy-christmas-street",
+      "text": "a snowy street in December, lights strung between the buildings",
+      "why_this_one": "the seasonal rule fires here and only here"
+    },
+    {
+      "id": "gym-6am",
+      "text": "a gym at six in the morning, someone deadlifting alone",
+      "why_this_one": "high arousal with low social density, which pulls two strategies in different directions"
+    }
+  ]
+}

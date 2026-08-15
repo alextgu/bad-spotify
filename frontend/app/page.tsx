@@ -1,3 +1,4 @@
+import DecisionWall from "@/components/DecisionWall";
 import ScrollController from "@/components/ScrollController";
 import SectionDemo from "@/components/SectionDemo";
 import SectionDescription from "@/components/SectionDescription";
@@ -19,7 +20,7 @@ import SectionTryIt from "@/components/SectionTryIt";
  *   3  Demo          the film, full bleed
  *   4  Try it        hand it over; the whole screen is one link
  *   5  Pipeline      a closer look at the actual mechanism
- *   6  Results       the numbers, and three things worth being pleased about
+ *   6  Results       the numbers, then every decision it has made
  *   7  FAQ           the awkward questions, and the end of the page
  *
  * This order is the wireframe and is not open. The one-viewport rule is not
@@ -34,10 +35,12 @@ import SectionTryIt from "@/components/SectionTryIt";
  * and a full-bleed closing ask. They were cut because they are not among the
  * seven, not because they failed. If one comes back, something here goes.
  *
- * `ScrollController` moves one screen per gesture; because every block is now
- * exactly one viewport, every stop is a section boundary and nothing lands in
- * the middle of anything. The wrapping `<div>`s are what it measures, so they
- * are structural rather than decorative.
+ * `ScrollController` moves one screen per gesture. Three blocks are taller
+ * than one viewport — 2 and 4 pin themselves, 6 stacks two screens — and each
+ * declares its own stops so that a gesture still lands on something whole.
+ * Every stop on this page is either a section top or a named beat inside one;
+ * nothing lands in the middle of anything. The wrapping `<div>`s are what it
+ * measures, so they are structural rather than decorative.
  */
 export default function Home() {
   return (
@@ -64,8 +67,8 @@ export default function Home() {
 
         {/* 4 — letting someone run it is worth more than describing it.
 
-            The only block that is longer than one screen, and it has to be:
-            it pins itself and spends that scroll moving the clip. `data-stops`
+            Longer than one screen, and it has to be: it pins itself and
+            spends that scroll moving the clip. `data-stops`
             are the moments the agent did something, so a gesture lands on a
             decision rather than on an arbitrary screenful — see
             ScrollController. The selected sample publishes its own recorded
@@ -84,9 +87,21 @@ export default function Home() {
           <SectionPipeline />
         </div>
 
-        {/* 6 */}
-        <div data-page-transition="fill">
+        {/* 6 — two beats, and the second one is why the first is allowed to
+            exist. The claim ("0 images stored", "222 tests") is worth nothing
+            without the evidence, so the evidence sits immediately after it and
+            in the same ink, read as one section that turns over rather than as
+            two.
+
+            Not pinned, which is what makes it cheap: two stacked `Screen`s and
+            the block is two viewports, so `0,1` is literally "the top of each
+            one". Nothing is mid-animation at either stop, so the rule that
+            governs the pinned section 2 — a stop must never land inside a
+            transition window — has nothing to catch here. Measured: stops at
+            5243 and 5992 on a 749px viewport, exactly the two section tops. */}
+        <div data-stops="0,1" data-page-transition="fill">
           <SectionResults />
+          <DecisionWall />
         </div>
 
         {/* 7 — the one screen anybody reads at length. */}

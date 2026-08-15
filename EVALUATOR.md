@@ -15,11 +15,11 @@ exists: a webcam, a screen share, or a video file stands in for the wearable.
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -r requirements.txt   # one-time, ~2 min
-.venv/bin/pytest -q                        # 215 tests, ~10 s on a laptop
+.venv/bin/pytest -q                        # 222 tests, ~10 s on a laptop
 PYTHONPATH=src .venv/bin/python run.py --source replay --ticks 8 --no-hud
 ```
 
-- The test count is regenerable: `.venv/bin/pytest --collect-only -q` → `215 tests collected`.
+- The test count is regenerable: `.venv/bin/pytest --collect-only -q` → `222 tests collected`.
 - The third command replays canned scenes through the production graph and
   prints each verdict with its reasoning (~15 s). With no credentials it
   downgrades out loud — you will see
@@ -72,7 +72,7 @@ PYTHONPATH=src .venv/bin/python run.py --source replay --ticks 8 --no-hud
 **Technical execution.** A LangGraph pipeline with conditional edges and a
 sequential fallback with identical semantics (`src/badspotify/agents/graph.py`);
 a change gate that refuses to spend model calls on an unchanged scene
-(`src/badspotify/capture/gate.py`); 215 tests of which roughly 87% assert
+(`src/badspotify/capture/gate.py`); 222 tests of which roughly 87% assert
 behaviour rather than constants (365 asserts, 46 literal comparisons — counted
 by grep, approximate). Perception ran against the live model at a measured
 1.17 s median (4 models benchmarked, 3 calls each, `STATUS.md`).

@@ -85,10 +85,10 @@ Plus one README beside each part that ships on its own: `frontend/`,
 
 ## Verified commands
 
-Every one of these was run on 14 Aug 2026 and did what it says.
+Every one of these was run on 15 Aug 2026 and did what it says.
 
 ```bash
-# tests — 215 pass
+# tests — 222 pass
 source .venv/bin/activate && python -m pytest tests/ -q
 # on Windows: .venv\Scripts\python.exe -m pytest tests -q
 
@@ -100,6 +100,10 @@ python run.py                       # 127.0.0.1:8420/dj  and  127.0.0.1:8420/
 
 # the hosted browser app (Gradio)
 python app.py                       # 127.0.0.1:7860
+
+# a batch of typed scenes -> frontend/public/results/gallery.json
+#   needs GOOGLE_API_KEY to be worth publishing; --backend mock to try it dry
+python scripts/run_samples.py --backend mock --out /tmp/gallery.json
 
 # one step at a time, JSON in and out
 python scripts/io/describe.py --text "a sunlit park" \
@@ -117,7 +121,7 @@ cd frontend && npx tsc --noEmit && npm run build
 `pytest` and `gradio` are in `requirements.txt`. `ffmpeg` on PATH is needed for
 video audio; without it the sampler runs vision-only rather than failing.
 
-### Test inventory (215, verified by `--collect-only`)
+### Test inventory (222, verified by `--collect-only`)
 
 | File | Count | Guards |
 |---|---|---|
@@ -129,6 +133,7 @@ video audio; without it the sampler runs vision-only rather than failing.
 | `tests/test_judge_temperature.py` | 3 | score-space sampling, greedy mode, weak-candidate suppression |
 | `tests/test_pipeline.py` | 15 | vibe reflection, antivibe, strategies, DJ bounds, fallback |
 | `tests/test_register_clash.py` | 24 | occasion mismatch and identity-term filtering |
+| `tests/test_run_samples.py` | 7 | the sample runner: one row per scene, and the output naming the backend it really ran on |
 | `tests/test_screen_capture.py` | 8 | screen capture lifecycle and frame metadata |
 | `tests/test_semantic_opposite.py` | 7 | model-inferred fast-food chain, no lookup, zero Spotify calls |
 | `tests/test_service.py` | 13 | `Engine`: describe / look / watch, no speakers by default, no bus leak |
@@ -249,7 +254,7 @@ concurrently and a judge picks between them.
 Before you say you're done:
 
 ```bash
-pytest tests/ -q                      # all 215, not just yours
+pytest tests/ -q                      # all 222, not just yours
 python run.py --ticks 6 --no-hud      # the loop still runs on mocks
 ```
 

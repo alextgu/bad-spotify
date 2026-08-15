@@ -59,11 +59,29 @@ the single biggest risk to the demo.
   off when the room really changed *and* the current song has had a fair run.
 - **Backup list.** If anything upstream dies, a pre-picked list of always-wrong
   songs plays anyway. It is never silent.
-- **Tests.** 215 of them, each guarding a specific way the demo could break.
+- **Tests.** 222 of them, each guarding a specific way the demo could break.
 - **Timeouts on the model calls.** A slow answer is abandoned and retried
   rather than freezing the loop. A late answer is worth less than a fast fallback.
 
 ## What just changed
+
+**The site shows what it decided, not only that it decides.** Section 6 gained
+a second beat: every recorded decision — six of them, from the three filmed
+clips — laid out as scene read, confidence, track, and reasoning, with the
+losing candidates named. Nothing is filtered; the rows are whatever
+`lib/decisions.ts` finds in `public/sessions/`, so a weak one cannot be left
+out without deleting a clip.
+*Proven by:* rendered at 749px, the block measures two stops (5243 and 5992),
+the second screen's content is 659px against a 749px floor so nothing clips,
+and the six rows in the DOM match the six moments in the session files.
+*Also built:* `scripts/run_samples.py`, which runs the twelve typed scenes in
+`data/sample_scenes.json` through `service.Engine` and writes a gallery JSON.
+*Still unknown — and this is why the gallery is not on the site:* there is no
+GOOGLE_API_KEY on this machine, so the run downgraded to the offline keyword
+reader, which read "a packed nightclub at 1am" as dark and quiet and returned
+a flat 0.5 on every axis for two of the twelve. The output names the backend
+it ran on; the bar for publishing it is that the name be "gemini". Anyone with
+a key can clear this in one command.
 
 **Setting semantics now choose a musical opposite without scenario lookups.**
 The one perception call returns setting traits, direct opposites, and associated
@@ -74,7 +92,7 @@ active; the offline fallback leaves the semantic chain empty. The local
 one perception call, resolves to opera/classical candidates, and triggers the
 genre-aware DJ path. The offline reader returns no special fast-food answer.
 Seven focused tests cover the model boundary, identity filtering, Engine path,
-genre gating, and zero-Spotify-call candidate generation. All 215 tests pass.
+genre gating, and zero-Spotify-call candidate generation. All 222 tests pass.
 *Still unknown:* whether the live model reaches the useful chain from a real
 fast-food photo without an example in its prompt.
 
@@ -110,7 +128,7 @@ and asks before the expensive work: two rooms that invert to the same music
 don't cost a track.
 *Proven by:* a scene held perfectly constant for 62s went from **6 tracks to 1**,
 and a hard cut is still answered within one read (2.5s). 11 new tests in
-`tests/test_dj_timing.py`; 215 pass.
+`tests/test_dj_timing.py`; 222 pass.
 *Thresholds are measured, not taste:* jitter moves the target ≤0.23 and flips
 the top pick 37% of the time; the smallest real scene change moves it 0.56.
 The deadband sits in that gap at 0.30.
@@ -126,7 +144,7 @@ aren't declared on the TypedDict.
 video, samples it through the current video source, and returns a mood and music
 timeline to `/demo`. Stable mood samples keep the current song choice. A new
 choice needs a different mood and enough vibe distance, and carries a two-second
-crossfade marker. Four focused tests pass, all 215 project tests pass, and the
+crossfade marker. Four focused tests pass, all 222 project tests pass, and the
 frontend type check and production build pass. It has been tried with rain footage.
 
 ## Built, but nobody has run it for real

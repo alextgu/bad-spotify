@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""Run the curated scenes in data/sample_scenes.json and record what came back.
+
+    python scripts/run_samples.py                    # live perception, per config.yaml
+    python scripts/run_samples.py --backend mock     # no API calls, no quota
+    python scripts/run_samples.py --only funeral,gym-6am
+
+in   data/sample_scenes.json -- typed scenes, inputs only
+out  frontend/public/results/gallery.json -- one entry per scene
+
+WHY THIS EXISTS
+---------------
+The site could describe the pipeline but could not show a single thing it had
+decided outside the four filmed clips. This produces that evidence, and does
+it by running the same `service.Engine` the Gradio app and the glasses path
+use -- not a re-implementation that could drift into flattering itself.
+
+WHAT IT RECORDS
+---------------
+Everything needed to check the decision, including the parts that make it look
+worse: the losing candidates with their scores, the confidence the model
+reported, and cases where the DJ declined to act. A gallery that only kept the
+good answers would be a slideshow, not a result.
+
+Re-running overwrites the file. The output carries the backends it actually
+ran on after any downgrade, so a mock run can never be mistaken for a live
+one on the site -- the page prints that field.
+
+The player is the mock: this writes a file, it must never touch a speaker.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+SCENES = ROOT / "data" / "sample_scenes.json"
+OUT = ROOT / "frontend" / "public" / "results" / "gallery.json"
+
+
+def log(msg: str) -> None:
+    """stderr, so a redirected stdout stays usable."""
+    print(msg, file=sys.stderr)
+
+
+def trim(considered: dict, keep: int = 3) -> dict:
+    """The top few candidates per strategy.
+
+    All six strategies return their full ranked list, which is ~40 tracks
+    each and would make the JSON the largest asset on the site for something
+    nobody scrolls. Three is enough to show the strategies disagreeing, which
+    is the only reason the losers are here at all.
+    """
+    return {name: cands[:keep] for name, cands in considered.items()}
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--backend", choices=["mock", "gemini", "huggingface"],
+                    help="override perceive.backend from config.yaml")
+    ap.add_argument("--only", help="comma-separated scene ids")
+    ap.add_argument("--out", default=str(OUT))
+    args = ap.parse_args()
+
+    from badspotify.service import Engine
+
+    spec = json.loads(SCENES.read_text(encoding="utf-8"))
+    scenes = spec["scenes"]
+    if args.only:
+        wanted = {s.strip() for s in args.only.split(",")}
+        scenes = [s for s in scenes if s["id"] in wanted]
+        missing = wanted - {s["id"] for s in scenes}
+        if missing:
+            log(f"error: no such scene id: {', '.join(sorted(missing))}")
+            raise SystemExit(2)
+
+    engine = Engine()
+    if args.backend:
+        from badspotify.perceive.scene import build_perceiver
+        cfg = {**engine.cfg.section("perceive"), "backend": args.backend}
+        engine.perceiver = build_perceiver(cfg)
+        engine.graph.perceiver = engine.perceiver
+
+    backends = engine.backends()
+    log(f"[samples] backends: {backends}")
+    if backends["perceive"] != "mock":
+        log(f"[samples] {len(scenes)} live perception calls about to be made")
+
+    entries = []
+    for i, scene in enumerate(scenes, 1):
+        # Each scene is judged on its own, not as a sequence. Without this the
+        # exclusion set carries over and scene 12 is picking from a corpus with
+        # eleven tracks already struck out -- which is right for a live run and
+        # wrong for a gallery, where every row should be the best answer that
+        # scene can get.
+        engine.reset()
+
+        started = time.perf_counter()
+        decision = engine.describe(scene["text"])
+        elapsed = int((time.perf_counter() - started) * 1000)
+
+        entries.append({
+            "id": scene["id"],
+            "input": scene["text"],
+            "why_this_one": scene.get("why_this_one", ""),
+            "scene": decision.scene,
+            "opposite": decision.opposite,
+            "considered": trim(decision.considered),
+            "chosen": decision.chosen,
+            "action": decision.action,
+            "reason": decision.reason,
+            "latency_ms": elapsed,
+        })
+        log(f"[samples] {i:2}/{len(scenes)} {scene['id']:<24} "
+            f"{decision.headline}  ({elapsed} ms)")
+
+    played = [e for e in entries if e["action"] in ("play", "fallback")]
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({
+        "README": "Generated by scripts/run_samples.py. Do not hand-edit -- "
+                  "re-run it. Inputs live in data/sample_scenes.json.",
+        "backends": backends,
+        "scene_count": len(entries),
+        "played_count": len(played),
+        "scenes": entries,
+    }, indent=1) + "\n", encoding="utf-8")
+
+    # relative_to() raises rather than falling back when --out points outside
+    # the repo, which is exactly what a scratch run does.
+    where = out.relative_to(ROOT) if out.is_relative_to(ROOT) else out
+    log(f"[samples] wrote {where} "
+        f"-- {len(played)}/{len(entries)} produced a track")
+
+
+if __name__ == "__main__":
+    main()
