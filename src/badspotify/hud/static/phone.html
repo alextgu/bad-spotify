@@ -1,0 +1,219 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b0c0e">
+<title>Slopify — companion</title>
+
+<!--
+  The companion app, standing in for the native one.
+
+  Apps do not run on Ray-Ban Meta. The Wearables Device Access Toolkit gives a
+  PHONE app the glasses' camera, mics and speakers, and that app posts frames
+  to the agent. This page is that app's shape, built for a phone browser so
+  the whole thing can be driven from a pocket before anyone has hardware --
+  and when the native app exists it posts to the same endpoint.
+
+  Rear camera on purpose: this is a point-of-view device. A selfie stream is
+  the one thing the glasses can never send.
+-->
+<style>
+  :root {
+    --bg: #0b0c0e; --panel: #14161a; --line: #23262c;
+    --ink: #f2f4f7; --dim: #8b93a1; --accent: #1CA85C; --warn: #f0883e;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: flex; flex-direction: column;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+             env(safe-area-inset-bottom) env(safe-area-inset-left);
+    overscroll-behavior: none;
+  }
+
+  header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; border-bottom: 1px solid var(--line); flex: none;
+  }
+  .mark { font-weight: 700; letter-spacing: -0.02em; }
+  .state { margin-left: auto; font-size: 13px; color: var(--dim); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+         background: #454b55; margin-right: 6px; }
+  .dot.on { background: var(--accent); }
+  .dot.busy { background: var(--warn); }
+
+  /* The viewfinder is small on purpose. The song and the reason are the
+     product; the picture is only evidence that it is looking at the room. */
+  .view {
+    position: relative; flex: none; background: #000;
+    aspect-ratio: 16 / 9; overflow: hidden;
+  }
+  video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .view .tag {
+    position: absolute; left: 10px; bottom: 10px;
+    font: 11px/1 ui-monospace, monospace; letter-spacing: .14em;
+    text-transform: uppercase; color: #fff9; background: #0009;
+    padding: 5px 7px; border-radius: 5px;
+  }
+
+  main { flex: 1; overflow-y: auto; padding: 18px 16px 24px; }
+  h2 { font: 600 11px/1 ui-monospace, monospace; letter-spacing: .18em;
+       text-transform: uppercase; color: var(--dim); margin: 0 0 10px; }
+
+  .song { font-size: 30px; font-weight: 700; line-height: 1.12;
+          letter-spacing: -0.02em; }
+  .artist { color: var(--dim); margin-top: 4px; font-size: 17px; }
+  .why { margin-top: 14px; font-size: 15px; color: #cfd5de; }
+  .axis {
+    display: inline-block; margin-top: 12px; padding: 4px 9px;
+    border: 1px solid var(--line); border-radius: 999px;
+    font: 11px/1 ui-monospace, monospace; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .err { margin-top: 14px; color: var(--warn); font-size: 14px; }
+
+  .card { border-top: 1px solid var(--line); margin-top: 22px; padding-top: 18px; }
+  .scene { font-size: 17px; font-weight: 550; }
+  .meta { color: var(--dim); font-size: 13px; margin-top: 6px;
+          font-family: ui-monospace, monospace; }
+
+  /* Thumb-reachable, because the person using this is walking around. */
+  footer {
+    flex: none; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line); display: flex; gap: 10px;
+  }
+  button {
+    flex: 1; font: inherit; font-weight: 650; padding: 15px 16px;
+    border-radius: 12px; border: 1px solid var(--line);
+    background: #1d2026; color: var(--ink);
+  }
+  button.go { background: var(--accent); color: #04220f; border-color: var(--accent); }
+  button:disabled { opacity: .4; }
+</style>
+
+<header>
+  <span class="mark">Slopify</span>
+  <span class="sub" style="color:var(--dim);font-size:13px">companion</span>
+  <span class="state"><span class="dot" id="dot"></span><span id="status">idle</span></span>
+</header>
+
+<div class="view">
+  <video id="v" autoplay muted playsinline></video>
+  <span class="tag" id="tag">camera off</span>
+</div>
+
+<main>
+  <h2 id="head">Now playing</h2>
+  <div class="song" id="song">—</div>
+  <div class="artist" id="artist"></div>
+  <div class="axis" id="axis" hidden></div>
+  <div class="why" id="why"></div>
+  <div class="err" id="err"></div>
+
+  <div class="card">
+    <h2>What it sees</h2>
+    <div class="scene" id="setting">—</div>
+    <div class="meta" id="meta"></div>
+  </div>
+</main>
+
+<footer>
+  <button class="go" id="start">Start</button>
+  <button id="stop" disabled>Stop</button>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+let stream = null, timer = null, busy = false;
+
+function setStatus(t, cls) {
+  $("status").textContent = t;
+  $("dot").className = "dot" + (cls ? " " + cls : "");
+}
+
+async function start() {
+  stop();
+  try {
+    // `environment` = the rear camera. This is a point-of-view device; a
+    // selfie stream is the one thing the glasses can never send.
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: {facingMode: {ideal: "environment"}, width: {ideal: 1280}},
+      audio: false,
+    });
+  } catch (e) {
+    $("err").textContent = "camera blocked: " + e.name +
+      (location.protocol === "http:" && location.hostname !== "localhost"
+        ? " — phones only allow the camera over HTTPS or on localhost."
+        : "");
+    return;
+  }
+  $("v").srcObject = stream;
+  $("tag").textContent = "point of view";
+  $("stop").disabled = false;
+  $("start").disabled = true;
+  setStatus("watching", "on");
+  timer = setInterval(tick, 2000);
+  tick();
+}
+
+function stop() {
+  clearInterval(timer); timer = null;
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  $("v").srcObject = null;
+  $("tag").textContent = "camera off";
+  $("stop").disabled = true;
+  $("start").disabled = false;
+  setStatus("idle");
+}
+
+async function tick() {
+  const v = $("v");
+  if (!stream || !v.videoWidth || busy) return;      // never stack requests
+  busy = true;
+  const w = 960, h = Math.round(v.videoHeight * w / v.videoWidth);
+  const c = Object.assign(document.createElement("canvas"), {width: w, height: h});
+  c.getContext("2d").drawImage(v, 0, 0, w, h);
+  const blob = await new Promise(r => c.toBlob(r, "image/jpeg", 0.8));
+  if (!blob) { busy = false; return; }
+
+  const body = new FormData();
+  body.append("file", blob, "frame.jpg");
+  setStatus("thinking", "busy");
+  try {
+    const res = await fetch("/api/frame", {method: "POST", body});
+    if (res.ok) render(await res.json());
+    else $("err").textContent = "HTTP " + res.status;
+  } catch (e) {
+    $("err").textContent = "cannot reach the agent: " + e.message;
+  }
+  busy = false;
+  if (stream) setStatus("watching", "on");
+}
+
+function render(d) {
+  if (d.skipped) return;
+  if (d.scene) {
+    $("setting").textContent = d.scene.setting || "—";
+    const refs = (d.scene.references || []).join(", ");
+    $("meta").textContent = [
+      refs && refs, d.scene.mood, "conf " + d.scene.confidence,
+      d.scene.latency_ms + "ms",
+    ].filter(Boolean).join("  ·  ");
+  }
+  const pick = d.playing || d.chosen;
+  if (pick) {
+    $("head").textContent = d.playing ? "Now playing" : "Selected";
+    $("song").textContent = pick.title;
+    $("artist").textContent = pick.artist;
+    $("why").textContent = pick.why || pick.quip || "";
+    if (pick.strategy) { $("axis").hidden = false; $("axis").textContent = pick.strategy; }
+  }
+  $("err").textContent = d.error ? "chosen, but not played — " + d.error : "";
+}
+
+$("start").onclick = start;
+$("stop").onclick = stop;
+</script>

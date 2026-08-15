@@ -30,6 +30,26 @@ from badspotify.voice.lines import DEFAULT_GREETING, greeting  #noqa: E402
 from badspotify.voice.narrator import build_narrator          #noqa: E402
 
 
+def _lan_address() -> str:
+    """This machine's address on the wifi, for a phone to aim at.
+
+    Asks the routing table by opening a UDP socket to a public address --
+    nothing is sent, but the OS picks the interface it would use, which is the
+    one the phone can see. `gethostname()` lookups return 127.0.0.1 on plenty
+    of machines and would send someone chasing a URL that cannot work.
+    """
+    import socket
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        return s.getsockname()[0]
+    except Exception:
+        return "127.0.0.1"
+    finally:
+        s.close()
+
+
 class Runtime:
     def __init__(self, cfg):
         self.cfg = cfg
@@ -123,6 +143,9 @@ def main() -> None:
     ap.add_argument("--no-hud", action="store_true")
     ap.add_argument("--serve", action="store_true",
                     help="serve the upload app without starting a capture source")
+    ap.add_argument("--lan", action="store_true",
+                    help="bind every interface so a phone on the same wifi can "
+                         "reach /phone -- the companion app for the glasses")
     ap.add_argument("--quiet", action="store_true", help="only verdicts and errors")
     ap.add_argument("--turbo", action="store_true",
                     help="collapse DJ time bounds (verification runs only -- "
@@ -141,6 +164,8 @@ def main() -> None:
         cfg.setdefault("capture", {})["loop"] = True
     if args.no_hud:
         cfg.setdefault("hud", {})["enabled"] = False
+    if args.lan:
+        cfg.setdefault("hud", {})["host"] = "0.0.0.0"
     if args.turbo:
         cfg.setdefault("dj", {}).update(min_track_seconds=0, cooldown_seconds=0)
 
@@ -163,6 +188,15 @@ def main() -> None:
             server = serve_in_thread(rt, host, port)
             print(f"[hud] DJ face:          http://{host}:{port}/dj")
             print(f"[hud] engineering view: http://{host}:{port}/")
+            print(f"[hud] live (this machine): http://127.0.0.1:{port}/live")
+            if host in ("0.0.0.0", "::"):
+                lan = _lan_address()
+                print(f"[hud] companion app:    http://{lan}:{port}/phone")
+                print("[hud] NOTE: phones only allow the camera on HTTPS or "
+                      "localhost. On Android open\n"
+                      "      chrome://flags/#unsafely-treat-insecure-origin-"
+                      f"as-secure and add http://{lan}:{port}\n"
+                      "      -- or put a tunnel in front of it.")
         except Exception as e:
             print(f"[hud] disabled ({e})")
 

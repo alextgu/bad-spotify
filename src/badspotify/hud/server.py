@@ -103,6 +103,18 @@ def create_app(runtime=None):
         """
         return FileResponse(STATIC / "live.html")
 
+    @app.get("/phone")
+    async def phone():
+        """The companion app, standing in for the native one.
+
+        Apps do not run on Ray-Ban Meta: the Wearables toolkit gives a PHONE
+        app the glasses' camera and speakers, and that app posts frames to the
+        agent. This is that app's shape, in a phone browser, so the pipeline
+        can be driven from a pocket before anyone has hardware -- and the
+        native version posts to the same `/api/frame`.
+        """
+        return FileResponse(STATIC / "phone.html")
+
     @app.post("/api/frame")
     async def frame(file: UploadFile = File(...)):
         """One frame from the browser, through the real pipeline.
