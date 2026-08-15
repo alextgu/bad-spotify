@@ -62,8 +62,7 @@ export const hero = {
 
 /* ------------------------------------------------------- 2 · description -- */
 export const description = {
-  statement:
-    "It looks at the room. Then it picks the song that belongs there least.",
+  statement: "We find the worst possible song for every occasion.",
 
   /**
    * What goes in and what comes out, as a chain rather than a paragraph.
