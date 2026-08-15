@@ -1,0 +1,10 @@
+numpy
+scipy
+torch
+transformers
+librosa
+soundfile
+opencv-python-headless
+networkx
+gensim
+pytest
