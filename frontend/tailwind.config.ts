@@ -2,8 +2,12 @@ import type { Config } from "tailwindcss";
 
 /**
  * The whole design system. If a value isn't in here it doesn't go in a
- * component — see DESIGN_RULES.md. One-off values are how a page ends up with
- * eleven font sizes and reads as generated.
+ * component. One-off values are how a page ends up with eleven font sizes and
+ * reads as generated.
+ *
+ * The visual layer is being restarted, so treat these tokens as the current
+ * state rather than as settled: they came out of the previous pass and none of
+ * them is load-bearing for anything outside `frontend/`.
  */
 export default {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],

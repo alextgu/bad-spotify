@@ -23,6 +23,10 @@ coverage/
 next-env.d.ts
 *.tsbuildinfo
 
+#Things taken out of the repo but not thrown away. AGENTS.md rule 6 says to
+#move here rather than delete; it only works if git actually ignores it.
+_review/
+
 #Local configuration and caches
 .env
 .env.*.local

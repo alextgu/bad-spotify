@@ -183,8 +183,7 @@ html { scroll-behavior: smooth; }
 
 
 /* The darkening on a video poster, so the caption stays legible over any
-   still. A named class rather than an arbitrary Tailwind value -- see
-   DESIGN_RULES.md. */
+   still. A named class rather than an arbitrary Tailwind value. */
 .poster-vignette {
   background: radial-gradient(circle at 50% 50%, transparent 30%, rgba(0, 0, 0, 0.5));
 }

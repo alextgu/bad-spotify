@@ -44,10 +44,10 @@ app/
   demo/page.tsx    the demo ground             [working]
 components/
   Wordmark         PLACEHOLDER name, set in type
-  Reveal           fade-and-rise on scroll
+  BlurFade         fade-and-unblur on scroll
   MomentCard       one decision, explained     [working]
   Timeline         where each song lands       [working]
-  PipelineDiagram  the six steps               [TODO]
+  PipelineDiagram  the six steps               [working]
 lib/
   brand.ts         name, tagline, all copy     ← RENAME HERE
   types.ts         the contract with the agent [done]
@@ -68,18 +68,19 @@ working title needs replacing before this goes public alongside their API.
 
 ## The look
 
-Minimal product launch, played completely straight. One idea per screen, a lot
-of empty space, one accent colour. The product is absurd; the presentation is
-not. That gap is the joke, and it collapses the moment the page starts winking.
+**Being restarted. Nothing here describes it yet.**
 
-**Don't add:** gradient text, a second accent colour, icons on every card, or a
-second call to action. Each of those turns it back into a hackathon page.
+The previous pass's rules lived in `DESIGN_RULES.md`, `SITE_PROMPT.md` and
+`PREMIUM_SITE_PROMPT.md`, which are now in `_review/` and out of the repo, so
+that a new direction isn't arguing with a specification nobody chose any more.
+The tokens still in `tailwind.config.ts` are what that pass left behind, not a
+decision — replace them freely.
+
+The one thing that is a *decision* rather than a visual choice, recorded in
+`STATUS.md`: the look and feel is a DJ character, not a dashboard.
 
 ## What's left
 
-- **The diagram.** `components/PipelineDiagram.tsx` is a placeholder. The six
-  steps are listed in the file. Inline SVG is probably right — scales on a
-  projector, no dependency.
 - **The landing page.** Skeleton. Needs the framing judges read first.
 - **Drag-and-drop.** Spec says drop in a video and see the picks. Until the
   agent runs server-side, this should fall back to the sample and say so.
@@ -96,13 +97,6 @@ lead with the song.
 **The site survives a dead video.** Click a timeline dot and the cards still
 work even if the footage doesn't load — codec support varies and a projector
 laptop is not our laptop. Don't make anything depend on video playback.
-
-## Styling
-
-Tailwind, with the same palette as the agent's own screens (`tailwind.config.ts`)
-so the site and the running product look like one thing. `scene` blue is the
-world as it is; `target` orange is what we're about to do about it. That pairing
-is used consistently — keep it.
 
 ## Hosting
 

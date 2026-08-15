@@ -311,11 +311,18 @@ doc as though it were agreed.
   implements it.
 - **The name.** `bad spotify` is a working title in `frontend/lib/brand.ts`.
   Spotify's terms forbid "Spotify" in a product name, so it cannot ship as is.
-- **The site's visual design.** The current pass is *framework only*: white
-  showcase, tokens in `frontend/app/globals.css`, section 1 (advertisement) and
-  section 2 (the rippling mark) are structural placeholders with named slots.
-  Page transitions are planned; `.section-page` gives each section a one-screen
-  floor, and scroll-snap is deliberately off.
+- **The site's visual design.** Being restarted, and deliberately undescribed
+  here. The previous pass's specifications — `DESIGN_RULES.md`,
+  `SITE_PROMPT.md`, `PREMIUM_SITE_PROMPT.md` — were moved to `_review/` and out
+  of the repo, so a new direction isn't arguing with a spec nobody chose any
+  more. What survives is code, not doctrine: the tokens in
+  `frontend/tailwind.config.ts` and the classes in `frontend/app/globals.css`
+  are the old pass's leftovers and may be replaced wholesale. Nothing outside
+  `frontend/` depends on either.
+
+  Two things that are *not* visual choices and do carry over: the look and feel
+  is a DJ character rather than a dashboard (`STATUS.md`, 13 Aug), and the
+  reasoning stays visible — see "What to optimise for" at the end of this file.
 
 ---
 
