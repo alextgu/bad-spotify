@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -53,7 +53,11 @@ const TRAVEL = 0.9;
  */
 const REMAINDER = 0.35;
 
+type PageTransition = "fade" | "wipe" | "lift" | "fill";
+
 export default function ScrollController() {
+  const fillLayer = useRef<HTMLDivElement>(null);
+
   useLayoutEffect(() => {
     const mm = gsap.matchMedia();
 
@@ -141,6 +145,127 @@ export default function ScrollController() {
       /* ------------------------------------------------------- the travel -- */
       let moving = false;
 
+      const fade = () => {
+        const main = document.querySelector("main");
+        if (!main || document.querySelector(".pin-spacer .pin-spacer")) return;
+
+        gsap.fromTo(
+          main,
+          { opacity: 1 },
+          {
+            opacity: 0.86,
+            duration: TRAVEL / 2,
+            ease: "power1.inOut",
+            yoyo: true,
+            repeat: 1,
+            overwrite: true,
+          },
+        );
+      };
+
+      /**
+       * A page transition belongs to the section being entered, not to the
+       * wheel gesture. Internal stops in the two pinned sections therefore
+       * keep their continuous movement instead of replaying a curtain between
+       * beats of the same scene.
+       */
+      const transitionAt = (target: number) => {
+        const main = document.querySelector("main");
+        if (!main) return null;
+
+        for (const child of Array.from(main.children)) {
+          const block = child as HTMLElement;
+          const top = Math.round(block.getBoundingClientRect().top + window.scrollY);
+          if (Math.abs(top - target) > 8) continue;
+
+          const mode = block.dataset.pageTransition as PageTransition | undefined;
+          if (!mode) return null;
+
+          return {
+            mode,
+            surface: (block.firstElementChild as HTMLElement | null) ?? block,
+          };
+        }
+
+        return null;
+      };
+
+      const animateTransition = (target: number, direction: 1 | -1) => {
+        const transition = transitionAt(target);
+        if (!transition || transition.mode === "fade") {
+          fade();
+          return;
+        }
+
+        const { mode, surface } = transition;
+
+        if (mode === "wipe") {
+          gsap.fromTo(
+            surface,
+            {
+              clipPath:
+                direction === 1 ? "inset(0 0 0 100%)" : "inset(0 100% 0 0)",
+            },
+            {
+              clipPath: "inset(0 0 0 0)",
+              duration: TRAVEL,
+              ease: "power2.inOut",
+              clearProps: "clipPath",
+              overwrite: true,
+            },
+          );
+          return;
+        }
+
+        if (mode === "lift") {
+          gsap.fromTo(
+            surface,
+            {
+              y: direction * 34,
+              scale: 0.985,
+              opacity: 0.68,
+            },
+            {
+              y: 0,
+              scale: 1,
+              opacity: 1,
+              duration: TRAVEL,
+              ease: "power2.inOut",
+              clearProps: "transform,opacity",
+              overwrite: true,
+            },
+          );
+          return;
+        }
+
+        const layer = fillLayer.current;
+        if (!layer) {
+          fade();
+          return;
+        }
+
+        gsap.killTweensOf(layer);
+        gsap.set(layer, {
+          scaleY: 0,
+          transformOrigin: direction === 1 ? "bottom" : "top",
+        });
+        gsap
+          .timeline()
+          .to(layer, {
+            scaleY: 1,
+            duration: TRAVEL * 0.44,
+            ease: "power2.inOut",
+          })
+          .set(layer, {
+            transformOrigin: direction === 1 ? "top" : "bottom",
+          })
+          .to(layer, {
+            scaleY: 0,
+            duration: TRAVEL * 0.44,
+            ease: "power2.inOut",
+          });
+      };
+
       const go = (direction: 1 | -1) => {
         if (moving || !stops.length) return;
         const here = window.scrollY;
@@ -154,27 +279,7 @@ export default function ScrollController() {
 
         moving = true;
 
-        /* A shallow dip in opacity across the travel, so one screen dissolves
-           into the next instead of sliding past. It bottoms out at 0.86 — deep
-           enough to soften the hand-off, nowhere near a fade to black, which
-           would read as a page transition and make every gesture feel like a
-           commitment. Skipped inside a pinned section, where the content is
-           supposed to be continuous with itself. */
-        const main = document.querySelector("main");
-        if (main && !document.querySelector(".pin-spacer .pin-spacer")) {
-          gsap.fromTo(
-            main,
-            { opacity: 1 },
-            {
-              opacity: 0.86,
-              duration: TRAVEL / 2,
-              ease: "power1.inOut",
-              yoyo: true,
-              repeat: 1,
-              overwrite: true,
-            },
-          );
-        }
+        animateTransition(target, direction);
 
         gsap.to(window, {
           duration: TRAVEL,
@@ -241,5 +346,12 @@ export default function ScrollController() {
     return () => mm.revert();
   }, []);
 
-  return null;
+  return (
+    <div
+      ref={fillLayer}
+      data-page-transition-layer="fill"
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-[80] origin-bottom scale-y-0 bg-offset"
+    />
+  );
 }

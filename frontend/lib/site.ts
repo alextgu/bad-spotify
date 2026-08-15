@@ -63,7 +63,7 @@ export const hero = {
 /* ------------------------------------------------------- 2 · description -- */
 export const description = {
   statement:
-    "Your phone knows what you played last Tuesday. It has never once looked up.",
+    "It looks at the room. Then it picks the song that belongs there least.",
 
   /**
    * What goes in and what comes out, as a chain rather than a paragraph.
@@ -75,24 +75,24 @@ export const description = {
    */
   chain: [
     {
-      step: "In",
-      title: "Camera glasses",
-      body: "A frame every few seconds, and the last few seconds of sound.",
+      step: "See",
+      title: "Camera glasses catch the scene",
+      body: "A frame every few seconds, plus a short slice of ambient sound.",
     },
     {
       step: "Read",
-      title: "One look at the room",
-      body: "Setting, activity, mood, and how sure it is. Below 0.35 confidence it does nothing at all.",
+      title: "It understands the moment",
+      body: "It identifies the setting, activity, and mood, then stops if the read is uncertain.",
     },
     {
       step: "Invert",
-      title: "The exact opposite",
-      body: "That mood, reflected through the centre. Six strategies argue over what fits it worst.",
+      title: "It finds the musical opposite",
+      body: "Five mood axes flip, then six competing strategies argue over what fits worst.",
     },
     {
-      step: "Out",
-      title: "A song, on Spotify",
-      body: "Queued, or cut straight in if the room really changed. Then it tells you what it did.",
+      step: "Play",
+      title: "Spotify plays the worst fit",
+      body: "The winner is queued or cut in, with the reason shown alongside it.",
     },
   ],
   /** Three moves. Any more and this stops fitting one screen. */

@@ -29,22 +29,11 @@ export default function HeroCollage() {
         />
       </figure>
 
-      <figure
-        className="pointer-events-auto absolute bottom-[1%] right-[1%] z-20 h-[49%] w-[66%]
-                   rotate-[5.5deg] overflow-hidden rounded-[1.5rem]
-                   shadow-[0_30px_90px_rgba(0,0,0,0.58)] ring-1 ring-white/15
-                   transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]
-                   origin-center will-change-transform hover:rotate-[3deg] hover:scale-[1.04]"
-      >
-        <Image
-          src="/images/rock.png"
-          alt="A black-and-white rock band performing"
-          fill
-          priority
-          sizes="(min-width: 1024px) 37vw, 0px"
-          className="object-cover"
-        />
-      </figure>
+      {/* The rock photo used to sit here, rotated 5.5deg over the corner. Its
+          file was never added — `/images/rock.png` returns 404 — so it drew as
+          a shadowed empty rectangle with an alt string nobody could see. A
+          frame around nothing is worse than one less frame. If the photo turns
+          up, this is where it goes. */}
 
       <figure
         className="group pointer-events-auto absolute -right-[2%] -top-[5%] z-30 h-[82%] w-[48%]

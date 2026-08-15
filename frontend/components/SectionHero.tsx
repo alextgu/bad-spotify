@@ -1,6 +1,7 @@
 import Label from "@/components/Label";
 import HeroCollage from "@/components/HeroCollage";
 import LogoMark from "@/components/LogoMark";
+import NowPlayingCard from "@/components/NowPlayingCard";
 import Slot from "@/components/Slot";
 import { brand } from "@/lib/brand";
 import { hero } from "@/lib/site";
@@ -89,6 +90,11 @@ export default function SectionHero() {
                 </span>
               </div>
             </div>
+
+            {/* The sticker sits between the cinematic card and the credit,
+                so the foot of the hero reads left to right as: what is coming,
+                what is playing, who made it. */}
+            <NowPlayingCard />
 
             <a
               href="https://devpost.com/software/spotify-cj"

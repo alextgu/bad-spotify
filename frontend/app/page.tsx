@@ -53,12 +53,12 @@ export default function Home() {
         {/* 2 — the claim, then two worked examples that flood in from
             opposite sides. Pinned, so it is longer than one screen: the stops
             are the beats, and both examples are real recorded output. */}
-        <div data-stops="0,0.45,1">
+        <div data-stops="0,0.45,1" data-page-transition="fade">
           <SectionDescription />
         </div>
 
         {/* 3 */}
-        <div>
+        <div data-page-transition="wipe">
           <SectionDemo />
         </div>
 
@@ -74,23 +74,23 @@ export default function Home() {
 
             It carries its own opaque background because this is the one screen
             with fine detail and a moving control on it. */}
-        <div data-stops="0,1">
+        <div data-stops="0,1" data-page-transition="fade">
           <SectionTryIt />
         </div>
 
         {/* 5 — the screen that decides whether this reads as an agent or as a
             shuffle button, so it shows the mechanism rather than claiming it. */}
-        <div>
+        <div data-page-transition="lift">
           <SectionPipeline />
         </div>
 
         {/* 6 */}
-        <div>
+        <div data-page-transition="fill">
           <SectionResults />
         </div>
 
         {/* 7 — the one screen anybody reads at length. */}
-        <div>
+        <div data-page-transition="wipe">
           <SectionFAQ />
         </div>
       </main>

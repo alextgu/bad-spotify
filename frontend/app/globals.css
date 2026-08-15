@@ -406,3 +406,23 @@ video {
 @media (prefers-reduced-motion: reduce) {
   .rig-camera-pulse { animation: none; opacity: 0; }
 }
+
+/* ---------------------------------------------------------------------------
+   THE NOW-PLAYING STICKER'S EQUALISER
+
+   Four bars on four different periods, none a multiple of another, so they
+   never march in step. Same rule as the logo's sparkles: synchronised motion
+   reads as a loading indicator, and this has to read as audio.
+
+   `scaleY` off a bottom origin rather than animating `height`, so it stays on
+   the compositor and costs nothing.
+--------------------------------------------------------------------------- */
+@keyframes eq {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}

@@ -297,22 +297,59 @@ export default function SectionTryIt() {
             {tryIt.body}
           </p>
 
-          <div className="mt-section-sm flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => setPicking(true)}
-              className="rounded-full bg-ink px-8 py-4 font-mono text-label uppercase text-paper
-                         transition-[transform,background-color] duration-interaction ease-calm
-                         hover:-translate-y-0.5 hover:bg-offset-ink"
-            >
-              Use a sample clip
-            </button>
+          <div className="mx-auto mt-rest max-w-[48rem] space-y-3 text-left">
+            {samples.map((sample) => (
+              <button
+                key={sample.id}
+                data-sample-card
+                type="button"
+                onClick={(event) =>
+                  choose(sample, event.currentTarget.getBoundingClientRect())
+                }
+                className="group grid w-full overflow-hidden rounded-card border border-hairline bg-paper text-left
+                           transition-[transform,border-color] duration-interaction ease-calm
+                           hover:-translate-y-1 hover:border-ink focus-visible:-translate-y-1
+                           sm:grid-cols-[minmax(220px,0.9fr)_1.1fr]"
+              >
+                <div className="relative aspect-[16/10] overflow-hidden bg-ink sm:aspect-auto">
+                  <video
+                    className="h-full w-full object-cover"
+                    src={sample.src}
+                    muted
+                    playsInline
+                    preload="metadata"
+                  />
+                  <span className="absolute bottom-3 right-3">
+                    <Label className="!text-paper/70">{sample.length}</Label>
+                  </span>
+                </div>
 
-            {/* Wired now, and wired honestly. The rule that kept this
-                disabled still holds -- a control that silently does the OTHER
-                thing is worse than one plainly switched off -- so it never
-                falls back to the sample. It either shows your footage with
-                your reasoning beside it, or it says exactly why it cannot. */}
+                <div className="flex flex-col justify-center p-5 sm:p-6">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="font-display text-title">{sample.title}</h3>
+                    {sample.placeholder && (
+                      <Label className="shrink-0 !text-graphite/70">
+                        placeholder
+                      </Label>
+                    )}
+                  </div>
+                  <p className="mt-2 text-caption text-graphite">{sample.blurb}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Wired now, and wired honestly. The rule that kept this disabled
+              still holds -- a control that silently does the OTHER thing is
+              worse than one plainly switched off -- so it never falls back to
+              the sample. It either shows your footage with your reasoning
+              beside it, or it says exactly why it cannot.
+
+              The row wrapper is what the merge lost: the upload control used
+              to sit in a flex row beside a "use a sample" button, and when the
+              chooser became a list of cards the button survived while its
+              container did not. */}
+          <div className="mt-rest flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               onClick={() => file.current?.click()}
