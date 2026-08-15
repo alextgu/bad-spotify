@@ -146,6 +146,10 @@ def main() -> None:
     ap.add_argument("--lan", action="store_true",
                     help="bind every interface so a phone on the same wifi can "
                          "reach /phone -- the companion app for the glasses")
+    ap.add_argument("--https", action="store_true",
+                    help="serve TLS with a self-signed certificate. Phones only "
+                         "allow the camera in a secure context, so /phone needs "
+                         "this over the network")
     ap.add_argument("--quiet", action="store_true", help="only verdicts and errors")
     ap.add_argument("--turbo", action="store_true",
                     help="collapse DJ time bounds (verification runs only -- "
@@ -185,18 +189,30 @@ def main() -> None:
             from badspotify.hud.server import serve_in_thread
             host = cfg.get_path("hud.host", "127.0.0.1")
             port = int(cfg.get_path("hud.port", 8420))
-            server = serve_in_thread(rt, host, port)
-            print(f"[hud] DJ face:          http://{host}:{port}/dj")
-            print(f"[hud] engineering view: http://{host}:{port}/")
-            print(f"[hud] live (this machine): http://127.0.0.1:{port}/live")
+            lan = _lan_address()
+            tls = None
+            if args.https:
+                from badspotify.hud.tls import ensure_cert
+                tls = ensure_cert(lan)
+
+            server = serve_in_thread(rt, host, port, tls=tls)
+            scheme = "https" if tls else "http"
+            local = "127.0.0.1" if host in ("0.0.0.0", "::") else host
+            print(f"[hud] DJ face:          {scheme}://{local}:{port}/dj")
+            print(f"[hud] engineering view: {scheme}://{local}:{port}/")
+            print(f"[hud] live:             {scheme}://{local}:{port}/live")
             if host in ("0.0.0.0", "::"):
-                lan = _lan_address()
-                print(f"[hud] companion app:    http://{lan}:{port}/phone")
-                print("[hud] NOTE: phones only allow the camera on HTTPS or "
-                      "localhost. On Android open\n"
-                      "      chrome://flags/#unsafely-treat-insecure-origin-"
-                      f"as-secure and add http://{lan}:{port}\n"
-                      "      -- or put a tunnel in front of it.")
+                print(f"[hud] companion app:    {scheme}://{lan}:{port}/phone")
+                if tls:
+                    print("[hud] The phone warns that the certificate is not "
+                          "trusted -- it is signed by this\n"
+                          "      machine, which is the point. Tap advanced, "
+                          "then proceed; the camera\n"
+                          "      works after that.")
+                else:
+                    print("[hud] NOTE: phones only allow the camera on HTTPS "
+                          "or localhost, so it will be\n"
+                          "      blocked at that address. Add --https.")
         except Exception as e:
             print(f"[hud] disabled ({e})")
 

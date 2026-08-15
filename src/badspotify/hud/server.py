@@ -276,7 +276,8 @@ def create_app(runtime=None):
     return app
 
 
-def serve_in_thread(runtime, host: str = "127.0.0.1", port: int = 8420):
+def serve_in_thread(runtime, host: str = "127.0.0.1", port: int = 8420,
+                    tls: tuple[str, str] | None = None):
     import threading
 
     import uvicorn
@@ -295,8 +296,15 @@ def serve_in_thread(runtime, host: str = "127.0.0.1", port: int = 8420):
             print("[hud] no websocket library -- pip install 'uvicorn[standard]'; "
                   "the HUD will not update live")
 
+    #HTTPS only when asked. It exists so a phone will enable its camera --
+    #browsers gate getUserMedia behind a secure context -- and it costs a
+    #one-time warning on the phone, so it is not the default for local work.
+    extra = {}
+    if tls:
+        extra["ssl_certfile"], extra["ssl_keyfile"] = tls
+
     config = uvicorn.Config(app, host=host, port=port,
-                            log_level="warning", ws=ws_impl)
+                            log_level="warning", ws=ws_impl, **extra)
     server = uvicorn.Server(config)
     t = threading.Thread(target=server.run, daemon=True)
     t.start()

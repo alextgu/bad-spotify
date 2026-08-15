@@ -56,3 +56,6 @@ data/sessions/
 # page is silent with nothing anywhere to explain why.
 !frontend/public/audio/*.mp3
 data/discovered_uris.json
+
+#Generated locally so a phone will enable its camera. Machine-specific.
+.tls/
