@@ -68,6 +68,13 @@ export const description = {
     { title: "Scores it", body: "Energy, valence, tension" },
     { title: "Drops the needle", body: "Perfect, or exactly wrong" },
   ],
+  /**
+   * The examples, which do more work than the three abstractions above them.
+   * Both are real output — `park -> Drowning Pool` and `library -> Sandstorm`
+   * are what the loop actually produces, and are the two cases the headless
+   * run is checked against.
+   */
+  examples: "A sunlit park gets Drowning Pool. A quiet library gets Sandstorm. Never at random — random isn't funny.",
 } as const;
 
 /* -------------------------------------------------------------- 3 · demo -- */
@@ -95,31 +102,60 @@ export const tryIt = {
 /* ---------------------------------------------------------- 5 · pipeline -- */
 export const pipeline = {
   title: "A closer look.",
-  body: "Six steps, about every five seconds. The two that matter are the ones where the line bends: nothing changes, so it doesn't spend a model call — and six theories of the right wrong answer, argued out by a judge.",
+  /* One sentence. It was three, and the third column of notes below had
+     nowhere to go — this screen is the diagram, not the prose. */
+  body: "Six steps, about every five seconds. The two worth watching are where the line bends.",
+  /**
+   * The three decisions underneath the diagram that a drawing can't show.
+   * Kept to three because the diagram is the subject of the screen and this
+   * is the caption — a fourth would push the section past one viewport.
+   */
+  notes: [
+    {
+      title: "Distance defends, the model lands it",
+      body: "The mood vector is reflected through the centre of the cube — instant, and arguable. But distance alone picks noise records nobody knows. Only a model knows the true opposite of a sunlit park is funeral doom.",
+    },
+    {
+      title: "Six theories that disagree",
+      body: "Wrong on every axis, wrong about energy, wrong in meaning, wrong about the setting, wrong about the occasion, and one that goes looking outside the corpus. Three that argue beat five that agree.",
+    },
+    {
+      title: "It knows when it doesn't know",
+      body: "Below 0.35 confidence it does nothing. Pointed at an unreadable frame it reported “obstructed or blocked camera view” at 0.10 and correctly refused to act.",
+    },
+  ],
 } as const;
 
 /* ----------------------------------------------------------- 6 · results -- */
 export const results = {
   title: "What came out of it.",
+  /**
+   * Every one of these is measured or countable in the repo.
+   *
+   * "1.4s scene to sound" used to sit here and has been removed: the vision
+   * call is measured at a 1.17s median across four models, three calls each,
+   * but nothing measures the full scene-to-speaker path, so the number was a
+   * guess wearing a decimal point.
+   */
   metrics: [
-    { value: "1.4", unit: "s", label: "Scene to sound" },
-    { value: "40", unit: "kb", label: "Per sample" },
+    { value: "1.17", unit: "s", label: "Scene read, median" },
+    { value: "192", unit: "", label: "Tests" },
+    { value: "47", unit: "", label: "Songs, by hand" },
     { value: "0", unit: "", label: "Images stored" },
-    { value: "6", unit: "", label: "Cues per day" },
   ],
   /** Things that are true, and checkable in the repo. Keep it to three. */
   proud: [
     {
       title: "It is never silent",
-      body: "Every model, player and voice degrades to a stand-in, and under all of them sits a pre-picked fallback deck.",
+      body: "Every model, player and voice degrades to a stand-in, and under all of them sits a pre-picked fallback deck. Silence is the only real bug.",
     },
     {
-      title: "Six theories, not one score",
-      body: "Mood, tempo, lyrics, setting, occasion and catalogue each propose a different wrong answer. A judge picks between them.",
+      title: "The reasoning is the product",
+      body: "Watching it read a room correctly and then queue the worst possible answer is the whole thing in one screen. A shuffle button can't show its working.",
     },
     {
-      title: "192 tests",
-      body: "Each one guarding a specific way the demo could break, including the three that already had.",
+      title: "Nothing here is faked",
+      body: "Where something is a placeholder the interface says so. The upload button is switched off and labelled rather than quietly playing the sample instead.",
     },
   ],
 } as const;
@@ -140,11 +176,15 @@ export const faq = [
   },
   {
     q: "What's faked for the demo?",
-    a: "The scene-change threshold is hand-tuned per location; everything else is live.",
+    a: "The vision step is real and has run against the live model, but every frame it has seen so far was synthetic — it has never been pointed at real footage. The Spotify player is built and tested against a stand-in, and nobody has yet heard it come out of a real speaker. Uploading your own clip is switched off rather than quietly playing the sample.",
   },
   {
     q: "Isn't this one prompt in a trenchcoat?",
-    a: "The prompt is the cheapest part and we're not pretending otherwise.",
+    a: "The prompt is the cheapest part and we're not pretending otherwise. What's around it: a change gate that refuses to spend a model call when nothing moved, six strategies that disagree, a judge, and a DJ that won't thrash.",
+  },
+  {
+    q: "What broke?",
+    a: "A four-second timeout sat below the model's real 5–8s latency, so every call silently fell back to a canned read and looked like it was working. Two safety mechanisms deadlocked and nothing played on calm footage. And librosa removed the function we used for tempo, zeroing every audio feature for days without an error.",
   },
 ] as const;
 

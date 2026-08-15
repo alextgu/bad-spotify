@@ -33,6 +33,12 @@ export default function SectionDescription() {
           <h2 className="mx-auto max-w-statement text-center font-display text-headline">
             {description.statement}
           </h2>
+          {/* The examples do more work than the three abstractions below them:
+              "gets Drowning Pool" is a thing you can picture, "reads the room"
+              is not. Both are real output from the headless run. */}
+          <p className="mx-auto mt-block max-w-measure-sub text-center text-body text-graphite">
+            {description.examples}
+          </p>
         </Reveal>
 
         <div className="mt-section-sm grid gap-rest md:grid-cols-3">

@@ -35,11 +35,25 @@ export default function SectionPipeline() {
           </p>
         </Reveal>
 
-        <Reveal delay={0.12} className="mt-rest overflow-x-auto">
+        <Reveal delay={0.12} className="mt-block overflow-x-auto">
           <div className="min-w-diagram">
             <PipelineDiagram />
           </div>
         </Reveal>
+
+        {/* The three decisions the drawing can't show. Three, not four —
+            the diagram is the subject of this screen and these are its
+            caption; a fourth column pushes the section past one viewport. */}
+        <dl className="mt-block grid gap-x-8 gap-y-5 md:grid-cols-3">
+          {pipeline.notes.map((note, i) => (
+            <Reveal key={note.title} delay={0.2 + i * 0.08}>
+              <dt className="border-t border-hairline pt-3 font-display text-[0.95rem] font-semibold">
+                {note.title}
+              </dt>
+              <dd className="mt-1.5 text-caption text-graphite">{note.body}</dd>
+            </Reveal>
+          ))}
+        </dl>
       </div>
     </Screen>
   );
