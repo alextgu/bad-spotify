@@ -45,21 +45,26 @@ scene is usually read a few seconds before the song actually lands.
 
 ```
 app/
-  page.tsx         the launch page             [working]
-  demo/page.tsx    the demo ground             [working]
+  page.tsx         the launch page — seven screens, discrete scroll
+  demo/page.tsx    the demo ground
 components/
-  LogoMark         animated pink-and-purple mark [working]
-  HeroCollage      forest, rock and notes title stack [working]
-  BlurFade         fade-and-unblur on scroll
-  MomentCard       one decision, explained     [working]
-  Timeline         where each song lands       [working]
-  PipelineDiagram  the six steps               [working]
+  SectionHero..FAQ the seven screens, one file each
+  ScrollController one gesture, one stop; reads data-stops/data-page-transition
+  GlassesModel     the 3D glasses (GlassesRig is its no-WebGL fallback)
+  HeroCollage      forest-and-notes title stack + the Spotify bar
+  NowPlayingCard   the real Bodies embed, hover glow
+  ClipPicker       choose a recorded clip; FLIP into the workbench
+  MomentCard, Timeline   the demo ground's cards
+  Reveal, Screen, Slot, Label, LogoMark   shared primitives
 lib/
-  brand.ts         name, tagline, all copy     ← RENAME HERE
-  types.ts         the contract with the agent [done]
+  brand.ts         name + positioning     ← the one place the name lives
+  site.ts          every word on the launch page
+  cues.ts          try-it data, read from public/sessions/*.json
+  samples.ts       the clips on offer
+  types.ts         the contract with the agent
   session.ts       loading + which moment is live
 public/
-  sessions/        recorded runs
+  sessions/        recorded runs (three from real footage)
   videos/          the footage
 ```
 
@@ -86,12 +91,15 @@ wireframe. Everything else about how the page looks is open.
 
 ## What's left
 
-- **The landing page.** Skeleton. Needs the framing judges read first.
-- **Drag-and-drop.** Spec says drop in a video and see the picks. Until the
-  agent runs server-side, this should fall back to the sample and say so.
-- **Losing candidates.** The session file records what it *considered* and
-  rejected. Showing that makes the reasoning much more convincing — three
-  competing strategies are more interesting than one answer appearing.
+Everything this list used to hold is built: the landing page is seven finished
+screens, upload works against the local agent (and says exactly why when the
+agent isn't running, rather than falling back to the sample), and the try-it
+panel shows the losing candidates with their scores. What actually remains:
+
+- **The hero and demo films.** Both are labelled placeholder slots in
+  `lib/site.ts`; the shoot notes are written into the slots themselves.
+- **A 375px pass.** The pins and the discrete scroll switch off below 1000px
+  and the stacked fallbacks exist, but nobody has verified a phone visually.
 
 ## Two things to keep
 
