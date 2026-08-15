@@ -222,33 +222,41 @@ video {
 }
 
 /* ---------------------------------------------------------------------------
-   THE GLASSES, and the grid behind them — section 2.
+   THE GLASSES — section 2.
 
-   Built out of divs and CSS 3D rather than a downloaded model, and that is a
-   decision rather than a shortcut. A Meta Ray-Ban model off the internet is
-   somebody else's trademarked product design with an unverifiable licence, it
-   is a megabyte of external asset that can fail on a projector, and the first
-   rule in this repo is that nothing may fail live. This is a few hundred
-   bytes, it is ours, it stays sharp at any resolution, and it cannot 404.
+   Divs and CSS 3D rather than a downloaded model. A Meta Ray-Ban model off the
+   internet is someone else's trademarked product design with an unverifiable
+   licence, it is a megabyte of external asset that can fail on a projector,
+   and the first rule in this repo is that nothing may fail live.
 
-   Restored from `ProductRotator`, which the seven-screen rebuild deleted, and
-   retinted from the old orange to the current green.
+   Rebuilt larger and with actual construction: a frame front with rim and
+   inner bevel, hinges, tapered temples with tips, and lenses that carry a
+   tint, a sheen and an inner shadow. The parts are separate elements so the
+   3D transform has something to be three-dimensional ABOUT — a single rounded
+   rectangle spinning reads as a spinning rectangle.
+
+   NO `animation` on `.rig`. A CSS animation owns `transform` outright and
+   overrides inline styles every frame, so a keyframe spin cannot be dragged.
+   Rotation is one number in GlassesRig.tsx and both the drift and the pointer
+   add to it.
 --------------------------------------------------------------------------- */
 .rig-scene {
-  --rig-lens-w: 132px;
-  --rig-lens-h: 78px;
-  --rig-temple-l: 150px;
-  perspective: 900px;
+  --rig-lens-w: 190px;
+  --rig-lens-h: 112px;
+  --rig-temple-l: 210px;
+  --rig-frame: #2b2926;
+  --rig-frame-lit: #4a463f;
+  perspective: 1300px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 260px;
+  min-height: 340px;
 }
 
 .rig {
   position: relative;
   transform-style: preserve-3d;
-  animation: rig-spin 18s linear infinite;
+  will-change: transform;
 }
 
 .rig-front {
@@ -257,69 +265,118 @@ video {
   transform-style: preserve-3d;
 }
 
+/* The lens: a tinted pane inside a thick rim. The inset shadow is what stops
+   it reading as a flat swatch — it gives the pane an edge to sit behind. */
 .rig-lens {
   position: relative;
   width: var(--rig-lens-w);
   height: var(--rig-lens-h);
-  border: 2px solid #8e877c;
-  border-radius: 22px;
-  background: linear-gradient(140deg, rgba(28, 168, 92, 0.16), rgba(20, 20, 22, 0.72));
+  border: 5px solid var(--rig-frame);
+  border-radius: 40% 40% 44% 44% / 46% 46% 54% 54%;
+  background:
+    linear-gradient(152deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.05) 26%, transparent 42%),
+    linear-gradient(200deg, rgba(28, 168, 92, 0.22), rgba(24, 26, 30, 0.86));
+  box-shadow:
+    inset 0 2px 10px rgba(255, 255, 255, 0.16),
+    inset 0 -8px 18px rgba(0, 0, 0, 0.5),
+    0 10px 26px -12px rgba(20, 18, 16, 0.5);
+}
+
+/* A highlight along the top rim, so the frame catches light from above the
+   way a real one does. */
+.rig-lens::after {
+  content: "";
+  position: absolute;
+  inset: -5px -5px auto -5px;
+  height: 46%;
+  border-radius: 40% 40% 60% 60% / 70% 70% 30% 30%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 72%);
+  pointer-events: none;
 }
 
 .rig-bridge {
-  width: 34px;
-  height: 12px;
-  border-top: 2px solid #8e877c;
-  border-radius: 6px 6px 0 0;
+  position: relative;
+  width: 44px;
+  height: 20px;
+  border-top: 5px solid var(--rig-frame);
+  border-radius: 14px 14px 0 0;
+  transform: translateY(-16%);
 }
+
+/* The hinge blocks where the temples meet the front. Small, but they are what
+   make the join look built rather than glued. */
+.rig-front::before,
+.rig-front::after {
+  content: "";
+  position: absolute;
+  top: 16%;
+  width: 12px;
+  height: 20px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--rig-frame-lit), var(--rig-frame));
+  transform: translateZ(-4px);
+}
+
+.rig-front::before { left: -6px; }
+.rig-front::after { right: -6px; }
 
 .rig-temple {
   position: absolute;
-  top: 14px;
+  top: 17%;
   width: var(--rig-temple-l);
-  height: 10px;
-  border-radius: 5px;
-  background: #8e877c;
+  height: 13px;
+  border-radius: 6px 3px 3px 6px;
+  background: linear-gradient(180deg, var(--rig-frame-lit) 0%, var(--rig-frame) 55%, #1d1b19 100%);
+}
+
+/* The tip: the part that goes behind the ear, angled down. */
+.rig-temple::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 34px;
+  height: 13px;
+  border-radius: 4px 8px 8px 4px;
+  background: linear-gradient(180deg, #35322d, #171614);
+  transform-origin: left center;
+  transform: rotateZ(9deg);
 }
 
 .rig-temple-left {
   left: 0;
   transform-origin: left center;
-  transform: rotateY(-84deg);
+  transform: rotateY(-86deg);
 }
 
 .rig-temple-right {
   right: 0;
   transform-origin: right center;
-  transform: rotateY(84deg);
+  transform: rotateY(86deg);
 }
 
 /* The camera. The only part of the hardware the agent actually needs, so it is
    the only part that gets the accent colour. */
 .rig-camera {
   position: absolute;
-  top: 10px;
-  left: 12px;
-  width: 12px;
-  height: 12px;
+  top: 12px;
+  left: 14px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
-  background: #1ca85c;
+  background: radial-gradient(circle at 34% 30%, #6ee7a8, #1ca85c 62%, #0c5c33);
+  box-shadow: 0 0 12px rgba(28, 168, 92, 0.55);
 }
 
 .rig-camera-pulse {
   position: absolute;
-  top: 10px;
-  left: 12px;
-  width: 12px;
-  height: 12px;
+  top: 12px;
+  left: 14px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
   border: 1px solid #1ca85c;
   animation: rig-pulse 5s ease-out infinite;   /* one look every ~5s */
-}
-
-@keyframes rig-spin {
-  from { transform: rotateX(-8deg) rotateY(0deg); }
-  to   { transform: rotateX(-8deg) rotateY(360deg); }
 }
 
 @keyframes rig-pulse {
@@ -339,6 +396,5 @@ video {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rig { animation: none; transform: rotateX(-8deg) rotateY(-24deg); }
   .rig-camera-pulse { animation: none; opacity: 0; }
 }

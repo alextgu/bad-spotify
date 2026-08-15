@@ -177,7 +177,7 @@ export default function SectionDescription() {
           invert, song. */}
       <div
         ref={intro}
-        className="relative mx-auto grid w-full max-w-content items-center gap-rest px-gutter lg:grid-cols-[0.85fr_1fr]"
+        className="relative mx-auto grid w-full max-w-content items-center gap-rest px-gutter lg:grid-cols-[1fr_1fr]"
       >
         <div className="hidden lg:block">
           <GlassesRig />
@@ -188,18 +188,20 @@ export default function SectionDescription() {
             {description.statement}
           </h2>
 
-          <ol className="mt-rest space-y-4">
+          {/* Four lines, each one big. The explanatory sentence under every
+              step is gone and so are the rules between them: four titles, four
+              paragraphs and four dividers made a specification sheet out of
+              what should be a single readable idea. The step label carries the
+              sequence, so the horizontal rules were saying it twice. */}
+          <ol className="mt-rest space-y-5">
             {description.chain.map((link) => (
-              <li key={link.step} className="flex gap-4 border-t border-hairline pt-3">
-                <Label tone="offset" className="w-12 shrink-0 pt-1">
+              <li key={link.step} className="flex items-baseline gap-5">
+                <Label tone="offset" className="w-14 shrink-0">
                   {link.step}
                 </Label>
-                <div>
-                  <p className="font-display text-title">{link.title}</p>
-                  <p className="mt-1 max-w-measure text-caption text-graphite">
-                    {link.body}
-                  </p>
-                </div>
+                <p className="font-display text-[clamp(1.5rem,2.3vw,2.1rem)] font-semibold leading-tight tracking-[-0.03em]">
+                  {link.title}
+                </p>
               </li>
             ))}
           </ol>
