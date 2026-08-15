@@ -33,7 +33,9 @@ class Config(dict):
 
 def load_config(path: str | Path | None = None) -> Config:
     path = Path(path) if path else ROOT / "config.yaml"
-    with open(path) as f:
+    # encoding is explicit: the announce template holds an em dash, and on
+    # Windows the default is the locale codepage, which mangles it silently.
+    with open(path, encoding="utf-8") as f:
         return Config(yaml.safe_load(f) or {})
 
 

@@ -47,7 +47,7 @@ class Corpus:
         for candidate in [path, ROOT / "data" / "corpus.json",
                           ROOT / "data" / "corpus.seed.json"]:
             if candidate and Path(candidate).exists():
-                raw = json.loads(Path(candidate).read_text())
+                raw = json.loads(Path(candidate).read_text(encoding="utf-8"))
                 tracks = [
                     Track(
                         id=r["id"], title=r["title"], artist=r["artist"],

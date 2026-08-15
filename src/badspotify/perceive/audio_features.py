@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, asdict
 
 import numpy as np
-from ..log import notice as print  # stdout is reserved for data
+from ..log import notice  # stdout is reserved for data
 
 
 @dataclass
@@ -54,27 +54,67 @@ def extract(audio: np.ndarray | None, sr: int = 16000) -> AudioFeatures:
     except Exception:
         return feats
 
-    try:
+    onsets: np.ndarray = np.asarray([])
+
+    # Each feature is guarded on its own. They used to share one try block, and
+    # when `librosa.beat.tempo` was removed in 1.0 the exception took centroid,
+    # flatness and pulse down with it -- all four read zero for days and nothing
+    # said so. One dead feature must not silence the others.
+    def _guard(name: str, fn):
+        try:
+            return fn()
+        except Exception as e:  #Keeps the main loop running after analysis errors
+            notice(f"[audio] {name} degraded: {e}")
+            return None
+
+    def _onsets():
         onset_env = librosa.onset.onset_strength(y=x, sr=sr)
-        onsets = librosa.onset.onset_detect(onset_envelope=onset_env, sr=sr)
+        return onset_env, librosa.onset.onset_detect(
+            onset_envelope=onset_env, sr=sr)
+
+    got = _guard("onsets", _onsets)
+    if got is not None:
+        onset_env, onsets = got
         duration = max(len(x) / sr, 1e-6)
         feats.onset_rate = len(onsets) / duration
 
-        tempo = librosa.beat.tempo(onset_envelope=onset_env, sr=sr)
-        feats.tempo_bpm = float(tempo[0]) if len(tempo) else 0.0
+        # librosa 1.0 moved tempo out of `beat` and re-exports it on `feature`.
+        # Don't reach for `librosa.feature.rhythm` -- the submodule isn't bound
+        # as an attribute until something imports it, so getattr misses it.
+        tempo_fn = (getattr(librosa.feature, "tempo", None)
+                    or getattr(librosa.beat, "tempo", None))
+        if tempo_fn is None:
+            notice("[audio] tempo unavailable in librosa "
+                   f"{getattr(librosa, '__version__', '?')}")
+        else:
+            tempo = _guard("tempo", lambda: tempo_fn(
+                onset_envelope=onset_env, sr=sr))
+            if tempo is not None:
+                feats.tempo_bpm = float(tempo[0]) if len(tempo) else 0.0
 
-        feats.spectral_centroid = float(np.mean(librosa.feature.spectral_centroid(y=x, sr=sr)))
-        feats.spectral_flatness = float(np.mean(librosa.feature.spectral_flatness(y=x)))
+    centroid = _guard("centroid", lambda: float(
+        np.mean(librosa.feature.spectral_centroid(y=x, sr=sr))))
+    if centroid is not None:
+        feats.spectral_centroid = centroid
 
-        #Measures how consistent the beat timing is
-        if len(onsets) > 3:
+    flatness = _guard("flatness", lambda: float(
+        np.mean(librosa.feature.spectral_flatness(y=x))))
+    if flatness is not None:
+        feats.spectral_flatness = flatness
+
+    #Measures how consistent the beat timing is
+    if len(onsets) > 3:
+        def _pulse():
             times = librosa.frames_to_time(onsets, sr=sr)
             iois = np.diff(times)
             if len(iois) > 1 and np.mean(iois) > 0:
                 cv = float(np.std(iois) / np.mean(iois))
-                feats.pulse_regularity = float(max(0.0, 1.0 - min(cv, 1.0)))
-    except Exception as e:  #Keeps the main loop running after analysis errors
-        print(f"[audio] feature extraction degraded: {e}")
+                return float(max(0.0, 1.0 - min(cv, 1.0)))
+            return None
+
+        pulse = _guard("pulse", _pulse)
+        if pulse is not None:
+            feats.pulse_regularity = pulse
 
     return feats
 

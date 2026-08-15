@@ -32,13 +32,17 @@ def log(msg: str) -> None:
 
 def read_json(path: str | None = None) -> dict:
     """Read JSON from a file, or from stdin if no path is given."""
+    #utf-8-sig, not utf-8: PowerShell puts a BOM at the front of anything it
+    #pipes, so `describe.py | invert.py` died on Windows with "Unexpected
+    #UTF-8 BOM" before the second script had read a thing. Plain utf-8 text
+    #decodes identically under this codec, so it costs nothing elsewhere.
     if path:
-        return json.loads(Path(path).read_text())
+        return json.loads(Path(path).read_text(encoding="utf-8-sig"))
     if sys.stdin.isatty():
         log("error: expected JSON on stdin, or pass a file with --in\n"
             "       e.g.  python scripts/io/invert.py --in scene.json")
         raise SystemExit(2)
-    raw = sys.stdin.read().strip()
+    raw = sys.stdin.read().lstrip("﻿").strip()
     if not raw:
         log("error: got empty input")
         raise SystemExit(2)

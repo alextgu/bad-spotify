@@ -54,7 +54,7 @@ class ReplaySource:
             )
             hint_file = self.dir / "scene.json"
             if hint_file.exists():
-                self._hints = json.loads(hint_file.read_text())
+                self._hints = json.loads(hint_file.read_text(encoding="utf-8"))
 
     def close(self) -> None:
         pass
