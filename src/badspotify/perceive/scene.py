@@ -38,6 +38,27 @@ The vibe axes, all 0..1:
   brightness  0 = dark/dim,       1 = glaring/bright
   organicness 0 = synthetic/manmade, 1 = natural/human/acoustic
 
+`references` is what KIND of occasion this is, in 2-5 short lowercase tags:
+the event, the setting and the social register. "wedding", "funeral",
+"boardroom", "rave", "children's party", "gym", "commute", "festival",
+"religious ceremony", "date night", "hospital". Name the specific occasion
+where you can see one -- "diwali celebration" and "graduation ceremony" are
+far more useful than "gathering".
+
+DO name things that are RECOGNISABLE and public: landmarks ("the White House",
+"Camp Nou"), teams, brands, events, and public figures who are unmistakably
+identifiable and famous ("Taylor Swift", "a US president at a podium"). These
+are entities, and naming them is what lets the rest of the system be specific
+instead of generic.
+
+HARD RULE: name WHAT something is, never WHO someone is *like*. Do not report
+anyone's race, ethnicity, religion, sex, age, body or appearance -- not here
+and nowhere else in your answer. That applies to famous people too: "Taylor
+Swift" is a name, and is fine; anything about how a person looks is not, and
+is never what makes any of this work. For members of the public who are not
+public figures, describe only what they are DOING ("someone waiting in a
+queue"), never what they appear to be.
+
 Set `confidence` honestly. A blurry or ambiguous frame should score low --
 downstream logic uses this to decide whether to act at all."""
 
@@ -53,27 +74,32 @@ _MOCK_TABLE = [
          activity="walking slowly on a path", social_context="small_group",
          mood_label="peaceful", vibe=dict(valence=0.85, arousal=0.15, density=0.25,
                                           brightness=0.9, organicness=0.9),
-         tempo=TempoFeel.SLOW, meter=Meter.STEADY, colors=["#8FBF6A", "#CFE8A0", "#4A7BC8"]),
+         tempo=TempoFeel.SLOW, meter=Meter.STEADY, colors=["#8FBF6A", "#CFE8A0", "#4A7BC8"],
+         references=["park", "outdoors", "leisure"]),
     dict(setting="quiet library aisle between tall shelves",
          activity="browsing books", social_context="alone",
          mood_label="hushed", vibe=dict(valence=0.55, arousal=0.08, density=0.3,
                                         brightness=0.35, organicness=0.6),
-         tempo=TempoFeel.STILL, meter=Meter.UNKNOWN, colors=["#6B5A45", "#A08C6E", "#2E2A24"]),
+         tempo=TempoFeel.STILL, meter=Meter.UNKNOWN, colors=["#6B5A45", "#A08C6E", "#2E2A24"],
+         references=["library", "study", "quiet public space"]),
     dict(setting="child's birthday party, cake with candles",
          activity="singing around a table", social_context="crowd",
          mood_label="joyful", vibe=dict(valence=0.95, arousal=0.7, density=0.8,
                                         brightness=0.8, organicness=0.7),
-         tempo=TempoFeel.BRISK, meter=Meter.STEADY, colors=["#FF6FA5", "#FFD166", "#7FD4F0"]),
+         tempo=TempoFeel.BRISK, meter=Meter.STEADY, colors=["#FF6FA5", "#FFD166", "#7FD4F0"],
+         references=["children's party", "birthday", "celebration"]),
     dict(setting="empty concrete parking garage at night",
          activity="walking alone to a car", social_context="alone",
          mood_label="uneasy", vibe=dict(valence=0.2, arousal=0.35, density=0.15,
                                         brightness=0.12, organicness=0.1),
-         tempo=TempoFeel.WALKING, meter=Meter.IRREGULAR, colors=["#2B2F3A", "#4A4F5C", "#8A8F99"]),
+         tempo=TempoFeel.WALKING, meter=Meter.IRREGULAR, colors=["#2B2F3A", "#4A4F5C", "#8A8F99"],
+         references=["car park", "night", "deserted place"]),
     dict(setting="crowded coffee shop, espresso machine hissing",
          activity="waiting in line", social_context="crowd",
          mood_label="busy", vibe=dict(valence=0.6, arousal=0.55, density=0.75,
                                       brightness=0.55, organicness=0.5),
-         tempo=TempoFeel.BRISK, meter=Meter.IRREGULAR, colors=["#A9714B", "#D9B48F", "#3B2A20"]),
+         tempo=TempoFeel.BRISK, meter=Meter.IRREGULAR, colors=["#A9714B", "#D9B48F", "#3B2A20"],
+         references=["cafe", "queue", "commute"]),
 ]
 
 
@@ -101,6 +127,7 @@ class MockPerceiver:
             tempo_feel=row["tempo"],
             meter=row["meter"],
             dominant_colors=row["colors"],
+            references=row.get("references", []),
             audio_summary=audio_features.summary(),
             confidence=0.9,
             notes="mock perceiver",
@@ -128,6 +155,7 @@ RESPONSE_SCHEMA = {
                        "enum": ["still", "slow", "walking", "brisk", "frantic"]},
         "meter": {"type": "string", "enum": ["steady", "swung", "irregular", "unknown"]},
         "dominant_colors": {"type": "array", "items": {"type": "string"}},
+        "references": {"type": "array", "items": {"type": "string"}},
         "confidence": {"type": "number"},
         "notes": {"type": "string"},
     },
@@ -136,13 +164,57 @@ RESPONSE_SCHEMA = {
 }
 
 
+#Words that describe PEOPLE rather than the occasion. The prompt already says
+#not to return these, but a prompt is a request and this is a hard rule, so it
+#is enforced here too -- the model is not the last line of defence for it.
+#Occasion words that merely sound cultural ("diwali", "quinceanera") are fine
+#and deliberately absent: the event is the joke, the attendees are not.
+_IDENTITY_TERMS = {
+    "asian", "african", "arab", "black", "brown", "white", "caucasian",
+    "hispanic", "latino", "latina", "indian people", "chinese people",
+    "european", "middle eastern", "south asian", "east asian",
+    "muslim", "christian", "jewish", "hindu", "sikh", "buddhist", "atheist",
+    "male", "female", "men", "women", "man", "woman", "boy", "girl",
+    "gay", "straight", "lgbt", "queer", "trans",
+    "liberal", "conservative", "left-wing", "right-wing", "republican",
+    "democrat", "immigrant", "refugee", "elderly", "old people", "young people",
+    "poor", "rich", "homeless", "disabled",
+}
+
+
+def _clean_references(raw) -> list[str]:
+    """Keep occasions, drop anything that describes the people present."""
+    if not isinstance(raw, list):
+        return []
+    out: list[str] = []
+    for item in raw:
+        if not isinstance(item, str):
+            continue
+        tag = " ".join(item.lower().split())[:40]
+        if not tag:
+            continue
+        words = set(tag.replace("-", " ").split())
+        if tag in _IDENTITY_TERMS or words & _IDENTITY_TERMS:
+            print(f"[perceive] dropped reference {item!r}: describes people, "
+                  "not the occasion")
+            continue
+        if tag not in out:
+            out.append(tag)
+    return out[:6]
+
+
 class GeminiPerceiver:
     backend = "gemini"
 
     def __init__(self, cfg: dict):
         from google import genai
         self.cfg = cfg
-        self.model = cfg.get("model", "gemini-2.5-flash")
+        #`model` is the huggingface CLIP checkpoint; the gemini backend gets
+        #its own key so flipping `backend` doesn't require editing two lines.
+        self.model = cfg.get("gemini_model") or cfg.get("model") \
+            or "gemini-3.5-flash-lite"
+        if self.model.startswith("openai/"):     # the CLIP default leaking in
+            self.model = "gemini-3.5-flash-lite"
         self.timeout_s = float(cfg.get("timeout_s", 4.0))
         self.retries = int(cfg.get("retries", 1))
         self.client = genai.Client()
@@ -201,6 +273,7 @@ class GeminiPerceiver:
                 tempo_feel=TempoFeel(d.get("tempo_feel", "walking")),
                 meter=Meter(d.get("meter", "unknown")),
                 dominant_colors=d.get("dominant_colors", []),
+                references=_clean_references(d.get("references")),
                 audio_summary=audio_features.summary(),
                 confidence=float(d.get("confidence", 0.5)),
                 notes=d.get("notes", ""),
@@ -413,28 +486,36 @@ def build_perceiver(cfg: dict) -> ScenePerceiver:
 _TEXT_RULES = [
     (("funeral", "hospital", "memorial", "grief", "vigil", "3am"),
      dict(valence=.1, arousal=.2, density=.3, brightness=.25, organicness=.6),
-     "solemn", TempoFeel.SLOW, Meter.UNKNOWN, ["#3A3F4A"]),
+     "solemn", TempoFeel.SLOW, Meter.UNKNOWN, ["#3A3F4A"],
+     ["funeral", "mourning", "hospital"]),
     (("birthday", "party", "wedding", "celebration", "cake"),
      dict(valence=.92, arousal=.7, density=.8, brightness=.8, organicness=.7),
-     "joyful", TempoFeel.BRISK, Meter.STEADY, ["#FF6FA5", "#FFD166"]),
+     "joyful", TempoFeel.BRISK, Meter.STEADY, ["#FF6FA5", "#FFD166"],
+     ["celebration", "party", "wedding"]),
     (("library", "exam", "silent", "quiet", "study"),
      dict(valence=.5, arousal=.08, density=.25, brightness=.4, organicness=.55),
-     "hushed", TempoFeel.STILL, Meter.UNKNOWN, ["#6B5A45", "#A08C6E"]),
+     "hushed", TempoFeel.STILL, Meter.UNKNOWN, ["#6B5A45", "#A08C6E"],
+     ["study", "library", "quiet public space"]),
     (("park", "sunlit", "sunny", "beach", "picnic", "grass"),
      dict(valence=.85, arousal=.15, density=.25, brightness=.9, organicness=.9),
-     "peaceful", TempoFeel.SLOW, Meter.STEADY, ["#8FBF6A", "#CFE8A0"]),
+     "peaceful", TempoFeel.SLOW, Meter.STEADY, ["#8FBF6A", "#CFE8A0"],
+     ["outdoors", "leisure", "park"]),
     (("garage", "alley", "night", "empty", "alone", "dark"),
      dict(valence=.2, arousal=.35, density=.15, brightness=.12, organicness=.15),
-     "uneasy", TempoFeel.WALKING, Meter.IRREGULAR, ["#2B2F3A", "#4A4F5C"]),
+     "uneasy", TempoFeel.WALKING, Meter.IRREGULAR, ["#2B2F3A", "#4A4F5C"],
+     ["deserted place", "night", "walking alone"]),
     (("date", "candlelit", "romantic", "dinner"),
      dict(valence=.75, arousal=.25, density=.35, brightness=.35, organicness=.8),
-     "intimate", TempoFeel.SLOW, Meter.STEADY, ["#7A2E3A", "#D9A25F"]),
+     "intimate", TempoFeel.SLOW, Meter.STEADY, ["#7A2E3A", "#D9A25F"],
+     ["date night", "restaurant", "romance"]),
     (("gym", "run", "workout", "training"),
      dict(valence=.7, arousal=.85, density=.7, brightness=.7, organicness=.5),
-     "driven", TempoFeel.FRANTIC, Meter.STEADY, ["#222", "#E24"]),
+     "driven", TempoFeel.FRANTIC, Meter.STEADY, ["#222", "#E24"],
+     ["gym", "workout", "sport"]),
     (("meeting", "office", "interview", "presentation", "desk"),
      dict(valence=.5, arousal=.4, density=.45, brightness=.6, organicness=.35),
-     "professional", TempoFeel.WALKING, Meter.STEADY, ["#8892A0", "#D7DBE0"]),
+     "professional", TempoFeel.WALKING, Meter.STEADY, ["#8892A0", "#D7DBE0"],
+     ["workplace", "meeting", "formal"]),
 ]
 
 
@@ -445,12 +526,13 @@ def scene_from_text(text: str) -> SceneRead:
     and it exercises the exact same downstream graph as a real frame.
     """
     low = text.lower()
-    for keywords, vibe, mood, tempo, meter, colors in _TEXT_RULES:
+    for keywords, vibe, mood, tempo, meter, colors, refs in _TEXT_RULES:
         if any(k in low for k in keywords):
             return SceneRead(
                 setting=text, activity="injected scene", social_context="unknown",
                 mood_label=mood, vibe=Vibe(**vibe), tempo_feel=tempo, meter=meter,
-                dominant_colors=colors, audio_summary="(injected, no audio)",
+                dominant_colors=colors, references=refs,
+                audio_summary="(injected, no audio)",
                 confidence=0.95, notes="scene injection", source="mock",
             )
     return SceneRead(

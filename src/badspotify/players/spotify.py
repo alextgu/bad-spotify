@@ -31,7 +31,10 @@ from ..log import notice as print  # stdout is reserved for data
 SCOPES = (
     "user-modify-playback-state "
     "user-read-playback-state "
-    "user-read-currently-playing"
+    "user-read-currently-playing "
+    #Without this, /me returns product=None and the Premium check can't run.
+    #It was checking a field it had never asked permission to read.
+    "user-read-private"
 )
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -117,10 +120,20 @@ class SpotifyPlayer:
             me = self.sp.current_user()
         except Exception as e:
             raise SpotifyError(explain(e)) from e
-        if me.get("product") != "premium":
+        #`product` is only present when the token carries `user-read-private`.
+        #Without it the field is None -- which is "we didn't ask", NOT "free
+        #account". Treating those the same rejected every account including
+        #Premium ones, because that scope wasn't in SCOPES at all.
+        product = me.get("product")
+        if product is None:
+            print("[spotify] can't read the subscription level "
+                  "(no user-read-private scope) -- continuing; playback will "
+                  "fail loudly later if this isn't Premium")
+            return me
+        if product != "premium":
             raise SpotifyError(
                 f"account '{me.get('display_name') or me.get('id')}' is "
-                f"'{me.get('product')}', not premium. Playback control needs Premium.")
+                f"'{product}', not premium. Playback control needs Premium.")
         return me
 
     #Playback device
@@ -189,12 +202,24 @@ class SpotifyPlayer:
         if use_cache and track.id in self._uris:
             return self._uris[track.id], "cached"
 
+        #This is now the ONLY place the agent searches Spotify, and it runs on
+        #the track that actually gets played. Discovery deliberately hands over
+        #unresolved names precisely so this stays a handful of requests a
+        #session rather than fourteen per scene.
+        from ..music.discover import budget_ok, note_rate_limit, rate_limited
+
         rejections: list[str] = []
         for query in search_queries(track.title, track.artist):
+            if rate_limited():
+                return None, ("Spotify rate limit in force; not asking again "
+                              "until it lifts")
+            if not budget_ok():
+                return None, "search budget spent for this minute"
             try:
                 res = self.sp.search(q=query, type="track", limit=10,
                                      market=self.market)
             except Exception as e:
+                note_rate_limit(e)
                 return None, f"search failed: {explain(e)}"
             items = res.get("tracks", {}).get("items", [])
             winner, scored = best_match(items, track.title, track.artist)

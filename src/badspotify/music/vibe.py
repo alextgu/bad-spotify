@@ -90,6 +90,29 @@ TABOO_RULES: list[tuple[tuple[str, ...], list[str], str]] = [
 ]
 
 
+def _general_taboo(scene: SceneRead) -> list[str]:
+    """A theory of wrongness for scenes no hand-written rule anticipated.
+
+    The rules above cover nine situations. Everything else -- a monastery, a
+    football stadium, a car wash -- used to fall through to a single tag. This
+    inverts the mood directly instead, which is what the product claims to do
+    anyway, and yields a wide enough target for the strategies to argue over.
+    """
+    v = scene.vibe
+    tags: list[str] = []
+    #Calm scenes want assault; frantic ones want to be becalmed.
+    tags += (["rage", "screaming", "brutal", "assault", "noise"]
+             if v.arousal < 0.5 else
+             ["ambient", "calm", "weightless", "glacial", "quiet"])
+    #Happy scenes want grief; bleak ones want relentless cheer.
+    tags += (["funeral", "grief", "despair", "heartbreak", "death"]
+             if v.valence > 0.5 else
+             ["upbeat", "novelty", "celebration", "meme", "children"])
+    #Sparse scenes want a wall of sound, crowded ones want emptiness.
+    tags += ["unlistenable", "grating"] if v.density < 0.5 else ["ambient"]
+    return tags
+
+
 def contextual_taboo(scene: SceneRead, now: _dt.date | None = None) -> tuple[list[str], list[str], str]:
     """Return (boost_tags, ban_tags, rationale) for this scene."""
     haystack = " ".join([
@@ -102,11 +125,25 @@ def contextual_taboo(scene: SceneRead, now: _dt.date | None = None) -> tuple[lis
             boost.extend(tags)
             reasons.append(why)
 
-    #Treats Christmas music as inappropriate outside December
+    #Treats Christmas music as inappropriate outside December.
+    #
+    #This used to be the ONLY fallback, and it quietly became the whole
+    #product for eleven months of the year: "wrong-season" is carried by two
+    #tracks, `strategies.generate` filters candidates down to the target
+    #genres, and so every scene matching no rule above collapsed to one
+    #Christmas song. Measured across 24 varied scenes it won the monastery,
+    #the dentist, the football stadium and the lecture hall alike -- which is
+    #exactly what a hardcoded lookup looks like from outside.
+    #
+    #It is still a good joke. It is just not a theory of wrongness on its own,
+    #so it now joins a general fallback rather than replacing it.
     today = now or _dt.date.today()
-    if not boost and today.month not in (12,):
-        boost.append("wrong-season")
-        reasons.append("christmas music outside december")
+    if not boost:
+        boost.extend(_general_taboo(scene))
+        reasons.append("no specific rule matched; inverting the mood directly")
+        if today.month not in (12,):
+            boost.append("wrong-season")
+            reasons.append("christmas music outside december")
 
     #Removes music that fits the scene
     ban: list[str] = []

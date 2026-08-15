@@ -63,6 +63,20 @@ class SceneRead(BaseModel):
     dominant_colors: list[str] = Field(default_factory=list, description="hex strings")
     audio_summary: str = ""
 
+    #What KIND of moment this is, culturally -- the occasion and the register,
+    #so a pick can be wrong about the event and not merely about the acoustics.
+    #"a wedding", "a funeral", "a boardroom", "a rave", "a children's party".
+    #
+    #Strictly the situation, never the people in it. The project has one hard
+    #rule at the top of AGENTS.md -- no notion of anyone's race, sex, religion,
+    #politics or identity -- and this field is the obvious place that would
+    #leak in. A wedding is an occasion; who is attending it is not our business
+    #and is not what makes the joke work.
+    references: list[str] = Field(
+        default_factory=list,
+        description="occasion / setting / cultural register of the MOMENT, "
+                    "never attributes of the people in it")
+
     confidence: float = Field(0.5, ge=0, le=1)
     notes: str = ""
 
@@ -101,6 +115,10 @@ class Track(BaseModel):
     tags: list[str] = Field(default_factory=list)
     recognisability: float = Field(0.5, ge=0, le=1,
                                    description="the joke only lands if they know the song")
+    #Set only for tracks found outside the corpus: the specific clash that
+    #earned the pick ("Madrid anthem in Barcelona"). It is shown to the
+    #audience, and seeing WHY is the difference between an agent and shuffle.
+    why: str = ""
 
 
 class Candidate(BaseModel):
