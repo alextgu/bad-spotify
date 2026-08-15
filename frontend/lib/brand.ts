@@ -1,20 +1,28 @@
 /**
- * The name, and the two lines that describe the product.
+ * The name, and the lines that place the product.
  *
- * `name` is a placeholder and is meant to look like one — it renders as
- * literally `[name]` in the wordmark, the tab title and the footer, so nobody
- * can mistake it for a decision that was made. Change it here and it changes
- * everywhere; don't hardcode it anywhere else.
+ * `positioning` is the one sentence that says what this is by pointing at the
+ * thing everyone already has. It sits in the hero, above the headline, because
+ * "a DJ that goes on vibes instead of history" explains the product faster
+ * than any amount of describing it from scratch does.
+ *
+ * On naming Spotify in our own copy: this is comparison, not affiliation.
+ * Keep it that way — the moment the page implies endorsement or uses their
+ * mark, it stops being comparison. No Spotify logo, no green lifted from
+ * their brand sheet, no "official" anything.
  *
  * Everything else the page says lives in `lib/site.ts`.
  */
 export const brand = {
-  name: "[name]",
+  name: "Slopify",
+
+  /** Sits above the hero headline, set small in mono. */
+  positioning: "Spotify DJ, if it went on vibes instead of history",
 
   tagline: "Music for the room you're in.",
 
   description:
-    "It reads the room you're standing in, not the songs you played last Tuesday.",
+    "A DJ that picks from the room you're standing in, rather than from what you played last week.",
 } as const;
 
 /**

@@ -31,7 +31,7 @@ export default function SectionFAQ() {
             key={item.q}
             className="group border-t border-hairline last:border-b"
           >
-            <summary className="flex cursor-pointer list-none items-baseline gap-gutter py-block font-serif text-title marker:hidden">
+            <summary className="flex cursor-pointer list-none items-baseline gap-gutter py-block font-display text-title marker:hidden">
               {item.q}
               <span
                 aria-hidden
@@ -47,8 +47,10 @@ export default function SectionFAQ() {
         ))}
       </div>
 
-      <footer className="flex flex-wrap justify-between gap-4 pt-section-sm">
-        <Label>{brand.name}</Label>
+      <footer className="flex flex-wrap items-baseline justify-between gap-4 pt-section-sm">
+        <span className="font-display text-[1.0625rem] font-semibold tracking-[-0.03em]">
+          {brand.name}
+        </span>
         <Label>{footer.right}</Label>
       </footer>
     </section>

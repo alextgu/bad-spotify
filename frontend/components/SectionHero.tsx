@@ -43,17 +43,31 @@ export default function SectionHero() {
             <span className="rounded border border-dashed border-paper/40 px-3 py-2 font-mono text-label uppercase text-paper/70">
               logo
             </span>
-            <span className="font-mono text-label uppercase text-paper/70">
+            {/* Set in the display face, not the mono label. It is the
+                product's name, and rendering it at caption weight made it the
+                least considered thing on a page about it. */}
+            <span className="font-display text-[1.0625rem] font-semibold tracking-[-0.03em] text-paper">
               {brand.name}
             </span>
           </div>
 
-          <div className="max-w-[36rem]">
-            <h1 className="max-w-[13ch] font-serif text-display">
+          <div className="max-w-[38rem]">
+            {/* What it is, said by pointing at the thing everyone already
+                has. It goes ABOVE the headline because the headline is a
+                promise and this is the category — a reader who doesn't know
+                what kind of object this is cannot evaluate the promise. */}
+            <Label tone="offset" className="block !text-offset">
+              {brand.positioning}
+            </Label>
+
+            <h1 className="mt-block max-w-[13ch] font-display text-display">
               {hero.headline}{" "}
-              <em className="italic text-offset">{hero.headlineAccent}</em>.
+              {/* Colour, not italic. The serif italic here read as a wine
+                  label; the accent alone does the emphasis. */}
+              <span className="text-offset">{hero.headlineAccent}</span>.
             </h1>
-            <p className="mt-block max-w-[27ch] text-body text-paper/85">
+
+            <p className="mt-block max-w-[30ch] text-body text-paper/85">
               {hero.sub}
             </p>
           </div>

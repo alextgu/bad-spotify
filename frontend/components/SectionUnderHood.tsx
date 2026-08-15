@@ -36,7 +36,7 @@ export default function SectionUnderHood() {
         <dl className="mt-section-sm grid gap-rest sm:grid-cols-2 lg:grid-cols-4">
           {metrics.map((m, i) => (
             <Reveal key={m.label} delay={i * 0.1}>
-              <dd className="font-serif text-display leading-none">
+              <dd className="font-display text-display leading-none">
                 {m.value}
                 {m.unit && (
                   <span className="text-[0.34em] text-paper/55">{m.unit}</span>

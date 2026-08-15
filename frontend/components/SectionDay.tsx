@@ -94,7 +94,7 @@ export default function SectionDay() {
                 <Label tone="offset" className="block">
                   {panel.index} — {panel.label}
                 </Label>
-                <h2 className="mt-block font-serif text-headline">{panel.title}</h2>
+                <h2 className="mt-block font-display text-headline">{panel.title}</h2>
               </div>
             ))}
           </div>
@@ -125,11 +125,11 @@ export default function SectionDay() {
               >
                 <Slot shot={cue.shot} className="aspect-[4/5] rounded-card" />
                 <div className="flex items-baseline justify-between gap-3 pt-gutter">
-                  <h3 className="font-serif text-title">{cue.title}</h3>
+                  <h3 className="font-display text-title">{cue.title}</h3>
                   <Label tone="offset">{cue.time}</Label>
                 </div>
                 <div className="mt-3 border-t border-hairline pt-3">
-                  <h4 className="font-serif text-title">{cue.track}</h4>
+                  <h4 className="font-display text-title">{cue.track}</h4>
                   <Label className="mt-1.5 block">{cue.artist}</Label>
                 </div>
               </article>

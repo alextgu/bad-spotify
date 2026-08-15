@@ -28,7 +28,9 @@ export const hero = {
   headline: "Music for the room you're",
   /** Set in italic serif — the only emphasis on the page. */
   headlineAccent: "in",
-  sub: "It reads the room you're standing in, not the songs you played last Tuesday.",
+  /* Deliberately does not repeat "last Tuesday" — the statement section two
+     screens down uses that line, and it lands harder there. */
+  sub: "Everything else picks from what you have already played. This picks from the room you are standing in.",
   shot: {
     file: "hero.mp4",
     note: [

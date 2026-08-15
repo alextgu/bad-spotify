@@ -22,7 +22,7 @@ export default function SectionInvite() {
       />
 
       <div className="absolute inset-0 flex flex-col items-center justify-center px-gutter text-center text-paper">
-        <h2 className="font-serif text-headline">
+        <h2 className="font-display text-headline">
           {invite.lines.map((line) => (
             <span key={line} className="block">
               {line}

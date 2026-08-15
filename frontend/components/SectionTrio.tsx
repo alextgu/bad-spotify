@@ -39,7 +39,7 @@ export default function SectionTrio() {
               <circle r="2.5" className="fill-ink" />
             </g>
           </Glyph>
-          <h3 className="font-serif text-title">{trio[0].title}</h3>
+          <h3 className="font-display text-title">{trio[0].title}</h3>
           <p className="mt-2 text-caption text-graphite">{trio[0].body}</p>
         </Reveal>
 
@@ -62,7 +62,7 @@ export default function SectionTrio() {
               strokeWidth="1.2"
             />
           </Glyph>
-          <h3 className="font-serif text-title">{trio[1].title}</h3>
+          <h3 className="font-display text-title">{trio[1].title}</h3>
           <p className="mt-2 text-caption text-graphite">{trio[1].body}</p>
         </Reveal>
 
@@ -80,7 +80,7 @@ export default function SectionTrio() {
               <circle r="2.5" className="fill-offset" />
             </g>
           </Glyph>
-          <h3 className="font-serif text-title">{trio[2].title}</h3>
+          <h3 className="font-display text-title">{trio[2].title}</h3>
           <p className="mt-2 text-caption text-graphite">{trio[2].body}</p>
         </Reveal>
       </div>

@@ -17,7 +17,7 @@ export default function SectionBroke() {
   return (
     <section className="mx-auto max-w-content px-gutter py-section-sm md:py-section">
       <Reveal>
-        <h2 className="max-w-[13ch] font-serif text-headline">{broke.title}</h2>
+        <h2 className="max-w-[13ch] font-display text-headline">{broke.title}</h2>
       </Reveal>
 
       <ul className="mt-rest">
@@ -31,7 +31,7 @@ export default function SectionBroke() {
             <Label tone="offset" className="w-8 shrink-0">
               {String(i + 1).padStart(2, "0")}
             </Label>
-            <span className="font-serif text-title text-graphite line-through decoration-offset decoration-2">
+            <span className="font-display text-title text-graphite line-through decoration-offset decoration-2">
               {item}
             </span>
           </Reveal>

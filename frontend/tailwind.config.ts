@@ -45,17 +45,27 @@ export default {
         },
 
         /* ------------------------------------------------------ the pair --
-           Two colours carrying one idea, inherited from the old `scene` /
-           `target` split and kept because the meaning is still true:
+           Two colours carrying one idea:
 
              phase   the world as it is        (what was read)
              offset  what we do about it       (what was played)
 
-           Both are desaturated well past where they'd sit on a launch page.
-           A hot accent is the fastest way to look like every other AI product;
-           these are closer to pigment than to UI. */
+           `offset` is green, because the product is placed against streaming
+           DJs and the category reads green. It is deliberately NOT Spotify's
+           #1DB954 — near enough to sit in the same family, far enough that we
+           are not shipping someone else's brand colour. Ours is a degree
+           cooler and a shade deeper.
+
+           Two tints, because one green cannot do both jobs: DEFAULT is for
+           fills and for type on dark, where it is bright enough to read;
+           `ink` is for small type on paper, where DEFAULT would sit around
+           2.3:1 and fail. Use `text-offset-ink` on the paper sections and
+           `text-offset` on the dark ones. */
         phase: "#2E4A6E",
-        offset: "#B0563A",
+        offset: {
+          DEFAULT: "#1CA85C",
+          ink: "#0C7A40",
+        },
 
         /* LEGACY — /demo only. */
         plane: "#0d0d0d",
@@ -71,24 +81,24 @@ export default {
        * Five sizes, each carrying its own tracking, weight and leading, so
        * `text-headline` is the entire decision.
        *
-       * The display sizes are set in the serif and stay at weight 400. The
-       * previous pass ran 800-weight grotesk at up to 140px with -0.045em
-       * tracking, which is a shout — a serif at its normal weight says the
-       * same thing at conversational volume, and it is the single largest
-       * reason this reads as a product rather than a launch.
+       * Reweighted when the serif was dropped. A serif carries a headline at
+       * weight 400; a geometric grotesk at 400 just looks unset, so display
+       * and headline sit at 600 — enough to have presence, short of the 800
+       * that made the original mockup shout. Tracking tightens a little too:
+       * geometric faces set loose at large sizes look like a slide deck.
        */
       fontSize: {
         display: [
           "clamp(2.75rem, 6.6vw, 5.75rem)",
-          { lineHeight: "1.03", letterSpacing: "-0.021em", fontWeight: "400" },
+          { lineHeight: "1.02", letterSpacing: "-0.032em", fontWeight: "600" },
         ],
         headline: [
           "clamp(1.9rem, 3.9vw, 3.4rem)",
-          { lineHeight: "1.1", letterSpacing: "-0.018em", fontWeight: "400" },
+          { lineHeight: "1.08", letterSpacing: "-0.028em", fontWeight: "600" },
         ],
         title: [
           "1.3125rem",
-          { lineHeight: "1.3", letterSpacing: "-0.012em", fontWeight: "500" },
+          { lineHeight: "1.3", letterSpacing: "-0.016em", fontWeight: "600" },
         ],
         body: [
           "1.0625rem",
@@ -181,9 +191,12 @@ export default {
       },
 
       fontFamily: {
-        /* Set by next/font in app/layout.tsx; these are the CSS variables. */
-        serif: ["var(--font-serif)", "Georgia", "serif"],
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        /* Set by next/font in app/layout.tsx; these are the CSS variables.
+           `display` and `sans` are the same family on purpose — see the note
+           in layout.tsx. `font-display` is kept as a separate name so that
+           swapping the headline face later is one line here. */
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        sans: ["var(--font-display)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
     },

@@ -16,7 +16,7 @@ export default function SectionStatement() {
   return (
     <section className="px-gutter py-section-sm md:py-section">
       <Reveal>
-        <h2 className="mx-auto max-w-statement text-center font-serif text-headline">
+        <h2 className="mx-auto max-w-statement text-center font-display text-headline">
           {statement}
         </h2>
       </Reveal>

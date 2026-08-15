@@ -1,4 +1,4 @@
-# bad spotify
+# Slopify
 
 **A wearable agent whose only feature is playing the worst possible music for the moment.**
 

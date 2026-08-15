@@ -1,4 +1,4 @@
-# bad spotify — presentation site
+# Slopify — presentation site
 
 ## Analyze an uploaded video
 
@@ -57,14 +57,16 @@ public/
   videos/          the footage
 ```
 
-## The name is a placeholder
+## The name
 
-`lib/brand.ts` holds the name, tagline, and every headline number. **Change
-`brand.name` there and it updates the wordmark, the page title, the metadata,
-and the footer.** Don't hardcode the name anywhere else.
+**Slopify**, settled 15 Aug. `lib/brand.ts` holds it, along with the tagline
+and the positioning line. **Change `brand.name` there and it updates the
+wordmark, the page title, the metadata, and the footer.** Don't hardcode it
+anywhere else.
 
-Note: Spotify's developer terms don't allow "Spotify" in a product name, so the
-working title needs replacing before this goes public alongside their API.
+The hero names Spotify once, as a comparison. That is nominative use and it has
+to stay that way — no Spotify mark, no Spotify green, nothing implying
+affiliation or endorsement.
 
 ## The look
 

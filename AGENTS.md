@@ -336,8 +336,12 @@ doc as though it were agreed.
 - **The "best song" mode.** The site's FAQ says the same machinery would find the
   best song with the sign flipped. That is a design claim, not code — nothing
   implements it.
-- **The name.** `bad spotify` is a working title in `frontend/lib/brand.ts`.
-  Spotify's terms forbid "Spotify" in a product name, so it cannot ship as is.
+- ~~**The name.**~~ **Settled 15 Aug: Slopify**, set in `frontend/lib/brand.ts`.
+  It does not contain the string "Spotify", so the developer-terms rule that
+  killed the old working title does not apply. The page does name Spotify, once,
+  as a comparison — that is nominative use and it stays that way: no Spotify
+  mark, no Spotify green, nothing implying affiliation. If that line ever grows
+  into a claim of endorsement, it is a legal problem rather than a taste one.
 - **The site's visual design.** Being restarted. Every document that described
   the previous one has been deleted, so that a new direction isn't arguing with
   a specification nobody chose any more — **don't write another one here.**

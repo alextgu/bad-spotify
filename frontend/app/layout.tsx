@@ -1,28 +1,25 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, JetBrains_Mono, Schibsted_Grotesk } from "next/font/google";
+import { Figtree, JetBrains_Mono } from "next/font/google";
 import { brand } from "@/lib/brand";
 import "./globals.css";
 
 /**
- * Three faces, each with one job, loaded through `next/font` so they are
- * self-hosted and there is no render-blocking request to Google on stage.
+ * Two faces.
  *
- *   serif  every display line. Weight 400 only — there is no bold, which is
- *          the point: the size does the work and the page never shouts.
- *   sans   body, UI, anything that has to be read at length.
- *   mono   labels and timecodes. Small, wide-tracked, uppercase.
+ *   display/sans  Figtree, for everything that is read. Spotify sets its
+ *                 entire product in Circular, which is proprietary; Figtree is
+ *                 the closest thing on Google Fonts — the same geometric
+ *                 grotesk skeleton, near-circular bowls, a single-storey `g`.
+ *                 One family across display and body, as they do, because two
+ *                 competing grotesks on one page is a tell.
+ *   mono          JetBrains Mono, for labels and timecodes only.
+ *
+ * This replaced Instrument Serif, which was elegant and wrong: a calligraphic
+ * italic on the hero read as a wine label rather than as software.
  */
-const serif = Instrument_Serif({
-  weight: "400",
-  style: ["normal", "italic"],
+const display = Figtree({
   subsets: ["latin"],
-  variable: "--font-serif",
-  display: "swap",
-});
-
-const sans = Schibsted_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-display",
   display: "swap",
 });
 
@@ -42,7 +39,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`}>
+    <html lang="en" className={`${display.variable} ${mono.variable}`}>
       <body className="bg-paper font-sans text-ink antialiased">{children}</body>
     </html>
   );

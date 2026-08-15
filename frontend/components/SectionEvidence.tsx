@@ -49,7 +49,7 @@ export default function SectionEvidence() {
                 <Label tone="offset" className="block">
                   {m.time}
                 </Label>
-                <p className="mt-2 font-serif text-title">{m.title}</p>
+                <p className="mt-2 font-display text-title">{m.title}</p>
               </div>
             </Reveal>
           ))}

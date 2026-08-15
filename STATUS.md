@@ -39,7 +39,7 @@ Last updated: 15 Aug 2026
 | Video sampler (`src/videofeed/`) | Done — 17 tests, incl. a real generated clip | |
 | Engine (`service.py`) — one decision, no loop | Built, unproven | |
 | Gradio app (`app.py`) | Built, unproven | |
-| Naming and logo | Placeholder in `frontend/lib/brand.ts` | |
+| Naming and logo | Name done — **Slopify**, 15 Aug, in `frontend/lib/brand.ts`. Logo still a dashed placeholder in the hero | |
 | Glasses | Not started — and not needed | |
 
 "Built, unproven" is not a criticism. Everything was deliberately built to run
@@ -278,9 +278,13 @@ Don't re-open these without a reason.
   should look. The visual layer is being restarted, so it no longer holds and
   has been removed rather than left to be read as current. The section ordering
   in `frontend/app/page.tsx` is the part that survives.
-- **13 Aug** — Name is a placeholder in `frontend/lib/brand.ts` until we pick
-  one. It should play off “DJ”. Note: Spotify's terms forbid “Spotify” in a
-  product name, so the current working title can't ship publicly.
+- **15 Aug** — **The name is Slopify**, and the product is positioned as
+  "Spotify DJ, if it went on vibes instead of history". That comparison is in
+  the hero because naming the thing everyone already has explains the category
+  faster than describing it from scratch. It is nominative comparison only —
+  no Spotify mark, and the accent green is deliberately not theirs.
+  (Supersedes the 13 Aug placeholder decision; the old working title contained
+  "Spotify", which their developer terms forbid. "Slopify" does not.)
 - **13 Aug** — No inversion dial. Always fully invert; measure and report the
   mismatch instead. `Verdict.mismatch` is an outcome, never an input.
 - **13 Aug** — One decision path. Anything holding a scene already enters the
