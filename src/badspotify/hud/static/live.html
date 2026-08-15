@@ -47,6 +47,7 @@
   .song { font-size: 25px; font-weight: 650; line-height: 1.2; }
   .artist { color: var(--dim); margin-top: 2px; }
   .quip { margin-top: 12px; color: var(--dim); font-style: italic; }
+  #err { color: var(--warn); margin-top: 12px; }
   .scene { font-size: 17px; font-weight: 550; }
   .meta { color: var(--dim); font-size: 13px; margin-top: 6px; }
   .swatches { display: flex; gap: 6px; margin-top: 10px; }
@@ -90,10 +91,11 @@
 
   <section>
     <div class="panel">
-      <h2>Now playing</h2>
+      <h2 id="playheading">Now playing</h2>
       <div class="song" id="song">—</div>
       <div class="artist" id="artist"></div>
       <div class="quip" id="quip"></div>
+      <div id="err"></div>
     </div>
 
     <div class="panel" style="margin-top:16px">
@@ -197,12 +199,15 @@ function render(d) {
     $("swatches").innerHTML = (d.scene.colors || [])
       .map(c => '<i style="background:' + c + '"></i>').join("");
   }
-  if (d.playing) {
-    $("song").textContent = d.playing.title;
-    $("artist").textContent = d.playing.artist
-      + (d.playing.strategy ? "   ·   " + d.playing.strategy : "");
-    $("quip").textContent = d.playing.quip || "";
+  const song = d.playing || d.chosen;
+  if (song) {
+    $("playheading").textContent = d.playing ? "Now playing" : "Selected";
+    $("song").textContent = song.title;
+    $("artist").textContent = song.artist
+      + (song.strategy ? "   ·   " + song.strategy : "");
+    $("quip").textContent = song.quip || song.why || "";
   }
+  $("err").textContent = d.error ? "could not play it: " + d.error : "";
   if (d.action) log(d.action.toUpperCase() + " — " + (d.reason || ""));
 }
 

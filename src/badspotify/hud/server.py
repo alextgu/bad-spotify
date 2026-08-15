@@ -143,7 +143,20 @@ def create_app(runtime=None):
         scene = state.get("scene")
         decision = state.get("decision")
         current = runtime.graph.dj.state.current
+        #What it CHOSE, which is not the same as what it managed to play. A
+        #sleeping speaker used to make the whole decision invisible -- the page
+        #showed nothing at all while the log had a verdict and a reason -- so
+        #the pick and the failure both have to reach the screen.
+        verdict = state.get("verdict")
+        chosen = None if verdict is None else {
+            "title": verdict.track.title,
+            "artist": verdict.track.artist,
+            "strategy": verdict.strategy,
+            "why": verdict.track.why or verdict.reasoning or verdict.quip,
+        }
         return JSONResponse({
+            "chosen": chosen,
+            "error": state.get("play_error"),
             "scene": None if scene is None else {
                 "setting": scene.setting,
                 "activity": scene.activity,
