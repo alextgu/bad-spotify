@@ -57,8 +57,10 @@ export default function Home() {
           <SectionHero />
         </div>
 
-        {/* 2 — the turn. One sentence, and a lot of nothing around it. */}
-        <div>
+        {/* 2 — the turn. One sentence, and a lot of nothing around it.
+            The strings go out here: the emptiness around the sentence is the
+            whole point of the screen, and a moving line in it is company. */}
+        <div data-strings="off">
           <SectionStatement />
         </div>
 
@@ -86,8 +88,9 @@ export default function Home() {
           <SectionInvite />
         </div>
 
-        {/* 9 — the questions a sceptic is already forming. */}
-        <div>
+        {/* 9 — the questions a sceptic is already forming. Strings out; this
+            is the one screen someone actually reads at length. */}
+        <div data-strings="off">
           <SectionFAQ />
         </div>
       </main>

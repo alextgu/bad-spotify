@@ -87,69 +87,84 @@ export default function DemoPage() {
     // so it carries its own dark surface rather than inheriting the body's.
     // When /demo is reworked, this and the LEGACY block in tailwind.config.ts
     // go together.
-    <main className="min-h-screen bg-plane px-6 py-12 text-ink-primary">
-      <div className="mx-auto max-w-6xl">
-      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Demo ground</h1>
-          <p className="mt-1 text-sm text-ink-muted">
-            Upload a video. The local model reads its mood every five seconds.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="cursor-pointer rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition duration-interaction ease-brand hover:bg-white/85">
-            {processing ? "Analyzing video..." : "Choose video"}
-            <input
-              className="hidden"
-              type="file"
-              accept="video/mp4,video/webm,video/quicktime,video/x-msvideo,video/x-matroska"
+    <main className="relative h-dvh overflow-hidden bg-plane text-ink-primary">
+      <video
+        ref={videoRef}
+        className="absolute inset-0 h-full w-full object-cover"
+        controls
+        playsInline
+        src={videoUrl}
+        onTimeUpdate={(event) => setT(event.currentTarget.currentTime)}
+        onSeeked={(event) => setT(event.currentTarget.currentTime)}
+        onError={() => setVideoBroken(true)}
+      />
+
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/55" />
+
+      <div className="pointer-events-none absolute inset-0 z-10 flex flex-col">
+        <header className="pointer-events-auto flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight">Demo ground</h1>
+            <p className="mt-1 text-sm text-ink-muted">
+              Upload a video. The local model reads its mood every five seconds.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="cursor-pointer rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition duration-interaction ease-brand hover:bg-white/85">
+              {processing ? "Analyzing video..." : "Choose video"}
+              <input
+                className="hidden"
+                type="file"
+                accept="video/mp4,video/webm,video/quicktime,video/x-msvideo,video/x-matroska"
+                disabled={processing}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) void analyze(file);
+                  event.currentTarget.value = "";
+                }}
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => void restoreSample()}
               disabled={processing}
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) void analyze(file);
-                event.currentTarget.value = "";
-              }}
-            />
-          </label>
-          <button
-            type="button"
-            onClick={() => void restoreSample()}
-            disabled={processing}
-            className="rounded-lg border border-strong px-4 py-2 text-sm text-ink-secondary transition duration-interaction ease-brand hover:border-white/30 hover:text-white disabled:opacity-50"
-          >
-            Use sample
-          </button>
+              className="rounded-lg border border-strong px-4 py-2 text-sm text-ink-secondary transition duration-interaction ease-brand hover:border-white/30 hover:text-white disabled:opacity-50"
+            >
+              Use sample
+            </button>
+          </div>
+        </header>
+
+        {processing && (
+          <div className="pointer-events-auto mx-6 mb-4 rounded-lg border border-scene/40 bg-scene/10 p-4 text-sm text-ink-secondary">
+            Reading frames, audio, colour, and movement. The first run also
+            downloads the local model.
+          </div>
+        )}
+
+        {error && (
+          <div className="pointer-events-auto mx-6 mb-4 rounded-lg border border-critical/40 bg-critical/10 p-4 text-sm">
+            {error}
+          </div>
+        )}
+
+        <div className="flex min-h-0 flex-1 flex-col justify-end lg:flex-row lg:items-end lg:justify-end">
+          <div className="pointer-events-auto max-h-[45%] w-full overflow-y-auto px-6 pb-2 lg:max-h-full lg:w-[24rem] lg:shrink-0">
+            {moment ? (
+              <MomentCard moment={moment} />
+            ) : (
+              <div className="rounded-xl border border-subtle bg-surface-1 p-6 text-sm text-ink-muted">
+                {processing
+                  ? "The first mood card will appear when analysis finishes."
+                  : "Choose a video or press play on the sample."}
+              </div>
+            )}
+          </div>
         </div>
-      </header>
 
-      {processing && (
-        <div className="mb-6 rounded-lg border border-scene/40 bg-scene/10 p-4 text-sm text-ink-secondary">
-          Reading frames, audio, colour, and movement. The first run also
-          downloads the local model.
-        </div>
-      )}
-
-      {error && (
-        <div className="mb-6 rounded-lg border border-critical/40 bg-critical/10 p-4 text-sm">
-          {error}
-        </div>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <div>
-          <video
-            ref={videoRef}
-            className="w-full rounded-xl border border-subtle bg-surface-1"
-            controls
-            playsInline
-            src={videoUrl}
-            onTimeUpdate={(event) => setT(event.currentTarget.currentTime)}
-            onSeeked={(event) => setT(event.currentTarget.currentTime)}
-            onError={() => setVideoBroken(true)}
-          />
-
+        <div className="pointer-events-auto px-6 pb-16">
           {videoBroken && (
-            <p className="mt-2 text-sm text-ink-muted">
+            <p className="mb-2 text-sm text-ink-muted">
               This browser could not play the video codec. The mood timeline is
               still available below.
             </p>
@@ -173,19 +188,6 @@ export default function DemoPage() {
             </p>
           )}
         </div>
-
-        <div>
-          {moment ? (
-            <MomentCard moment={moment} />
-          ) : (
-            <div className="rounded-xl border border-subtle bg-surface-1 p-6 text-sm text-ink-muted">
-              {processing
-                ? "The first mood card will appear when analysis finishes."
-                : "Choose a video or press play on the sample."}
-            </div>
-          )}
-        </div>
-      </div>
       </div>
     </main>
   );

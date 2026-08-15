@@ -3,72 +3,108 @@
 import { useEffect, useRef } from "react";
 
 /**
- * The background: seven strings across the viewport, which you can pluck.
+ * Four strings along the bottom of the window, drifting, pluckable.
  *
- * The page was plain paper, which is fine and says nothing. This says "music"
- * without another photograph, and it is the only thing here that answers to
- * the reader directly — everything else on the page happens whether they are
- * there or not.
- *
- * **At rest it is completely still**, and that is the whole discipline of it.
- * An ambient background that drifts on its own is a screensaver: it competes
- * with the type, it never stops, and after ten seconds it is noise. These
- * lines do nothing at all until the cursor crosses one, and go back to nothing
- * about a second and a half later. The motion is *caused*, so it reads as
- * response rather than decoration.
+ * The first version put seven of them across the whole viewport and held them
+ * perfectly straight until touched. Two things were wrong with that: lines
+ * through the middle of the screen are lines through the middle of the
+ * reading, and a background that is motionless until poked doesn't read as
+ * alive, it reads as broken. This one lives in a band at the foot of the
+ * window and is always moving slightly, the way a string that has just been
+ * put down is.
  *
  * ---------------------------------------------------------------------------
- * The physics, such as it is
+ * The drift
  * ---------------------------------------------------------------------------
- * A plucked string vibrates in its fundamental mode: fixed at both ends,
- * maximum displacement in the middle. So the shape is a half sine over the
- * width, `sin(pi * x / w)`, scaled by an amplitude that oscillates and decays:
+ * Each string is the sum of three travelling waves with different wavelengths
+ * and speeds, times a slow breath that swells and settles the whole line.
+ * Nothing in that stack shares a period with anything else, so the pattern
+ * never visibly repeats — which is the only thing that makes ambient motion
+ * bearable for longer than about ten seconds. Every constant is jittered per
+ * string at mount, so no two runs of the page are quite the same and the four
+ * lines never drift into agreement with each other.
  *
- *     y(x, t) = y0 + A · sin(pi·x/w) · cos(omega·t) · e^(-t/tau)
- *
- * Amplitude comes from how fast the cursor crossed, and its sign from which
- * way — so flicking upward through a string throws it upward. Each string has
- * its own `omega`, low strings slower, which is what stops seven simultaneous
- * plucks from looking like one thick vibrating band.
- *
- * It is not a physical simulation and does not need to be. The only thing that
- * has to be true is that a fast crossing moves it more than a slow one.
+ * Amplitudes are small on purpose: 3-5px of travel. Enough that you can see it
+ * is not a ruled line, not so much that it becomes something happening.
  *
  * ---------------------------------------------------------------------------
- * Cost
+ * The pluck
  * ---------------------------------------------------------------------------
- * The rAF loop **stops** when every string is below the visible threshold, and
- * restarts on the next pluck. An untouched page runs no animation frames at
- * all, which matters on a laptop driving a projector.
+ * Crossing a string with the cursor adds the fundamental mode of a real
+ * plucked string on top of the drift — fixed at both ends, maximum
+ * displacement in the middle, decaying over about a second and a half:
  *
- * `pointer-events: none` throughout — this must never eat a click meant for a
- * link. It listens on the window instead.
+ *     sin(pi·x/w) · cos(omega·t) · e^(-t/tau)
+ *
+ * Amplitude from the speed of the crossing, sign from its direction, so an
+ * upward flick throws the string upward.
+ *
+ * ---------------------------------------------------------------------------
+ * Where it disappears
+ * ---------------------------------------------------------------------------
+ * Any section marked `data-strings="off"` fades the whole band out while it
+ * holds the viewport. Used on the two screens that are purely reading — the
+ * statement, which is one sentence alone on purpose, and the FAQ. A moving
+ * line under a paragraph is a moving line under a paragraph.
+ *
+ * Sections with their own background — the dark ones and the day — cover the
+ * band without needing the attribute.
  */
 
-/** Seven, not six: six reads as an explicit guitar, which is more literal than
- *  this wants to be. Seven reads as strings. */
-const COUNT = 7;
+/** Four strings, low to high. */
+const COUNT = 4;
 
-/** Peak displacement from one crossing, px. Past ~24 the lines start colliding
- *  with each other and it reads as a mess rather than as an instrument. */
-const MAX_AMPLITUDE = 22;
+/** The band's height as a fraction of the window. Only this is ever drawn. */
+const BAND = 0.34;
+
+/** Peak displacement from one crossing, px. */
+const MAX_PLUCK = 20;
 
 /** Seconds for a pluck to fall to silence. */
-const DECAY = 1.4;
+const DECAY = 1.5;
 
-/** Below this many px of displacement, a string counts as at rest. */
-const SILENT = 0.06;
+/**
+ * One per string, faintly different. Not a gradient and not a rainbow — four
+ * colours that could all plausibly be "a light line", pulled a few degrees
+ * apart so the band has depth instead of looking like one object drawn four
+ * times. Green sits third, where it is noticed without leading.
+ */
+const COLOURS = [
+  { r: 26, g: 25, b: 23, a: 0.1 }, // ink
+  { r: 121, g: 115, b: 106, a: 0.14 }, // graphite, warm
+  { r: 28, g: 168, b: 92, a: 0.17 }, // the accent
+  { r: 46, g: 74, b: 110, a: 0.12 }, // phase blue
+];
+
+interface Wave {
+  /** Wavelength, as a multiple of the band width. */
+  length: number;
+  /** Peak contribution, px. */
+  amp: number;
+  /** Travel speed, rad/s. Slow — everything here is under half a radian. */
+  speed: number;
+  /** Starting offset, so the strings never begin aligned. */
+  phase: number;
+}
 
 interface StringLine {
-  /** Resting y, as a fraction of viewport height. */
+  /** Resting y within the band, 0 at the top of it. */
   base: number;
-  /** Angular frequency. Lower index = lower and slower. */
+  waves: Wave[];
+  /** Period and offset of the slow swell over the whole line. */
+  breathSpeed: number;
+  breathPhase: number;
+  /** Fundamental frequency when plucked. */
   omega: number;
-  /** Current peak displacement in px, signed. */
-  amplitude: number;
-  /** Seconds since this string was last plucked. */
+  /** Current pluck displacement, signed px. */
+  pluck: number;
+  /** Seconds since plucked. */
   age: number;
+  colour: (typeof COLOURS)[number];
 }
+
+/** Random in [min, max). Called once per string at mount, never per frame. */
+const between = (min: number, max: number) => min + Math.random() * (max - min);
 
 export default function Strings() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -82,12 +118,19 @@ export default function Strings() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const lines: StringLine[] = Array.from({ length: COUNT }, (_, i) => ({
-      base: (i + 1) / (COUNT + 1),
-      // 8.5 to 17 rad/s, low to high. Deliberately not harmonic ratios: real
-      // ratios make simultaneous plucks re-align into a visible pulse.
-      omega: 8.5 + (i / (COUNT - 1)) * 8.5 + (i % 2) * 0.7,
-      amplitude: 0,
+      // Spread through the band, each nudged so they are not evenly ruled.
+      base: (i + 0.7) / (COUNT + 0.4) + between(-0.035, 0.035),
+      waves: [
+        { length: between(1.5, 2.1), amp: between(2.4, 4.0), speed: between(0.17, 0.27), phase: between(0, Math.PI * 2) },
+        { length: between(0.8, 1.15), amp: between(1.2, 2.1), speed: between(0.3, 0.46), phase: between(0, Math.PI * 2) },
+        { length: between(0.45, 0.62), amp: between(0.5, 1.1), speed: between(0.5, 0.78), phase: between(0, Math.PI * 2) },
+      ],
+      breathSpeed: between(0.07, 0.14),
+      breathPhase: between(0, Math.PI * 2),
+      omega: 9 + i * 2.3 + between(-0.6, 0.6),
+      pluck: 0,
       age: 0,
+      colour: COLOURS[i % COLOURS.length],
     }));
 
     let width = 0;
@@ -96,108 +139,90 @@ export default function Strings() {
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       width = window.innerWidth;
-      height = window.innerHeight;
+      height = Math.round(window.innerHeight * BAND);
       canvas.width = Math.floor(width * dpr);
       canvas.height = Math.floor(height * dpr);
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      draw();
     };
 
-    const draw = () => {
+    const draw = (t: number) => {
       ctx.clearRect(0, 0, width, height);
 
       for (const line of lines) {
         const y0 = line.base * height;
-        const displacement =
-          line.amplitude *
-          Math.cos(line.omega * line.age) *
-          Math.exp(-line.age / DECAY);
 
-        const loud = Math.min(Math.abs(displacement) / MAX_AMPLITUDE, 1);
+        // The swell: the whole line grows and settles on its own slow period.
+        const breath = 0.72 + 0.42 * Math.sin(t * line.breathSpeed + line.breathPhase);
 
-        // At rest the strings are barely there — one step above the hairline
-        // the page already uses. Ringing, they take on the accent, so a
-        // plucked string is briefly the greenest thing on screen.
-        ctx.strokeStyle = loud
-          ? `rgba(${Math.round(26 + (28 - 26) * loud)}, ${Math.round(
-              25 + (168 - 25) * loud,
-            )}, ${Math.round(23 + (92 - 23) * loud)}, ${0.1 + loud * 0.5})`
-          : "rgba(26, 25, 23, 0.1)";
-        ctx.lineWidth = 1 + loud * 0.6;
+        const pluckNow = line.pluck
+          ? line.pluck * Math.cos(line.omega * line.age) * Math.exp(-line.age / DECAY)
+          : 0;
+
+        const loud = Math.min(Math.abs(pluckNow) / MAX_PLUCK, 1);
+        const c = line.colour;
+
+        // Ringing, a string pulls toward the accent green and brightens.
+        ctx.strokeStyle = `rgba(${Math.round(c.r + (28 - c.r) * loud)}, ${Math.round(
+          c.g + (168 - c.g) * loud,
+        )}, ${Math.round(c.b + (92 - c.b) * loud)}, ${c.a + loud * 0.45})`;
+        ctx.lineWidth = 1 + loud * 0.7;
 
         ctx.beginPath();
-        if (Math.abs(displacement) < SILENT) {
-          // Flat: two points, no sampling.
-          ctx.moveTo(0, y0);
-          ctx.lineTo(width, y0);
-        } else {
-          const step = 12;
-          for (let x = 0; x <= width; x += step) {
-            const y = y0 + displacement * Math.sin((Math.PI * x) / width);
-            if (x === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
+        const step = 10;
+        for (let x = 0; x <= width; x += step) {
+          let y = y0;
+
+          for (const w of line.waves) {
+            y += w.amp * breath * Math.sin((Math.PI * 2 * x) / (w.length * width) + w.phase + t * w.speed);
           }
-          ctx.lineTo(width, y0);
+
+          // The pluck is pinned at both ends, so it fades out toward the edges
+          // while the drift keeps running underneath it.
+          y += pluckNow * Math.sin((Math.PI * x) / width);
+
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
         }
         ctx.stroke();
       }
     };
 
-    /* ------------------------------------------------------------- the loop --
-       Runs only while something is moving. `running` is the gate; the last
-       frame before stopping draws every string flat. */
-    let running = false;
+    /* ---------------------------------------------------------------- loop --
+       Runs continuously now, because the drift never stops. It is four
+       polylines over a third of the window; the earlier stop-when-idle
+       machinery bought nothing once there was no idle state to detect. */
     let frame = 0;
-    let last = 0;
+    let start = 0;
 
     const tick = (now: number) => {
-      const dt = Math.min((now - last) / 1000, 0.05);
-      last = now;
+      if (!start) start = now;
+      const t = (now - start) / 1000;
 
-      let alive = false;
       for (const line of lines) {
-        if (Math.abs(line.amplitude) < SILENT) {
-          line.amplitude = 0;
-          continue;
-        }
-        line.age += dt;
-        if (Math.abs(line.amplitude) * Math.exp(-line.age / DECAY) < SILENT) {
-          line.amplitude = 0;
+        if (!line.pluck) continue;
+        line.age += 1 / 60;
+        if (Math.abs(line.pluck) * Math.exp(-line.age / DECAY) < 0.05) {
+          line.pluck = 0;
           line.age = 0;
-        } else {
-          alive = true;
         }
       }
 
-      draw();
-
-      if (alive) {
-        frame = requestAnimationFrame(tick);
-      } else {
-        running = false;
-        draw(); // settle flat
-      }
-    };
-
-    const start = () => {
-      if (running) return;
-      running = true;
-      last = performance.now();
+      draw(t);
       frame = requestAnimationFrame(tick);
     };
 
-    /* ----------------------------------------------------------- the pluck --
-       A string is plucked when the cursor crosses it: previous position on one
-       side, current position on the other. Speed sets how hard, direction sets
-       which way. */
+    /* --------------------------------------------------------------- pluck --
+       A crossing is the cursor being on one side of a string and then the
+       other. Only the band's own vertical range is considered. */
     let prevY: number | null = null;
     let prevTime = 0;
 
     const onMove = (event: MouseEvent) => {
       const now = performance.now();
-      const y = event.clientY;
+      const bandTop = window.innerHeight - height;
+      const y = event.clientY - bandTop;
 
       if (prevY === null) {
         prevY = y;
@@ -206,35 +231,51 @@ export default function Strings() {
       }
 
       const dt = Math.max((now - prevTime) / 1000, 0.001);
-      const speed = Math.abs(y - prevY) / dt; // px per second
+      const speed = Math.abs(y - prevY) / dt;
       const direction = Math.sign(y - prevY) || 1;
 
       for (const line of lines) {
         const lineY = line.base * height;
-        const crossed = (prevY - lineY) * (y - lineY) <= 0 && prevY !== y;
-        if (!crossed) continue;
-
-        // Slow drags barely disturb it; a flick throws it. Capped so that
-        // dragging wildly can't stack the strings into each other.
-        const strength = Math.min(2 + speed * 0.012, MAX_AMPLITUDE);
-        line.amplitude = direction * strength;
+        if ((prevY - lineY) * (y - lineY) > 0 || prevY === y) continue;
+        line.pluck = direction * Math.min(2 + speed * 0.012, MAX_PLUCK);
         line.age = 0;
       }
 
       prevY = y;
       prevTime = now;
-      start();
     };
+
+    /* ------------------------------------------------------------- fade out --
+       Whichever block holds the middle of the viewport decides whether the
+       band is shown. */
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const off = (entry.target as HTMLElement).dataset.strings === "off";
+          canvas.style.opacity = off ? "0" : "1";
+        }
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
+    );
+
+    document
+      .querySelectorAll("main > *")
+      .forEach((block) => observer.observe(block));
 
     resize();
     window.addEventListener("resize", resize);
 
     if (!reduced) {
       window.addEventListener("mousemove", onMove, { passive: true });
+      frame = requestAnimationFrame(tick);
+    } else {
+      draw(0);
     }
 
     return () => {
       cancelAnimationFrame(frame);
+      observer.disconnect();
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", onMove);
     };
@@ -244,7 +285,7 @@ export default function Strings() {
     <canvas
       ref={canvasRef}
       aria-hidden
-      className="pointer-events-none fixed inset-0 -z-10"
+      className="pointer-events-none fixed bottom-0 left-0 right-0 -z-10 transition-opacity duration-slow ease-calm"
     />
   );
 }
