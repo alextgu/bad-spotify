@@ -14,6 +14,8 @@
  * rather than wired to quietly play the sample instead.
  */
 
+import type { Session } from "@/lib/types";
+
 /** Where the agent might be. HTTPS first: `run.py --https` is the phone path. */
 const BASES = [
   "https://127.0.0.1:8420",
@@ -21,7 +23,7 @@ const BASES = [
 ];
 
 export interface AnalyzeResult {
-  session: unknown;
+  session: Session;
   /** Which base answered, so the panel can say where the reasoning came from. */
   base: string;
 }

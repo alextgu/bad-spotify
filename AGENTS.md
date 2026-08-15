@@ -48,7 +48,7 @@ Plus one README beside each part that ships on its own: `frontend/`,
 Every one of these was run on 14 Aug 2026 and did what it says.
 
 ```bash
-# tests — 192 pass
+# tests — 209 pass
 source .venv/bin/activate && python -m pytest tests/ -q
 # on Windows: .venv\Scripts\python.exe -m pytest tests -q
 
@@ -77,12 +77,13 @@ cd frontend && npx tsc --noEmit && npm run build
 `pytest` and `gradio` are in `requirements.txt`. `ffmpeg` on PATH is needed for
 video audio; without it the sampler runs vision-only rather than failing.
 
-### Test inventory (192, verified by `--collect-only`)
+### Test inventory (209, verified by `--collect-only`)
 
 | File | Count | Guards |
 |---|---|---|
 | `tests/test_discover.py` | 15 | discovery caching, zero Spotify calls during candidate generation, request budget |
-| `tests/test_dj_timing.py` | 18 | deadband, jumps, dwell floor, clocks, stable-scene reuse |
+| `tests/test_dj_timing.py` | 19 | deadband, jumps, dwell floor, clocks, stable-scene reuse |
+| `tests/test_glasses.py` | 10 | glasses capture, ingest, and frame delivery |
 | `tests/test_live_frames.py` | 6 | live frame endpoint, locking, image validation |
 | `tests/test_local_video_app.py` | 4 | local perception, upload validation, sampled analysis |
 | `tests/test_judge_temperature.py` | 3 | score-space sampling, greedy mode, weak-candidate suppression |
@@ -93,6 +94,7 @@ video audio; without it the sampler runs vision-only rather than failing.
 | `tests/test_service.py` | 13 | `Engine`: describe / look / watch, no speakers by default, no bus leak |
 | `tests/test_spotify_match.py` | 13 | search-result matching (karaoke, tribute bands, wrong artists) |
 | `tests/test_spotify_player.py` | 16 | player behavior against a stand-in Spotify |
+| `tests/test_tls.py` | 6 | HTTPS certificate generation and server configuration |
 | `tests/test_video_and_session.py` | 7 | video-as-live and the recorded session format |
 | `tests/test_videofeed.py` | 17 | sampling a real generated mp4: cadence, triggers, rate limiting, sinks |
 | `tests/test_voice_lines.py` | 26 | voice-line selection, startup behavior, renderer/site agreement |
@@ -207,7 +209,7 @@ concurrently and a judge picks between them.
 Before you say you're done:
 
 ```bash
-pytest tests/ -q                      # all 192, not just yours
+pytest tests/ -q                      # all 209, not just yours
 python run.py --ticks 6 --no-hud      # the loop still runs on mocks
 ```
 
@@ -330,9 +332,12 @@ doc as though it were agreed.
   correctly did nothing. `agents/judge.py` is still unrun against the real API.
   The 4s timeout was **wrong, not just a guess**: `gemini-2.5-flash` took
   5–8s, so every call timed out and silently fell back to a canned read. Now
-  `gemini-3.5-flash-lite` at a measured 1.17s median, timeout 3.0s. What is
-  still unknown: whether the descriptions are any good on **real footage** —
-  every frame it has seen so far was synthetic.
+  `gemini-3.5-flash-lite` at a measured 1.17s median, timeout 3.0s. **Run on
+  real footage 15 Aug:** 29 sampled frames across library → birthday → gym,
+  office → food court, and a winter forest walk all returned specific,
+  setting-correct reads at 0.95–0.98 confidence. Four first attempts exceeded
+  3.0s; every retry succeeded. `agents/judge.py` remains unrun against the real
+  API.
 - **The "best song" mode.** The site's FAQ says the same machinery would find the
   best song with the sign flipped. That is a design claim, not code — nothing
   implements it.

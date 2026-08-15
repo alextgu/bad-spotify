@@ -1,43 +1,50 @@
-/**
- * The clips on offer in the picker.
- *
- * There is one, because there is one recorded run: `public/sessions/
- * sample.json`, a park read at 0s that gets Drowning Pool five seconds later.
- * The three invented options that used to be here — a kitchen, a bus, a
- * ceiling — were removed once the panel started showing real session data,
- * because picking "Dinner for one" and then reading "sunlit public park" in
- * the reasoning column is exactly the kind of mismatch that costs the whole
- * screen its credibility.
- *
- * `placeholder` is still true: the *decision* is real, the *footage* is not.
- * `sample.mp4` is the synthetic test clip, because nobody has filmed the park.
- * That flag drives the tag in the picker and the note under the video, so
- * dropping in real footage and clearing it removes both reminders at once.
- *
- * To add another: `python run.py --video yourclip.mp4 --record yourclip`, put
- * the JSON in `public/sessions/` and the footage in `public/videos/`, and give
- * `lib/cues.ts` the new import.
- */
+import type { Session } from '@/lib/types';
+import libraryBirthdayGymSession from '@/public/sessions/library-birthday-gym.json';
+import officeFoodCourtSession from '@/public/sessions/office-food-court.json';
+import winterForestWalkSession from '@/public/sessions/winter-forest-walk.json';
+
+/** One real clip and the footage-derived session shown beside it. */
 export interface Sample {
   id: string;
   title: string;
-  /** One line on what the agent is up against. */
   blurb: string;
-  /** Timecode range, for the card. */
   length: string;
+  durationS: number;
   src: string;
-  /** Honest flag: the footage is not what it claims to be. */
+  session: Session;
   placeholder?: boolean;
 }
 
+/** Three real clips, each paired with its own generated analysis session. */
 export const samples: Sample[] = [
   {
-    id: "park",
-    title: "Sunlit park",
+    id: 'library-birthday-gym',
+    title: 'Library → Birthday → Gym',
     blurb:
-      "People reading on the grass, someone walking slowly on a path. Read as peaceful at 0.90 confidence — then answered with nu metal.",
-    length: "00:30",
-    src: "/videos/sample.mp4",
-    placeholder: true,
+      'Gemini catches all three transitions: focused library, joyful birthday, then determined gym — answered with nu metal and dramatic classical.',
+    length: '00:53',
+    durationS: 52.75,
+    src: '/videos/library-birthday-gym.mp4',
+    session: libraryBirthdayGymSession as unknown as Session,
+  },
+  {
+    id: 'office-food-court',
+    title: 'Office → Food Court',
+    blurb:
+      'A focused open-plan office becomes a bustling mall food court. Gemini answers with Bodies, then gentle Satie.',
+    length: '00:32',
+    durationS: 32,
+    src: '/videos/office-food-court.mp4',
+    session: officeFoodCourtSession as unknown as Session,
+  },
+  {
+    id: 'winter-forest-walk',
+    title: 'Winter Forest Walk',
+    blurb:
+      'A tranquil walk along a snow-covered pine trail, confidently answered with Barbie Girl.',
+    length: '00:20',
+    durationS: 20.49,
+    src: '/videos/winter-forest-walk.mp4',
+    session: winterForestWalkSession as unknown as Session,
   },
 ];

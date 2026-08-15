@@ -24,12 +24,12 @@ Last updated: 15 Aug 2026
 | Backup list when things break | Done | |
 | Finding songs on Spotify | Built, unproven | |
 | Playing songs on Spotify | Built, unproven | |
-| Reading a photo into a description | Gemini proven live 14 Aug on synthetic frames; **still unproven on real footage** | |
+| Reading a photo into a description | Done — Gemini produced 29 specific, high-confidence reads from three real clips on 15 Aug; all matched the intended settings | |
 | Working out the opposite | Built, unproven — mood reflection plus setting attributes → opposite attributes → associated genres | |
 | The song list (47 songs) | Built, unproven | |
 | Picking the funniest one | Built, unproven | |
 | The voice | Scoped down 14 Aug | Nelson (`6OzrBCQf8cjERkYgzSg8`), listened to and approved. **Not in the live loop**: one greeting at startup, and pre-rendered clips on the site. That deletes the latency, ducking and mid-song-interrupt risks entirely — none of them can bite a line spoken before the music starts. Still needs a key to render the site's three clips |
-| Video file as input | Built, unproven — now sampled by `videofeed` | |
+| Video file as input | Done — three real clips analyzed through `videofeed` with Gemini on 15 Aug; scene cuts and footage-derived sessions verified | |
 | Recording a run for the site | Built, unproven | |
 | Screens — DJ face and engineering view | Built, unproven | |
 | Live camera/shared-screen HUD | Built, unproven — chosen song and playback errors reach the live response; browser not exercised | |
@@ -59,7 +59,7 @@ the single biggest risk to the demo.
   off when the room really changed *and* the current song has had a fair run.
 - **Backup list.** If anything upstream dies, a pre-picked list of always-wrong
   songs plays anyway. It is never silent.
-- **Tests.** 192 of them, each guarding a specific way the demo could break.
+- **Tests.** 209 of them, each guarding a specific way the demo could break.
 - **Timeouts on the model calls.** A slow answer is abandoned and retried
   rather than freezing the loop. A late answer is worth less than a fast fallback.
 
@@ -74,7 +74,7 @@ active; the offline fallback leaves the semantic chain empty. The local
 one perception call, resolves to opera/classical candidates, and triggers the
 genre-aware DJ path. The offline reader returns no special fast-food answer.
 Seven focused tests cover the model boundary, identity filtering, Engine path,
-genre gating, and zero-Spotify-call candidate generation. All 192 tests pass.
+genre gating, and zero-Spotify-call candidate generation. All 209 tests pass.
 *Still unknown:* whether the live model reaches the useful chain from a real
 fast-food photo without an example in its prompt.
 
@@ -110,7 +110,7 @@ and asks before the expensive work: two rooms that invert to the same music
 don't cost a track.
 *Proven by:* a scene held perfectly constant for 62s went from **6 tracks to 1**,
 and a hard cut is still answered within one read (2.5s). 11 new tests in
-`tests/test_dj_timing.py`; 192 pass.
+`tests/test_dj_timing.py`; 209 pass.
 *Thresholds are measured, not taste:* jitter moves the target ≤0.23 and flips
 the top pick 37% of the time; the smallest real scene change moves it 0.56.
 The deadband sits in that gap at 0.30.
@@ -126,7 +126,7 @@ aren't declared on the TypedDict.
 video, samples it through the current video source, and returns a mood and music
 timeline to `/demo`. Stable mood samples keep the current song choice. A new
 choice needs a different mood and enough vibe distance, and carries a two-second
-crossfade marker. Four focused tests pass, all 192 project tests pass, and the
+crossfade marker. Four focused tests pass, all 209 project tests pass, and the
 frontend type check and production build pass. It has been tried with rain footage.
 
 ## Built, but nobody has run it for real
@@ -168,9 +168,14 @@ we see the wiring.
 **6. Video as input**
 Feeds a recording in as though it were live — samples a frame every few seconds,
 pulls the matching audio out with ffmpeg, and reports where in the video it is.
-Tested against a generated clip, never against real footage.
-*To prove it:* run it on an actual video someone filmed.
-*Needs:* ffmpeg installed, otherwise it runs vision-only.
+Run 15 Aug against three real 1080p/4K clips with Gemini: library → birthday →
+gym produced 3 stable decisions at the real transitions, office → food court
+produced 2, and a winter forest walk produced 1. All 29 sampled frames stayed on
+the Gemini backend at 0.95–0.98 confidence and named the intended settings,
+including `shopping mall food court` and `snow-covered forest trail`. Four
+first attempts exceeded the 3s perception timeout; every retry succeeded. The
+runs were vision-only because ffmpeg is not installed. Their generated sessions
+now ship beside the three samples on the site.
 
 **7. The site**
 `frontend/` — Next.js, TypeScript, Tailwind. Builds clean.

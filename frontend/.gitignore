@@ -7,3 +7,6 @@ next-env.d.ts
 #Keeps the bundled sample video
 public/videos/*.mp4
 !public/videos/sample.mp4
+!public/videos/library-birthday-gym.mp4
+!public/videos/office-food-court.mp4
+!public/videos/winter-forest-walk.mp4

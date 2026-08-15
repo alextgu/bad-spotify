@@ -1,12 +1,12 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ClipPicker from "@/components/ClipPicker";
 import Label from "@/components/Label";
 import { AnalyzeError, analyze, durationOf } from "@/lib/analyze";
-import { cueAt, cues, cuesFromSession, type Cue } from "@/lib/cues";
+import { cueAt, cuesFor, cuesFromSession, type Cue } from "@/lib/cues";
 import { samples, type Sample } from "@/lib/samples";
 import { tryIt } from "@/lib/site";
 
@@ -46,9 +46,12 @@ gsap.registerPlugin(ScrollTrigger);
  * nowhere else to get it.
  *
  * ---------------------------------------------------------------------------
- * Two sources, one of them yours
+ * Bundled samples and your own footage
  * ---------------------------------------------------------------------------
- * The sample clip reads `lib/cues.ts`, which is the real recorded session.
+ * Each sample carries its own real recorded session. `lib/cues.ts` converts
+ * the selected session into cues, so the footage, decisions and timeline all
+ * change together.
+ *
  * "Upload your own" sends a file to the agent running on this machine and
  * replaces BOTH halves -- the video and the cues beside it -- because a panel
  * reasoning about a park next to somebody's kitchen is exactly the failure
@@ -122,7 +125,9 @@ export default function SectionTryIt() {
         title: chosen.name.replace(/\.[^.]+$/, ""),
         blurb: "Your footage, read by the agent running on this machine.",
         length: clock(seconds),
+        durationS: seconds,
         src: URL.createObjectURL(chosen),
+        session,
         placeholder: false,
       });
       setProgress(0);
@@ -135,11 +140,17 @@ export default function SectionTryIt() {
     }
   }
 
+  const bundledCues = useMemo(
+    () => cuesFor(clip.session, clip.durationS),
+    [clip.session, clip.durationS],
+  );
+  const activeCues = ownCues ?? bundledCues;
+
   /** The card the clip was chosen from, so it can fly out of it. */
   const origin = useRef<DOMRect | null>(null);
   const stage = useRef<HTMLDivElement>(null);
 
-  const cue = cueAt(progress, ownCues ?? cues);
+  const cue = cueAt(progress, activeCues);
 
   /* ------------------------------------------------------------- the FLIP --
      The chosen card becomes the video panel rather than being replaced by it.
@@ -196,10 +207,28 @@ export default function SectionTryIt() {
 
   const choose = (sample: Sample, from: DOMRect) => {
     origin.current = from;
+    setOwnCues(null);
     setClip(sample);
+    setProgress(0);
+    setStamp("00:00");
     setPicking(false);
     setStarted(true);
   };
+
+  /* The selected session owns the wheel stops too. The server-rendered page
+     starts with ordinary section boundaries; once a clip is chosen, publish
+     its actual decision times and ask the shared scroll controller to measure
+     again. */
+  useLayoutEffect(() => {
+    if (!started || !root.current?.parentElement) return;
+
+    const wrapper = root.current.parentElement;
+    const stops = Array.from(
+      new Set([0, ...activeCues.map((item) => Number(item.at.toFixed(4))), 1]),
+    ).sort((a, b) => a - b);
+    wrapper.dataset.stops = stops.join(",");
+    ScrollTrigger.refresh();
+  }, [started, activeCues]);
 
   useLayoutEffect(() => {
     if (!started) return;
@@ -251,7 +280,7 @@ export default function SectionTryIt() {
   }, [started]);
 
   /* ------------------------------------------------------------ chooser --
-     Two ways in: take the sample, or bring your own (not wired yet). */
+     Two ways in: take a bundled sample, or analyze your own clip locally. */
   if (!started) {
     return (
       <section
@@ -531,11 +560,11 @@ export default function SectionTryIt() {
           <div ref={track} className="relative w-[190%] will-change-transform">
             <div className="h-px w-full bg-hairline" />
 
-            {cues.map((c) => {
+            {activeCues.map((c) => {
               const active = c.time === cue.time;
               return (
                 <div
-                  key={c.time}
+                  key={`${c.time}-${c.track}`}
                   className="absolute top-0 w-44"
                   style={{ left: `${c.at * 100}%` }}
                 >

@@ -68,13 +68,13 @@ export default function Home() {
             it pins itself and spends that scroll moving the clip. `data-stops`
             are the moments the agent did something, so a gesture lands on a
             decision rather than on an arbitrary screenful — see
-            ScrollController. Three of them, because the recorded run in
-            public/sessions/sample.json contains exactly one decision: the read,
-            the commit five seconds later, and the end of the clip.
+            ScrollController. The selected sample publishes its own recorded
+            decision times after the picker closes; these are only the initial
+            section boundaries.
 
             It carries its own opaque background because this is the one screen
             with fine detail and a moving control on it. */}
-        <div data-stops="0,0.2,1">
+        <div data-stops="0,1">
           <SectionTryIt />
         </div>
 

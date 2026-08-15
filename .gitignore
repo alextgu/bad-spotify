@@ -30,6 +30,7 @@ _review/
 #Local configuration and caches
 .env
 .env.*.local
+2.env
 .cache/
 *.log
 

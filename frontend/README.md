@@ -7,7 +7,8 @@ Start the Python API with `python run.py --serve`. Then run this frontend with
 `http://127.0.0.1:8420/api/analyze-video` and displays the returned session.
 
 Set `NEXT_PUBLIC_BADSPOTIFY_API_URL` when the API uses another host or port.
-The bundled video and session remain available through the `Use sample` button.
+Three bundled videos and their footage-derived sessions remain available
+through the `Use sample` button.
 
 The site judges look at. **Not a product**: it does not run the agent, it
 replays a recording of the agent. That's deliberate — no backend to host, no

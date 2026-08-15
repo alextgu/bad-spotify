@@ -1,0 +1,201 @@
+{
+  "session": "winter-forest-walk",
+  "source": "winter-forest-walk.mp4",
+  "moment_count": 1,
+  "sample_interval_s": 5.0,
+  "duration_s": 20.49,
+  "model": "gemini-3.5-flash-lite",
+  "README": "Each moment is sampled from the uploaded video. The scene contains the detected mood. The chosen track is intentionally wrong for that mood.",
+  "moments": [
+    {
+      "video_time": 0.0,
+      "wall_time": 1786805002.5036025,
+      "scene": {
+        "setting": "snow-covered forest trail surrounded by dense pine trees",
+        "activity": "walking on a snowy path with an animal",
+        "mood": "tranquil",
+        "confidence": 0.95,
+        "tempo": "walking",
+        "meter": "steady",
+        "colors": [
+          "white",
+          "dark brown",
+          "blue"
+        ],
+        "vibe": {
+          "valence": 0.6,
+          "arousal": 0.1,
+          "density": 0.1,
+          "brightness": 0.7,
+          "organicness": 1.0
+        },
+        "setting_attributes": [
+          "natural",
+          "remote",
+          "quiet",
+          "wild"
+        ]
+      },
+      "opposite": {
+        "target_vibe": {
+          "valence": 0.4,
+          "arousal": 0.9,
+          "density": 0.9,
+          "brightness": 0.30000000000000004,
+          "organicness": 0.0
+        },
+        "looking_for": [
+          "electronic",
+          "dance",
+          "disco",
+          "rage",
+          "screaming",
+          "brutal",
+          "assault",
+          "noise",
+          "funeral",
+          "grief",
+          "despair",
+          "heartbreak",
+          "death",
+          "unlistenable",
+          "grating",
+          "wrong-season"
+        ],
+        "attributes": [
+          "artificial",
+          "urban",
+          "loud",
+          "domestic"
+        ],
+        "why": "scene reads tranquil (dominant axis 'organicness', deviation 0.50); setting traits ['natural', 'remote', 'quiet', 'wild'] invert to ['artificial', 'urban', 'loud', 'domestic'], associated with ['electronic', 'dance', 'disco']; no specific rule matched; inverting the mood directly; christmas music outside december"
+      },
+      "considered": {
+        "semantic_opposite": [
+          {
+            "title": "Dancing Queen",
+            "artist": "ABBA",
+            "score": 1.292,
+            "why": "natural, remote, quiet, wild -> artificial, urban, loud, domestic -> dance, disco, electronic"
+          },
+          {
+            "title": "September",
+            "artist": "Earth, Wind & Fire",
+            "score": 1.288,
+            "why": "natural, remote, quiet, wild -> artificial, urban, loud, domestic -> dance, disco, electronic"
+          },
+          {
+            "title": "Barbie Girl",
+            "artist": "Aqua",
+            "score": 1.268,
+            "why": "natural, remote, quiet, wild -> artificial, urban, loud, domestic -> dance, disco, electronic"
+          }
+        ],
+        "catalogue_dive": [
+          {
+            "title": "Sandstorm",
+            "artist": "Darude",
+            "score": 1.03,
+            "why": "Peak 2000s trance synth assault in a silent winter woods."
+          },
+          {
+            "title": "Baddadan",
+            "artist": "Chase & Status",
+            "score": 0.98,
+            "why": "Heavy drum and bass weapon for a quiet squirrel spotting."
+          },
+          {
+            "title": "Gosh",
+            "artist": "Jamie xx",
+            "score": 0.93,
+            "why": "Pounding warehouse rave beats echoing off frozen pine trees."
+          },
+          {
+            "title": "Scary Monsters and Nice Sprites",
+            "artist": "Skrillex",
+            "score": 0.88,
+            "why": "Aggressive dubstep drops to disturb the gentle snowfall."
+          }
+        ],
+        "genre_antipode": [
+          {
+            "title": "Hammer Smashed Face",
+            "artist": "Cannibal Corpse",
+            "score": 1.001,
+            "why": "d(scene)=1.52 d(target)=0.53"
+          },
+          {
+            "title": "Thunderdome Anthem",
+            "artist": "Various",
+            "score": 1.0,
+            "why": "d(scene)=1.59 d(target)=0.50"
+          }
+        ],
+        "lyrical_irony": [
+          {
+            "title": "Duality",
+            "artist": "Slipknot",
+            "score": 0.517,
+            "why": "taboo hits: ['rage', 'screaming']"
+          },
+          {
+            "title": "Woodpecker No. 1",
+            "artist": "Merzbow",
+            "score": 0.468,
+            "why": "taboo hits: ['noise', 'unlistenable']"
+          },
+          {
+            "title": "Funeral March (Sonata No. 2)",
+            "artist": "Frederic Chopin",
+            "score": 0.443,
+            "why": "taboo hits: ['death', 'funeral']"
+          },
+          {
+            "title": "Hurt",
+            "artist": "Johnny Cash",
+            "score": 0.436,
+            "why": "taboo hits: ['death', 'grief']"
+          }
+        ],
+        "tempo_clash": [
+          {
+            "title": "Free Jazz",
+            "artist": "Ornette Coleman",
+            "score": 0.441,
+            "why": "arousal gap 0.35, meter clash 1.00"
+          },
+          {
+            "title": "Bodies",
+            "artist": "Drowning Pool",
+            "score": 0.334,
+            "why": "arousal gap 0.46, meter clash 0.00"
+          }
+        ]
+      },
+      "chosen": {
+        "title": "Barbie Girl",
+        "artist": "Aqua",
+        "quip": "Matched to the mood.",
+        "strategy": "semantic_opposite",
+        "mismatch": 0.5705611273124028,
+        "why": "score-weighted choice via semantic_opposite: natural, remote, quiet, wild -> artificial, urban, loud, domestic -> dance, disco, electronic",
+        "runner_ups": [
+          "Dancing Queen",
+          "September",
+          "Sandstorm"
+        ]
+      },
+      "played": {
+        "at_video_time": 0.0,
+        "mode": null,
+        "track_id": "barbiegirl",
+        "genres": [
+          "eurodance",
+          "bubblegum"
+        ],
+        "crossfade_seconds": 0.0,
+        "latency_ms": 7866
+      }
+    }
+  ]
+}

@@ -1,0 +1,485 @@
+{
+  "session": "library-birthday-gym",
+  "source": "library-birthday-gym.mp4",
+  "moment_count": 3,
+  "sample_interval_s": 5.0,
+  "duration_s": 52.75,
+  "model": "gemini-3.5-flash-lite",
+  "README": "Each moment is sampled from the uploaded video. The scene contains the detected mood. The chosen track is intentionally wrong for that mood.",
+  "moments": [
+    {
+      "video_time": 0.0,
+      "wall_time": 1786804925.2062848,
+      "scene": {
+        "setting": "university library study hall",
+        "activity": "group studying and taking notes at a long table",
+        "mood": "focused",
+        "confidence": 0.95,
+        "tempo": "still",
+        "meter": "steady",
+        "colors": [
+          "white",
+          "brown",
+          "blue",
+          "beige"
+        ],
+        "vibe": {
+          "valence": 0.65,
+          "arousal": 0.2,
+          "density": 0.3,
+          "brightness": 0.75,
+          "organicness": 0.2
+        },
+        "setting_attributes": [
+          "quiet",
+          "academic",
+          "structured",
+          "indoor"
+        ]
+      },
+      "opposite": {
+        "target_vibe": {
+          "valence": 0.35,
+          "arousal": 1.0,
+          "density": 0.7,
+          "brightness": 0.25,
+          "organicness": 0.8
+        },
+        "looking_for": [
+          "punk",
+          "metal",
+          "dance",
+          "gabber",
+          "rave",
+          "brutal",
+          "screaming",
+          "noise",
+          "assault"
+        ],
+        "attributes": [
+          "noisy",
+          "chaotic",
+          "impromptu",
+          "outdoor"
+        ],
+        "why": "scene reads focused (dominant axis 'arousal', deviation 0.30); setting traits ['quiet', 'academic', 'structured', 'indoor'] invert to ['noisy', 'chaotic', 'impromptu', 'outdoor'], associated with ['punk', 'metal', 'dance']; silence violated"
+      },
+      "considered": {
+        "semantic_opposite": [
+          {
+            "title": "Duality",
+            "artist": "Slipknot",
+            "score": 1.23,
+            "why": "quiet, academic, structured, indoor -> noisy, chaotic, impromptu, outdoor -> dance, metal, punk"
+          }
+        ],
+        "catalogue_dive": [
+          {
+            "title": "Baby Shark",
+            "artist": "Pinkfong",
+            "score": 1.03,
+            "why": "Nursery torture echoing off brutalist concrete library pillars."
+          },
+          {
+            "title": "Crazy Frog",
+            "artist": "Axel F",
+            "score": 0.98,
+            "why": "Childhood annoyance piercing through midterm essay concentration."
+          },
+          {
+            "title": "What Does the Fox Say?",
+            "artist": "Ylvis",
+            "score": 0.93,
+            "why": "Absurdist viral noise breaking the solemn vow of absolute silence."
+          },
+          {
+            "title": "Gangnam Style",
+            "artist": "PSY",
+            "score": 0.88,
+            "why": "Global meme energy detonating precisely as someone highlights a textbook."
+          }
+        ],
+        "tempo_clash": [
+          {
+            "title": "Sandstorm",
+            "artist": "Darude",
+            "score": 0.661,
+            "why": "arousal gap 0.90, meter clash 0.00"
+          }
+        ],
+        "lyrical_irony": [
+          {
+            "title": "Thunderdome Anthem",
+            "artist": "Various",
+            "score": 0.584,
+            "why": "taboo hits: ['assault', 'gabber', 'rave']"
+          },
+          {
+            "title": "Hammer Smashed Face",
+            "artist": "Cannibal Corpse",
+            "score": 0.309,
+            "why": "taboo hits: ['brutal']"
+          }
+        ]
+      },
+      "chosen": {
+        "title": "Duality",
+        "artist": "Slipknot",
+        "quip": "This is the right call for the room.",
+        "strategy": "semantic_opposite",
+        "mismatch": 0.5100392141786747,
+        "why": "score-weighted choice via semantic_opposite: quiet, academic, structured, indoor -> noisy, chaotic, impromptu, outdoor -> dance, metal, punk",
+        "runner_ups": [
+          "Baby Shark",
+          "Crazy Frog",
+          "What Does the Fox Say?"
+        ]
+      },
+      "played": {
+        "at_video_time": 0.0,
+        "mode": null,
+        "track_id": "duality",
+        "genres": [
+          "nu metal"
+        ],
+        "crossfade_seconds": 0.0,
+        "latency_ms": 4991
+      }
+    },
+    {
+      "video_time": 27.09,
+      "wall_time": 1786804943.7657185,
+      "scene": {
+        "setting": "indoor domestic kitchen or dining room, birthday cake on a table",
+        "activity": "lighting candles on a birthday cake",
+        "mood": "joyful anticipation",
+        "confidence": 0.98,
+        "tempo": "still",
+        "meter": "steady",
+        "colors": [
+          "white",
+          "brown",
+          "yellow",
+          "blue",
+          "red"
+        ],
+        "vibe": {
+          "valence": 0.85,
+          "arousal": 0.35,
+          "density": 0.2,
+          "brightness": 0.6,
+          "organicness": 0.5
+        },
+        "setting_attributes": [
+          "domestic",
+          "informal",
+          "intimate",
+          "warm"
+        ]
+      },
+      "opposite": {
+        "target_vibe": {
+          "valence": 0.0,
+          "arousal": 0.65,
+          "density": 0.8,
+          "brightness": 0.4,
+          "organicness": 0.5
+        },
+        "looking_for": [
+          "ambient",
+          "classical",
+          "metal",
+          "funeral",
+          "death",
+          "grief",
+          "despair",
+          "heartbreak",
+          "death metal",
+          "brutal",
+          "growling"
+        ],
+        "attributes": [
+          "industrial",
+          "formal",
+          "public",
+          "cold"
+        ],
+        "why": "scene reads joyful anticipation (dominant axis 'valence', deviation 0.35); setting traits ['domestic', 'informal', 'intimate', 'warm'] invert to ['industrial', 'formal', 'public', 'cold'], associated with ['ambient', 'classical', 'metal']; joy undercut by mortality; romance detonated"
+      },
+      "considered": {
+        "semantic_opposite": [
+          {
+            "title": "O Fortuna",
+            "artist": "Carl Orff",
+            "score": 1.287,
+            "why": "domestic, informal, intimate, warm -> industrial, formal, public, cold -> ambient, classical, metal"
+          },
+          {
+            "title": "Ride of the Valkyries",
+            "artist": "Richard Wagner",
+            "score": 1.275,
+            "why": "domestic, informal, intimate, warm -> industrial, formal, public, cold -> ambient, classical, metal"
+          },
+          {
+            "title": "In the Hall of the Mountain King",
+            "artist": "Edvard Grieg",
+            "score": 1.261,
+            "why": "domestic, informal, intimate, warm -> industrial, formal, public, cold -> ambient, classical, metal"
+          },
+          {
+            "title": "Funeral March (Sonata No. 2)",
+            "artist": "Frederic Chopin",
+            "score": 1.254,
+            "why": "domestic, informal, intimate, warm -> industrial, formal, public, cold -> ambient, classical, metal"
+          }
+        ],
+        "catalogue_dive": [
+          {
+            "title": "Everybody Hurts",
+            "artist": "R.E.M.",
+            "score": 1.03,
+            "why": "Suicide prevention anthem while blowing out birthday candles"
+          },
+          {
+            "title": "Hurt",
+            "artist": "Johnny Cash",
+            "score": 0.98,
+            "why": "Desolate late-life regret over a sheet cake"
+          },
+          {
+            "title": "My Immortal",
+            "artist": "Evanescence",
+            "score": 0.93,
+            "why": "Gothic mourning song for a room full of living people"
+          },
+          {
+            "title": "Tears in Heaven",
+            "artist": "Eric Clapton",
+            "score": 0.88,
+            "why": "Tragic child-loss ballad during a lighthearted celebration"
+          }
+        ],
+        "genre_antipode": [
+          {
+            "title": "Hammer Smashed Face",
+            "artist": "Cannibal Corpse",
+            "score": 0.923,
+            "why": "d(scene)=1.29 d(target)=0.40"
+          }
+        ],
+        "register_clash": [
+          {
+            "title": "Adagio for Strings",
+            "artist": "Samuel Barber",
+            "score": 0.813,
+            "why": "belongs at funeral, not at birthday, celebration"
+          },
+          {
+            "title": "Gymnopedie No. 1",
+            "artist": "Erik Satie",
+            "score": 0.551,
+            "why": "belongs at study, not at birthday, celebration"
+          },
+          {
+            "title": "Clair de Lune",
+            "artist": "Claude Debussy",
+            "score": 0.549,
+            "why": "belongs at study, not at birthday, celebration"
+          }
+        ],
+        "lyrical_irony": [
+          {
+            "title": "Hurt",
+            "artist": "Johnny Cash",
+            "score": 0.469,
+            "why": "taboo hits: ['death', 'grief']"
+          }
+        ]
+      },
+      "chosen": {
+        "title": "O Fortuna",
+        "artist": "Carl Orff",
+        "quip": "Matched to the mood.",
+        "strategy": "semantic_opposite",
+        "mismatch": 0.5486346689738081,
+        "why": "score-weighted choice via semantic_opposite: domestic, informal, intimate, warm -> industrial, formal, public, cold -> ambient, classical, metal",
+        "runner_ups": [
+          "Ride of the Valkyries",
+          "In the Hall of the Mountain King",
+          "Funeral March (Sonata No. 2)"
+        ]
+      },
+      "played": {
+        "at_video_time": 27.09,
+        "mode": null,
+        "track_id": "ofortuna",
+        "genres": [
+          "classical",
+          "choral"
+        ],
+        "crossfade_seconds": 2.0,
+        "latency_ms": 4820
+      }
+    },
+    {
+      "video_time": 39.94,
+      "wall_time": 1786804955.83308,
+      "scene": {
+        "setting": "indoor gym or fitness studio training floor",
+        "activity": "performing pushups or plank exercise with athletic hand wraps",
+        "mood": "determined",
+        "confidence": 0.95,
+        "tempo": "brisk",
+        "meter": "steady",
+        "colors": [
+          "black",
+          "grey",
+          "white",
+          "brown"
+        ],
+        "vibe": {
+          "valence": 0.6,
+          "arousal": 0.7,
+          "density": 0.1,
+          "brightness": 0.8,
+          "organicness": 0.1
+        },
+        "setting_attributes": [
+          "utilitarian",
+          "industrial",
+          "high-energy"
+        ]
+      },
+      "opposite": {
+        "target_vibe": {
+          "valence": 0.4,
+          "arousal": 0.30000000000000004,
+          "density": 1.0,
+          "brightness": 0.19999999999999996,
+          "organicness": 0.9
+        },
+        "looking_for": [
+          "classical",
+          "ambient",
+          "weightless",
+          "glacial",
+          "funeral doom",
+          "calm"
+        ],
+        "attributes": [
+          "ornate",
+          "residential",
+          "sedentary"
+        ],
+        "why": "scene reads determined (dominant axis 'density', deviation 0.40); setting traits ['utilitarian', 'industrial', 'high-energy'] invert to ['ornate', 'residential', 'sedentary'], associated with ['classical', 'ambient']; momentum killed"
+      },
+      "considered": {
+        "semantic_opposite": [
+          {
+            "title": "Ride of the Valkyries",
+            "artist": "Richard Wagner",
+            "score": 1.28,
+            "why": "utilitarian, industrial, high-energy -> ornate, residential, sedentary -> ambient, classical"
+          },
+          {
+            "title": "Clair de Lune",
+            "artist": "Claude Debussy",
+            "score": 1.269,
+            "why": "utilitarian, industrial, high-energy -> ornate, residential, sedentary -> ambient, classical"
+          },
+          {
+            "title": "Funeral March (Sonata No. 2)",
+            "artist": "Frederic Chopin",
+            "score": 1.268,
+            "why": "utilitarian, industrial, high-energy -> ornate, residential, sedentary -> ambient, classical"
+          },
+          {
+            "title": "In the Hall of the Mountain King",
+            "artist": "Edvard Grieg",
+            "score": 1.267,
+            "why": "utilitarian, industrial, high-energy -> ornate, residential, sedentary -> ambient, classical"
+          }
+        ],
+        "catalogue_dive": [
+          {
+            "title": "Baby Shark",
+            "artist": "Pinkfong",
+            "score": 1.03,
+            "why": "Childhood nursery torture played during maximum adult core exhaustion."
+          },
+          {
+            "title": "Crazy Frog",
+            "artist": "Axel F",
+            "score": 0.98,
+            "why": "A 2005 ringtone screaming over a silent, meditative gym floor."
+          },
+          {
+            "title": "The Duck Song",
+            "artist": "Bryson Billboard",
+            "score": 0.93,
+            "why": "Asking someone holding a plank if they have any grapes."
+          },
+          {
+            "title": "What Does the Fox Say?",
+            "artist": "Ylvis",
+            "score": 0.88,
+            "why": "Unnecessary animal noises during peak athletic breathing."
+          }
+        ],
+        "genre_antipode": [
+          {
+            "title": "Adagio for Strings",
+            "artist": "Samuel Barber",
+            "score": 0.866,
+            "why": "d(scene)=1.27 d(target)=0.61"
+          }
+        ],
+        "tempo_clash": [
+          {
+            "title": "Gymnopedie No. 1",
+            "artist": "Erik Satie",
+            "score": 0.499,
+            "why": "arousal gap 0.69, meter clash 0.00"
+          },
+          {
+            "title": "1/1",
+            "artist": "Brian Eno",
+            "score": 0.477,
+            "why": "arousal gap 0.71, meter clash 0.00"
+          }
+        ],
+        "lyrical_irony": [
+          {
+            "title": "Ete",
+            "artist": "Bell Witch",
+            "score": 0.438,
+            "why": "taboo hits: ['funeral doom', 'glacial']"
+          }
+        ]
+      },
+      "chosen": {
+        "title": "In the Hall of the Mountain King",
+        "artist": "Edvard Grieg",
+        "quip": "A perfect fit for the occasion.",
+        "strategy": "semantic_opposite",
+        "mismatch": 0.49040799340956914,
+        "why": "score-weighted choice via semantic_opposite: utilitarian, industrial, high-energy -> ornate, residential, sedentary -> ambient, classical",
+        "runner_ups": [
+          "Ride of the Valkyries",
+          "Clair de Lune",
+          "Funeral March (Sonata No. 2)"
+        ]
+      },
+      "played": {
+        "at_video_time": 39.94,
+        "mode": null,
+        "track_id": "mountainking",
+        "genres": [
+          "classical"
+        ],
+        "crossfade_seconds": 2.0,
+        "latency_ms": 3999
+      }
+    }
+  ]
+}

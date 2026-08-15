@@ -1,0 +1,272 @@
+{
+  "session": "office-food-court",
+  "source": "office-food-court.mp4",
+  "moment_count": 2,
+  "sample_interval_s": 5.0,
+  "duration_s": 32.0,
+  "model": "gemini-3.5-flash-lite",
+  "README": "Each moment is sampled from the uploaded video. The scene contains the detected mood. The chosen track is intentionally wrong for that mood.",
+  "moments": [
+    {
+      "video_time": 0.0,
+      "wall_time": 1786804974.8844898,
+      "scene": {
+        "setting": "corporate office open-plan workspace",
+        "activity": "working at computer desks in an office",
+        "mood": "focused",
+        "confidence": 0.95,
+        "tempo": "still",
+        "meter": "steady",
+        "colors": [
+          "white",
+          "light green",
+          "beige"
+        ],
+        "vibe": {
+          "valence": 0.5,
+          "arousal": 0.2,
+          "density": 0.5,
+          "brightness": 0.8,
+          "organicness": 0.1
+        },
+        "setting_attributes": [
+          "sterile",
+          "structured",
+          "functional"
+        ]
+      },
+      "opposite": {
+        "target_vibe": {
+          "valence": 0.5,
+          "arousal": 0.8,
+          "density": 0.5,
+          "brightness": 0.19999999999999996,
+          "organicness": 1.0
+        },
+        "looking_for": [
+          "ambient",
+          "folk",
+          "seduction",
+          "sax",
+          "awkward",
+          "rage",
+          "screaming"
+        ],
+        "attributes": [
+          "chaotic",
+          "natural",
+          "ornate"
+        ],
+        "why": "scene reads focused (dominant axis 'organicness', deviation 0.40); setting traits ['sterile', 'structured', 'functional'] invert to ['chaotic', 'natural', 'ornate'], associated with ['ambient', 'folk']; professionalism sabotaged"
+      },
+      "considered": {
+        "tempo_clash": [
+          {
+            "title": "Bodies",
+            "artist": "Drowning Pool",
+            "score": 0.661,
+            "why": "arousal gap 0.91, meter clash 0.00"
+          }
+        ],
+        "lyrical_irony": [
+          {
+            "title": "Careless Whisper",
+            "artist": "George Michael",
+            "score": 0.608,
+            "why": "taboo hits: ['awkward', 'sax', 'seduction']"
+          },
+          {
+            "title": "Duality",
+            "artist": "Slipknot",
+            "score": 0.467,
+            "why": "taboo hits: ['rage', 'screaming']"
+          },
+          {
+            "title": "Let's Get It On",
+            "artist": "Marvin Gaye",
+            "score": 0.45,
+            "why": "taboo hits: ['awkward', 'seduction']"
+          }
+        ]
+      },
+      "chosen": {
+        "title": "Bodies",
+        "artist": "Drowning Pool",
+        "quip": "Reading the room, and this is my choice.",
+        "strategy": "tempo_clash",
+        "mismatch": 0.45827939076506596,
+        "why": "score-weighted choice via tempo_clash: arousal gap 0.91, meter clash 0.00",
+        "runner_ups": [
+          "Careless Whisper",
+          "Duality",
+          "Let's Get It On"
+        ]
+      },
+      "played": {
+        "at_video_time": 0.0,
+        "mode": null,
+        "track_id": "bodiesdrowning",
+        "genres": [
+          "nu metal"
+        ],
+        "crossfade_seconds": 0.0,
+        "latency_ms": 3953
+      }
+    },
+    {
+      "video_time": 20.55,
+      "wall_time": 1786804988.974792,
+      "scene": {
+        "setting": "shopping mall food court",
+        "activity": "people ordering food and dining in a busy food hall",
+        "mood": "bustling",
+        "confidence": 0.95,
+        "tempo": "walking",
+        "meter": "steady",
+        "colors": [
+          "white",
+          "red",
+          "brown"
+        ],
+        "vibe": {
+          "valence": 0.55,
+          "arousal": 0.65,
+          "density": 0.8,
+          "brightness": 0.75,
+          "organicness": 0.1
+        },
+        "setting_attributes": [
+          "commercial",
+          "casual",
+          "noisy",
+          "high-density"
+        ]
+      },
+      "opposite": {
+        "target_vibe": {
+          "valence": 0.44999999999999996,
+          "arousal": 0.35,
+          "density": 0.19999999999999996,
+          "brightness": 0.25,
+          "organicness": 1.0
+        },
+        "looking_for": [
+          "ambient",
+          "classical",
+          "opera",
+          "harsh noise",
+          "unlistenable",
+          "atonal",
+          "punishment"
+        ],
+        "attributes": [
+          "secluded",
+          "formal",
+          "silent",
+          "sparse"
+        ],
+        "why": "scene reads bustling (dominant axis 'organicness', deviation 0.40); setting traits ['commercial', 'casual', 'noisy', 'high-density'] invert to ['secluded', 'formal', 'silent', 'sparse'], associated with ['ambient', 'classical', 'opera']; the mundane made unbearable"
+      },
+      "considered": {
+        "semantic_opposite": [
+          {
+            "title": "Clair de Lune",
+            "artist": "Claude Debussy",
+            "score": 1.275,
+            "why": "commercial, casual, noisy, high-density -> secluded, formal, silent, sparse -> ambient, classical, opera"
+          },
+          {
+            "title": "O Fortuna",
+            "artist": "Carl Orff",
+            "score": 1.272,
+            "why": "commercial, casual, noisy, high-density -> secluded, formal, silent, sparse -> ambient, classical, opera"
+          },
+          {
+            "title": "Gymnopedie No. 1",
+            "artist": "Erik Satie",
+            "score": 1.269,
+            "why": "commercial, casual, noisy, high-density -> secluded, formal, silent, sparse -> ambient, classical, opera"
+          },
+          {
+            "title": "Funeral March (Sonata No. 2)",
+            "artist": "Frederic Chopin",
+            "score": 1.265,
+            "why": "commercial, casual, noisy, high-density -> secluded, formal, silent, sparse -> ambient, classical, opera"
+          }
+        ],
+        "catalogue_dive": [
+          {
+            "title": "Metamorphosis I",
+            "artist": "Philip Glass",
+            "score": 1.03,
+            "why": "Minimalist classical misery replacing the sound of plastic trays scraping on laminate."
+          },
+          {
+            "title": "Ascension",
+            "artist": "John Coltrane",
+            "score": 0.98,
+            "why": "Thirty-nine minutes of howling, chaotic free jazz played over the sizzle of the food kiosk."
+          },
+          {
+            "title": "Threnody to the Victims of Hiroshima",
+            "artist": "Krzysztof Penderecki",
+            "score": 0.93,
+            "why": "Screaming string quartets playing over people trying to enjoy a Cinnabon."
+          },
+          {
+            "title": "Metal Machine Music, Part 1",
+            "artist": "Lou Reed",
+            "score": 0.88,
+            "why": "Pure guitar feedback designed to clear a food hall faster than a health inspector."
+          }
+        ],
+        "lyrical_irony": [
+          {
+            "title": "Woodpecker No. 1",
+            "artist": "Merzbow",
+            "score": 0.499,
+            "why": "taboo hits: ['harsh noise', 'punishment', 'unlistenable']"
+          },
+          {
+            "title": "Ride of the Valkyries",
+            "artist": "Richard Wagner",
+            "score": 0.456,
+            "why": "taboo hits: ['classical', 'opera']"
+          }
+        ],
+        "tempo_clash": [
+          {
+            "title": "Free Jazz",
+            "artist": "Ornette Coleman",
+            "score": 0.441,
+            "why": "arousal gap 0.35, meter clash 1.00"
+          }
+        ]
+      },
+      "chosen": {
+        "title": "Gymnopedie No. 1",
+        "artist": "Erik Satie",
+        "quip": "A perfect fit for the occasion.",
+        "strategy": "semantic_opposite",
+        "mismatch": 0.5562193811797643,
+        "why": "score-weighted choice via semantic_opposite: commercial, casual, noisy, high-density -> secluded, formal, silent, sparse -> ambient, classical, opera",
+        "runner_ups": [
+          "Clair de Lune",
+          "O Fortuna",
+          "Funeral March (Sonata No. 2)"
+        ]
+      },
+      "played": {
+        "at_video_time": 20.55,
+        "mode": null,
+        "track_id": "gymnopedie",
+        "genres": [
+          "classical",
+          "impressionism"
+        ],
+        "crossfade_seconds": 2.0,
+        "latency_ms": 4521
+      }
+    }
+  ]
+}
