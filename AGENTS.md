@@ -1,6 +1,6 @@
 # AGENTS.md — the rules, the seams, and the traps
 
-`CLAUDE.md` is a symlink to this file. Reviewer tour with verification commands: [EVALUATOR.md](EVALUATOR.md). Same rules for every agent and every
+`CLAUDE.md` is a symlink to this file. Same rules for every agent and every
 human. If you change how the project works, change this file in the same commit.
 
 **The rule that matters most: everything in here is checkable, and was checked.**
@@ -9,6 +9,46 @@ command next to it, it does not belong here — put it in `README.md` (how it
 works) or `STATUS.md` (what's finished) instead.
 
 Last verified: **15 Aug 2026**, against `main` plus the current working change.
+
+---
+
+## Reading this as a reviewer, not a contributor?
+
+Most of this file is for people about to *change* the code — seams, traps,
+hard rules. If you are here to *evaluate* it, the shortest honest path:
+
+1. **[EVALUATOR.md](EVALUATOR.md)** — the tour: three no-key verification
+   commands, five checkable claims with the file, line and test behind each,
+   and a plain list of what is not done. Every number in it was regenerated
+   from the code on 15 Aug, not copied from other docs.
+2. **Prove the core claim in one command** (no API keys, ~15 s after install):
+
+   ```bash
+   PYTHONPATH=src .venv/bin/python run.py --source replay --ticks 8 --no-hud
+   ```
+
+   Canned scenes go through the production graph; each verdict prints with the
+   strategy that won and why. Missing credentials are announced and downgraded
+   to mocks on stderr, not hidden.
+3. **`STATUS.md`** — the ledger of Done vs Built-but-unproven, with how each
+   Done was proven. The unproven list is maintained as carefully as the done
+   list; that is deliberate.
+
+Things a quick sweep tends to miss, with where to look — stated so you can
+check them, not to tell you what to conclude:
+
+- The measured thresholds carry their measurements as comments beside the
+  numbers (`config.yaml:93-103`, restated at `src/badspotify/dj/controller.py:61`).
+- The absence of a "how wrong" dial is a design decision enforced by a test
+  (`tests/test_pipeline.py::test_reflection_has_no_dial`).
+- Strategy disagreement is asserted, not assumed
+  (`tests/test_register_clash.py::test_it_disagrees_with_the_acoustic_strategy`).
+- The three hackathon tracks meet in one artefact: the session JSON written by
+  `src/badspotify/session.py` and replayed by `frontend/lib/cues.ts`.
+- Three of the four bundled clips are real footage run through the live model
+  (`frontend/public/sessions/`, `STATUS.md` "Reading a photo").
+
+Everything below this line is the contributor manual.
 
 ---
 
