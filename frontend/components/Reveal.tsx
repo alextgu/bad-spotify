@@ -9,17 +9,21 @@ import { useEffect, useRef } from "react";
  *
  *   - **No masked line reveal.** Splitting a headline into lines and sliding
  *     them out from behind a mask is the most recognisable motion of the last
- *     two years of launch pages. It also delays the sentence — you cannot read
+ *     two years of launch pages, and it delays the sentence — you cannot read
  *     the thing until the animation has finished with it.
- *   - **No `expo` easing.** Expo leaves at enormous speed and stops dead. It
- *     reads as urgent, which is the opposite of the brief. The curve here
- *     leaves gently and spends most of its duration arriving.
- *   - **Small distance, long duration.** 14px over 1.6s. The previous pass
- *     moved 30–80px in under a second, which the eye reads as *travel*. This
- *     is closer to something coming into presence.
+ *   - **No `expo` easing.** Expo leaves at enormous speed and stops dead. The
+ *     curve here leaves gently and spends most of its duration arriving.
+ *   - **Small distance, long duration.** 14px over 1.6s. Closer to something
+ *     coming into presence than to something travelling.
  *
- * `once` is not optional: re-animating on every scroll-past is the fastest way
- * to make a calm page feel busy.
+ * **It re-animates on every arrival**, which is a reversal of how this started.
+ * When the page scrolled freely, re-animating on each scroll-past was the
+ * fastest way to make it feel busy — you would trip the same animation three
+ * times fighting your own trackpad. The page is discrete now: you don't pass a
+ * screen, you arrive at it, deliberately, one gesture at a time. Composing
+ * itself as you land is then the right behaviour, and going back to a screen
+ * you have seen shows it composing again rather than sitting there already
+ * finished.
  */
 export default function Reveal({
   children,
@@ -45,17 +49,24 @@ export default function Reveal({
       return;
     }
 
+    const show = () => {
+      el.style.transitionDelay = `${delay}s`;
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0)";
+    };
+
+    const hide = () => {
+      // No delay on the way out: staggering a disappearance is fussy, and
+      // nobody is watching a screen they have already left.
+      el.style.transitionDelay = "0s";
+      el.style.opacity = "0";
+      el.style.transform = "translateY(14px)";
+    };
+
     const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        el.style.transitionDelay = `${delay}s`;
-        el.style.opacity = "1";
-        el.style.transform = "translateY(0)";
-        io.disconnect();
-      },
+      ([entry]) => (entry.isIntersecting ? show() : hide()),
       // Fires a little before the element is fully on screen, so the reveal
-      // has finished by the time it is in comfortable reading position and
-      // nobody is ever waiting on it.
+      // has finished by the time it is in comfortable reading position.
       { rootMargin: "0px 0px -12% 0px", threshold: 0.01 },
     );
 

@@ -97,11 +97,29 @@ export default function ScrollController() {
         const found: number[] = [];
 
         Array.from(main.children).forEach((child) => {
-          const rect = (child as HTMLElement).getBoundingClientRect();
+          const el = child as HTMLElement;
+          const rect = el.getBoundingClientRect();
           const top = rect.top + window.scrollY;
           found.push(top);
 
-          // Then a stop per screen, while there is more than a remainder left.
+          /* A block can name its own stops with `data-stops`: a comma-separated
+             list of fractions of its scrollable length. The try-it section uses
+             it so that a gesture moves between the moments the agent actually
+             did something, rather than between evenly spaced screenfuls — you
+             can't land halfway and get a reasoning panel describing neither
+             state. */
+          const declared = el.dataset.stops;
+          if (declared) {
+            const length = rect.height - vh;
+            declared
+              .split(",")
+              .map((n) => parseFloat(n.trim()))
+              .filter((n) => Number.isFinite(n))
+              .forEach((fraction) => found.push(top + length * fraction));
+            return;
+          }
+
+          // Otherwise a stop per screen, while more than a remainder is left.
           for (let y = top + vh; y < top + rect.height - vh * REMAINDER; y += vh) {
             found.push(y);
           }
@@ -135,6 +153,29 @@ export default function ScrollController() {
         if (target === undefined) return;
 
         moving = true;
+
+        /* A shallow dip in opacity across the travel, so one screen dissolves
+           into the next instead of sliding past. It bottoms out at 0.86 — deep
+           enough to soften the hand-off, nowhere near a fade to black, which
+           would read as a page transition and make every gesture feel like a
+           commitment. Skipped inside a pinned section, where the content is
+           supposed to be continuous with itself. */
+        const main = document.querySelector("main");
+        if (main && !document.querySelector(".pin-spacer .pin-spacer")) {
+          gsap.fromTo(
+            main,
+            { opacity: 1 },
+            {
+              opacity: 0.86,
+              duration: TRAVEL / 2,
+              ease: "power1.inOut",
+              yoyo: true,
+              repeat: 1,
+              overwrite: true,
+            },
+          );
+        }
+
         gsap.to(window, {
           duration: TRAVEL,
           ease: "power2.inOut",

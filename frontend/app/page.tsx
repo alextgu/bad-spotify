@@ -65,11 +65,18 @@ export default function Home() {
         </div>
 
         {/* 4 — letting someone run it is worth more than describing it.
-            Strings off, and the section carries its own opaque background:
-            this is the one screen with a draggable control on it, and drifting
-            lines behind a timeline you are aiming at is noise exactly where
-            precision is wanted. */}
-        <div data-strings="off">
+
+            The only block that is longer than one screen, and it has to be:
+            it pins itself and spends that scroll moving the clip. `data-stops`
+            are the cue fractions from lib/cues.ts, so a gesture lands on a
+            moment the agent did something rather than on an arbitrary
+            screenful — see ScrollController.
+
+            Strings off, and it carries its own opaque background: this is the
+            one screen with fine detail and a moving control on it, and
+            drifting lines behind a timeline is noise exactly where precision
+            is wanted. */}
+        <div data-strings="off" data-stops="0,0.26,0.45,0.68,0.92,1">
           <SectionTryIt />
         </div>
 
