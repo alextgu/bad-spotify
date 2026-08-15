@@ -54,15 +54,21 @@ export default function SectionHero() {
                 hovers is the honest version; faking a shared one would mean
                 the mark reaching out for a class name its parent happens to
                 set. */}
-            <span className="flex items-center gap-3">
-              <LogoMark size={44} />
+            <span className="flex items-center gap-4">
+              <LogoMark size={64} />
               {/* Set in the display face, not the mono label. It is the
                   product's name, and rendering it at caption weight made it
                   the least considered thing on a page about it. */}
+              {/* Sized off the viewport rather than fixed, so it stays in
+                  proportion to the headline underneath it at every width. It
+                  is capped below the headline's ceiling on purpose: the name
+                  can be the loudest thing in the corner without becoming the
+                  loudest thing on the screen, which is still the promise. */}
               <span
-                className="cursor-default font-display text-[1.6rem] font-semibold leading-none
-                           tracking-[-0.035em] text-paper transition-[letter-spacing,opacity]
-                           duration-interaction ease-calm hover:tracking-[-0.015em] hover:opacity-90"
+                className="cursor-default font-display text-[clamp(2rem,3.1vw,3rem)] font-semibold
+                           leading-none tracking-[-0.04em] text-paper
+                           transition-[letter-spacing,opacity] duration-interaction ease-calm
+                           hover:tracking-[-0.025em] hover:opacity-90"
               >
                 {brand.name}
               </span>
