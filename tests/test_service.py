@@ -12,6 +12,8 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import random
+
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,7 +27,15 @@ cv2 = pytest.importorskip("cv2")
 
 @pytest.fixture(scope="module")
 def engine() -> Engine:
-    return Engine()
+    e = Engine()
+    # Seed the judge's sampler with the documented control (judge.random_seed
+    # -> _random_source). Unseeded it is SystemRandom, and at
+    # selection_temperature 0.20 the park and the library occasionally sample
+    # the same track, which failed test_the_park_and_the_library_disagree
+    # roughly one full-suite run in four. The behaviour under test is
+    # unchanged; only the dice are fixed.
+    e.graph.judge._rng = random.Random(7)
+    return e
 
 
 @pytest.fixture(scope="module")
