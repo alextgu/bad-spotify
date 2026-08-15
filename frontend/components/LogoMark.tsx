@@ -80,7 +80,7 @@ export default function LogoMark({ size = 36 }: { size?: number }) {
       {/* The bloom. Sits behind everything and never quite stops moving. */}
       <span
         aria-hidden
-        className="absolute -inset-2 rounded-full bg-[radial-gradient(circle,rgba(154,140,255,0.55),transparent_68%)]
+        className="absolute -inset-2 rounded-full bg-[radial-gradient(circle,rgba(214,64,190,0.55),transparent_68%)]
                    blur-[6px] motion-safe:animate-[halo_7s_ease-in-out_infinite]"
       />
 
@@ -89,7 +89,7 @@ export default function LogoMark({ size = 36 }: { size?: number }) {
           and anything set on top of it would be overwritten every frame. */}
       <span
         aria-hidden
-        className="absolute -inset-3 rounded-full bg-[radial-gradient(circle,rgba(120,230,190,0.5),transparent_66%)]
+        className="absolute -inset-3 rounded-full bg-[radial-gradient(circle,rgba(150,60,220,0.5),transparent_66%)]
                    opacity-0 blur-[10px] transition-opacity duration-interaction ease-calm
                    group-hover:opacity-100"
       />

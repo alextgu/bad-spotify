@@ -4,6 +4,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b0c0e">
+<link rel="icon" href="/static/logo.png" type="image/png">
+<!-- "Add to Home Screen" uses this, which is what makes the companion look
+     like an app rather than a browser tab when it is filmed. -->
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 <title>Slopify — companion</title>
 
 <!--
@@ -38,7 +42,9 @@
     display: flex; align-items: center; gap: 10px;
     padding: 12px 16px; border-bottom: 1px solid var(--line); flex: none;
   }
-  .mark { font-weight: 700; letter-spacing: -0.02em; }
+  .mark { font-weight: 700; letter-spacing: -0.02em; display: flex;
+          align-items: center; gap: 9px; }
+  .mark img { width: 26px; height: 26px; display: block; }
   .state { margin-left: auto; font-size: 13px; color: var(--dim); }
   .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
          background: #454b55; margin-right: 6px; }
@@ -95,7 +101,7 @@
 </style>
 
 <header>
-  <span class="mark">Slopify</span>
+  <span class="mark"><img src="/static/logo.png" alt="">Slopify</span>
   <span class="sub" style="color:var(--dim);font-size:13px">companion</span>
   <span class="state"><span class="dot" id="dot"></span><span id="status">idle</span></span>
 </header>
