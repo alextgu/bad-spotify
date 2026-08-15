@@ -55,6 +55,10 @@ class PipelineState(TypedDict, total=False):
     decision: Optional[DJDecision]
     t_start: float
     force: bool          # must be declared, or LangGraph drops it between nodes
+    hold: str            # set when the deadband says don't reconsider; same rule
+    approved: bool       # the deadband RAN and said yes. Never infer this from
+                         # `force`: quiet ticks reach the DJ without passing
+                         # through the deadband at all.
 
 
 class BadSpotifyGraph:
@@ -143,6 +147,19 @@ class BadSpotifyGraph:
                  target_genres=anti.target_genres[:8],
                  banned=anti.banned_genres)
 
+        #The cheap question first. Inverting a mood is local arithmetic; the
+        #strategies and the judge are not. If the target hasn't left the
+        #deadband there is nothing to decide, so don't pay to decide it.
+        approved = False
+        if not state.get("force"):
+            go, why = self.dj.should_reconsider(scene, anti.target)
+            if not go:
+                BUS.emit("dj", "hold", reason=why, mode="queue",
+                         scene_delta=round(self.dj.scene_delta(scene), 3), wait=0.0)
+                return {**state, "anti": anti, "candidates": [], "hold": why,
+                        "approved": False}
+            approved = True
+
         #Build candidates with three music picking strategies
         futures = {
             name: self._pool.submit(
@@ -163,9 +180,12 @@ class BadSpotifyGraph:
                 BUS.emit("error", f"strategy {name} failed", error=str(e))
 
         candidates.sort(key=lambda c: c.raw_distance, reverse=True)
-        return {**state, "anti": anti, "candidates": candidates}
+        return {**state, "anti": anti, "candidates": candidates,
+                "approved": approved}
 
     def n_judge(self, state: PipelineState) -> PipelineState:
+        if state.get("hold"):
+            return {**state, "verdict": None}
         candidates = state.get("candidates") or []
         if not candidates:
             BUS.emit("error", "no candidates survived")
@@ -185,8 +205,16 @@ class BadSpotifyGraph:
             return {**state, "verdict": None}
 
     def n_dj(self, state: PipelineState) -> PipelineState:
+        #A deadband hold already emitted its reason and has no verdict by
+        #design. It must NOT reach decide(), which reads "no verdict" as
+        #upstream failure and engages the chaos deck -- turning "nothing
+        #changed" into a random track, which is the exact opposite.
+        if state.get("hold"):
+            return {**state, "decision": DJDecision(
+                action=DJAction.HOLD, reason=state["hold"])}
         decision = self.dj.decide(state["scene"], state.get("verdict"),
-                                  force=bool(state.get("force")))
+                                  force=bool(state.get("force")),
+                                  pre_approved=bool(state.get("approved")))
         BUS.emit("dj", decision.action.value, reason=decision.reason,
                  mode=decision.mode.value,
                  scene_delta=round(decision.scene_delta, 3),
@@ -212,7 +240,10 @@ class BadSpotifyGraph:
                 BUS.emit("voice", spoken, quip=verdict.quip,
                          spoken=self.say_mode == "every_track")
             self.player.play(verdict.track, mode=decision.mode.value)
-            self.dj.commit(verdict, scene=state.get("scene"))
+            anti = state.get("anti")
+            self.dj.commit(verdict, scene=state.get("scene"),
+                           mode=decision.mode,
+                           target=anti.target if anti is not None else None)
             BUS.emit("play", f"{verdict.track.title} - {verdict.track.artist}",
                      video_time=(state.get("obs").meta or {}).get("video_time")
                      if state.get("obs") is not None else None,
@@ -258,10 +289,15 @@ class BadSpotifyGraph:
             lambda s: "perceive" if s.get("escalate") else "stable",
             {"perceive": "perceive", "stable": "stable"},
         )
+        #A quiet tick goes through `antagonize` too. Inverting a cached scene is
+        #local arithmetic, and it means the deadband is the ONE thing deciding
+        #on every path. This branch used to jump straight to `dj`, which left
+        #the twitchy raw-signature gate as the only bound on quiet ticks -- and
+        #ran three strategies and a judge on a scene nobody had re-read.
         g.add_conditional_edges(
             "stable",
-            lambda s: "dj" if s.get("scene") is not None else "stop",
-            {"dj": "dj", "stop": END},
+            lambda s: "antagonize" if s.get("scene") is not None else "stop",
+            {"antagonize": "antagonize", "stop": END},
         )
         g.add_edge("perceive", "antagonize")
         g.add_edge("antagonize", "judge")
@@ -278,12 +314,13 @@ class BadSpotifyGraph:
         state = self.n_gate(state)
         if state.get("escalate"):
             state = self.n_perceive(state)
-            state = self.n_antagonize(state)
-            state = self.n_judge(state)
         else:
             state = self.n_stable(state)
             if state.get("scene") is None:
                 return state
+        #Both paths go through the deadband -- see the note in _compile.
+        state = self.n_antagonize(state)
+        state = self.n_judge(state)
         state = self.n_dj(state)
         if state["decision"].action in (DJAction.PLAY, DJAction.FALLBACK):
             state = self.n_play(state)

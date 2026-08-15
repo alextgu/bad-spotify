@@ -65,7 +65,11 @@ class Runtime:
                  tempo=scene.tempo_feel.value, meter=scene.meter.value,
                  audio=scene.audio_summary, source="injected", latency_ms=0)
 
-        state = self.graph.n_antagonize({"scene": scene})
+        #`force` must be set here, not just faked by poking the counters: the
+        #deadband in n_antagonize reads it, and without it pressing the button
+        #twice on one scene holds instead of playing -- the "demo looks broken"
+        #failure this method exists to avoid.
+        state = self.graph.n_antagonize({"scene": scene, "force": True})
         state = self.graph.n_judge(state)
 
         self.graph.dj.state.pending_signature = scene.signature()
@@ -105,11 +109,14 @@ class Runtime:
 def main() -> None:
     ap = argparse.ArgumentParser(description="the agent that gets it wrong on purpose")
     ap.add_argument("--config", default=None)
-    ap.add_argument("--source", choices=["replay", "video", "webcam", "glasses"])
+    ap.add_argument("--source",
+                    choices=["replay", "video", "webcam", "screen", "glasses"])
     ap.add_argument("--video", default=None,
                     help="run against a video file as if it were live")
     ap.add_argument("--realtime", action="store_true",
                     help="pace the video at its true speed instead of as fast as possible")
+    ap.add_argument("--loop", action="store_true",
+                    help="restart the video when it ends -- for leaving a demo running")
     ap.add_argument("--record", default=None, metavar="NAME",
                     help="write the run to data/sessions/NAME.json for the demo site")
     ap.add_argument("--ticks", type=int, default=None, help="stop after N observations")
@@ -130,6 +137,8 @@ def main() -> None:
         cfg.setdefault("capture", {})["source"] = args.source
     if args.realtime:
         cfg.setdefault("capture", {})["realtime"] = True
+    if args.loop:
+        cfg.setdefault("capture", {})["loop"] = True
     if args.no_hud:
         cfg.setdefault("hud", {})["enabled"] = False
     if args.turbo:
