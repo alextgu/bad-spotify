@@ -91,10 +91,19 @@ export default function SectionDescription() {
                the space it left, and only then does the example's copy arrive.
                Sharing one ramp put the statement and "Bodies" on top of each
                other at 50% each. */
+            /* THE STOPS MUST NOT LAND INSIDE THESE WINDOWS.
+               `data-stops` in page.tsx is 0 / 0.45 / 1, so the middle stop has
+               to fall after `wordsIn` completes (0.44) and before `swap`
+               begins (0.5). It used to be 0.5 — a tenth of the way into the
+               swap — which parked the section with the scene panel slid 10%
+               into the words half. The panel is opaque and sits on top, so it
+               covered the first letters of the track name: "Bodies" came to
+               rest reading "dies". Anything that moves must be finished, or
+               not yet started, at every stop. */
             const introOut = ramp(p, 0.06, 0.2);
             const opened = ramp(p, 0.12, 0.34);
             const wordsIn = ramp(p, 0.3, 0.44);
-            const swap = ramp(p, 0.46, 0.84);
+            const swap = ramp(p, 0.5, 0.86);
 
             /* The statement doesn't fade out on its own — it is pushed. The
                scene panel slides in from off the left edge and shoves the
@@ -132,12 +141,12 @@ export default function SectionDescription() {
                They dip instead — the old one leaves before the new one
                arrives, and the gap between falls exactly where the scene is
                covering that half anyway. */
-            const dissolve = ramp(p, 0.55, 0.75);
+            const dissolve = ramp(p, 0.58, 0.78);
             gsap.set(scenes.current[0], { autoAlpha: 1 - dissolve });
             gsap.set(scenes.current[1], { autoAlpha: dissolve });
 
-            gsap.set(blocks.current[0], { autoAlpha: 1 - ramp(p, 0.48, 0.6) });
-            gsap.set(blocks.current[1], { autoAlpha: ramp(p, 0.72, 0.84) });
+            gsap.set(blocks.current[0], { autoAlpha: 1 - ramp(p, 0.52, 0.62) });
+            gsap.set(blocks.current[1], { autoAlpha: ramp(p, 0.76, 0.88) });
 
             setActive(p < 0.3 ? -1 : swap < 0.5 ? 0 : 1);
           },
