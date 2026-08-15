@@ -113,6 +113,8 @@ AXES = [
     "counter_energy",    # a funeral -> a stadium banger
     "counter_persona",   # a public figure -> the joke the internet already
                          # makes about their own publicised conduct
+    "counter_season",    # a heatwave -> sleigh bells. The oldest wrong-song
+                         # joke there is, and it still works
 ]
 
 SUGGEST_SCHEMA = {
@@ -173,6 +175,15 @@ energy -- that is the least interesting way to be wrong:
                     console fandoms all work the same way.
   counter_era       the wrong century. A candlelit medieval hall -> hyperpop.
                     A 1950s diner -> aggressive EDM.
+  counter_season    the wrong time of year, which everyone feels instantly
+                    even when they cannot say why. A heatwave, a beach, a
+                    sunburnt garden -> sleigh bells, Christmas number ones,
+                    songs about snow. A blizzard or a dark February bus stop
+                    -> "Walking on Sunshine", summer holiday anthems, steel
+                    drums. Reach for this when the WEATHER or the time of year
+                    is the loudest thing in the frame, and remember that
+                    Christmas music is funny in July precisely because it is
+                    so aggressively sincere about being in December.
   counter_register  gravity punctured. A seat of power, a solemn institution,
                     a formal ceremony -> a novelty song with no dignity at
                     all. The opposite of *serious* is *ridiculous*.

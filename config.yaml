@@ -64,7 +64,11 @@ antagonize:
     # Spotify catalogue for whatever the antivibe is hunting for. Needs
     # credentials; silently contributes nothing without them. This is what
     # stops a long session repeating itself.
-    - catalogue_dive
+    # - catalogue_dive   # OFF for recording: it names songs the player must
+    #                    # SEARCH for, and search is rate limited until the
+    #                    # quota lifts. A pick that shows on screen and then
+    #                    # fails to play is worse than a slightly safer pick.
+    #                    # Re-enable once the quota is back, or on Alex's app.
   candidates_per_strategy: 4
 
 judge:
@@ -119,7 +123,13 @@ player:
   # Run `python scripts/spotify_setup.py` once before using this.
   play_mode: queue        # default when the DJ has no opinion
   skip_to_queued: false   # true = queue then immediately skip into it
-  device_name:            # e.g. "Alex's MacBook Pro" -- blank picks the active one
+  device_name: "iPhone"   # pinned for recording; blank picks the active one
+  # Filming only. If the pinned device is asleep, play NOTHING rather than
+  # sending the song to whatever else is awake. A take where the sound came
+  # out of the laptop is worse than a take with no sound, because you find out
+  # about the first one in the edit. Turn this off for normal use, where the
+  # project's "it is never silent" rule should win.
+  require_device: true
   market: from_token
 
 voice:

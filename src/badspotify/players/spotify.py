@@ -82,6 +82,8 @@ class SpotifyPlayer:
         self.play_mode = (cfg.get("play_mode") or "queue").lower()
         self.skip_to_queued = bool(cfg.get("skip_to_queued", False))
         self.preferred_device = cfg.get("device_name")
+        #Only meaningful alongside `device_name`. See ensure_device.
+        self.require_device = bool(cfg.get("require_device", False))
 
         if client is not None:
             self.sp = client
@@ -144,10 +146,33 @@ class SpotifyPlayer:
         except Exception as e:
             raise SpotifyError(explain(e)) from e
 
+    def _is_preferred(self, device: dict) -> bool:
+        return bool(self.preferred_device) and (
+            self.preferred_device.lower() in (device.get("name") or "").lower())
+
     def ensure_device(self, force: bool = False) -> str:
-        """Find a usable device and make it the active one."""
+        """Find a usable device and make it the active one.
+
+        The cached id is re-checked rather than trusted. It used to be chosen
+        once and kept for the whole session, so if the laptop was awake at
+        startup and the phone was not, every song went to the laptop forever
+        and waking the phone afterwards did nothing at all. Devices sleep,
+        wake and disappear constantly, which is the one thing this cache
+        cannot assume they don't.
+        """
         if self.device_id and not force:
-            return self.device_id
+            devices = self.list_devices()
+            live = next((d for d in devices if d["id"] == self.device_id), None)
+            # Keep it only if it still exists, and only if it is still the one
+            # that was asked for.
+            if live and (not self.preferred_device or self._is_preferred(live)):
+                return self.device_id
+            if self.preferred_device:
+                better = next((d for d in devices if self._is_preferred(d)), None)
+                if better:
+                    print(f"[spotify] moving to {better['name']!r} "
+                          f"(it is awake now)")
+            self.device_id = None
 
         devices = self.list_devices()
         if not devices:
@@ -158,12 +183,19 @@ class SpotifyPlayer:
 
         chosen = None
         if self.preferred_device:
-            chosen = next(
-                (d for d in devices
-                 if self.preferred_device.lower() in (d.get("name") or "").lower()),
-                None)
+            chosen = next((d for d in devices if self._is_preferred(d)), None)
             if chosen is None:
-                names = ", ".join(d.get("name", "?") for d in devices)
+                names = ", ".join(d.get("name", "?") for d in devices) or "none"
+                if self.require_device:
+                    # Filming. A take where the sound came out of the laptop is
+                    # worse than a take with no sound, because you find out
+                    # about the first one in the edit. This is the one place
+                    # the project's "never silent" rule is deliberately off.
+                    raise SpotifyError(
+                        f"{self.preferred_device!r} is not awake, and "
+                        f"player.require_device is set, so nothing will be "
+                        f"played rather than sent to the wrong speaker. "
+                        f"Visible: {names}. Open Spotify on it and press play.")
                 print(f"[spotify] device {self.preferred_device!r} not found; "
                       f"visible: {names}")
         if chosen is None:
@@ -240,6 +272,20 @@ class SpotifyPlayer:
         except Exception:
             return False
 
+    def _is_playing_on(self, device_id: str) -> bool:
+        """Is sound coming out of THIS device right now?
+
+        "Is anything playing" is not the same question, and answering the
+        wrong one is how a track queued for a phone came out of a laptop.
+        """
+        try:
+            state = self.sp.current_playback()
+            if not state or not state.get("is_playing"):
+                return False
+            return (state.get("device") or {}).get("id") == device_id
+        except Exception:
+            return False
+
     def play(self, track: Track, mode: str | None = None) -> None:
         mode = (mode or self.play_mode).lower()
         uri, note = self.resolve(track)
@@ -249,8 +295,13 @@ class SpotifyPlayer:
         device_id = self.ensure_device()
 
         def attempt(dev: str) -> str:
-            #Starts playback when a silent device cannot process the queue
-            if mode == "queue" and self._is_playing():
+            #Queueing follows the ACTIVE device, not the one named in the call.
+            #So if the laptop is playing and the phone is the target, a queued
+            #track lands on the laptop -- which looked exactly like the pin
+            #being ignored. Only queue when the target is already the device
+            #playing; otherwise start it there outright, which is the only way
+            #to actually move the sound.
+            if mode == "queue" and self._is_playing_on(dev):
                 self.sp.add_to_queue(uri, device_id=dev)
                 if self.skip_to_queued:
                     self.sp.next_track(device_id=dev)

@@ -146,6 +146,11 @@ def main() -> None:
     ap.add_argument("--lan", action="store_true",
                     help="bind every interface so a phone on the same wifi can "
                          "reach /phone -- the companion app for the glasses")
+    ap.add_argument("--calm", action="store_true",
+                    help="film mode: make the DJ much harder to move. A "
+                         "handheld camera wobbles constantly and the normal "
+                         "bounds are tuned to feel responsive, which on camera "
+                         "reads as a shuffle button")
     ap.add_argument("--https", action="store_true",
                     help="serve TLS with a self-signed certificate. Phones only "
                          "allow the camera in a secure context, so /phone needs "
@@ -170,6 +175,35 @@ def main() -> None:
         cfg.setdefault("hud", {})["enabled"] = False
     if args.lan:
         cfg.setdefault("hud", {})["host"] = "0.0.0.0"
+    if args.calm:
+        # Filming is a different problem from demoing live. A phone in someone's
+        # hand re-frames, re-exposes and re-focuses constantly, so the scene
+        # read genuinely does move -- and the honest response to "something
+        # changed" is still usually to leave the music alone. A track that
+        # changes every twenty seconds on camera reads as random no matter how
+        # good the reasoning behind each pick was.
+        #
+        # So: the deadband roughly doubles, acting on a single read needs a
+        # near-total change of scene, three agreeing reads are required instead
+        # of two, and a track gets a minute to itself before anything may
+        # replace it.
+        # The stickiness comes from the dwell floor and the agreement count,
+        # NOT from a huge deadband. The first attempt used 0.55, which sits
+        # right on the smallest real scene change we ever measured (0.563), so
+        # it held through walking outside -- five minutes of filming produced
+        # one track and then ignored a genuine change of place. 0.45 clears
+        # camera wobble by a wide margin and still lets a new room through.
+        cfg.setdefault("dj", {}).update(
+            hold_threshold=0.45,        # was 0.30; noise tops out at 0.173
+            jump_threshold=1.00,        # was 0.55; acting on one read is rare
+            min_change_seconds=60,      # was 20
+            agreement_reads=3,          # was 2
+            cooldown_seconds=25,        # was 8
+            min_track_seconds=60,       # was 25
+            min_interrupt_seconds=45,   # was 15
+        )
+        print("[dj] calm mode: holding hard. One track per minute at most, "
+              "and only a real change of place will move it.")
     if args.turbo:
         cfg.setdefault("dj", {}).update(min_track_seconds=0, cooldown_seconds=0)
 

@@ -1,0 +1,29 @@
+{
+  "_readme": [
+    "The links for every picture and film on the page. Edit this file and the",
+    "site changes. No rebuild, no code, no deploy of anything but this file:",
+    "it is fetched at runtime, so replacing it on the host is enough.",
+    "",
+    "Keys are the filenames the placeholders already print on screen. Put a",
+    "URL against one and that slot stops being a placeholder and becomes the",
+    "real thing.",
+    "",
+    "Values can be:",
+    "  a YouTube link   https://youtu.be/XYZ  or  https://www.youtube.com/watch?v=XYZ",
+    "                   or a /shorts/ link. Rendered as an embed.",
+    "  a file           /videos/demo.mp4  (drop the file in public/videos/)",
+    "  an image         /images/park.jpg",
+    "  an object        { \"url\": \"...\", \"autoplay\": false, \"loop\": false }",
+    "                   for when the defaults below are wrong for that slot.",
+    "  empty string     leaves the placeholder exactly as it is today.",
+    "",
+    "Defaults: background slots autoplay muted and loop; anything else gets",
+    "ordinary controls. Set them explicitly with the object form if needed."
+  ],
+
+  "hero.mp4": "",
+  "clip-teaser.mp4": "",
+  "demo.mp4": "",
+  "example-park.jpg": "",
+  "example-library.jpg": ""
+}

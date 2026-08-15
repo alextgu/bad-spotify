@@ -53,7 +53,13 @@ class FakeSpotify:
             d["is_active"] = d["id"] == device_id
 
     def current_playback(self):
-        return {"is_playing": self._playing}
+        # Real Spotify says WHICH device is playing, and the difference
+        # matters: queueing follows the active device, not the one named in
+        # the call. A fake that omits it cannot catch a track queued for a
+        # phone coming out of a laptop.
+        active = next((d for d in self._devices if d.get("is_active")), None)
+        return {"is_playing": self._playing,
+                "device": {"id": active["id"]} if active else None}
 
     def start_playback(self, device_id=None, uris=None):
         if self._fail_first_play:
@@ -235,3 +241,106 @@ def test_corpus_uri_bypasses_search_entirely():
     p = player(fake)
     p.play(track(uri="spotify:track:handpicked"), mode="interrupt")
     assert ("start", "d1", "spotify:track:handpicked") in fake.calls
+
+
+# ------------------------------------------------- getting the right speaker --
+#
+# Both of these were found while filming: the song kept coming out of the
+# laptop even though the phone was pinned and awake.
+
+
+def two_devices(playing_on_laptop=False):
+    return FakeSpotify(
+        devices=[
+            {"id": "laptop", "name": "DESKTOP-TPMTA8G", "type": "Computer",
+             "is_active": True},
+            {"id": "phone", "name": "iPhone", "type": "Smartphone",
+             "is_active": False},
+        ],
+        playing=playing_on_laptop,
+    )
+
+
+def test_a_device_that_wakes_up_later_is_picked_up():
+    """The chosen device used to be cached for the whole session. If the
+    laptop was awake at startup and the phone was not, every song went to the
+    laptop forever and waking the phone changed nothing."""
+    fake = two_devices()
+    p = player(fake, device_name="iPhone")
+
+    assert p.ensure_device() == "phone"
+
+    # Something else grabs it back, the way the desktop app does.
+    for d in fake._devices:
+        d["is_active"] = d["id"] == "laptop"
+    p.device_id = "laptop"           # as if it had been cached earlier
+
+    assert p.ensure_device() == "phone", "it kept using the stale device"
+
+
+def test_a_vanished_device_is_replaced_rather_than_reused():
+    fake = two_devices()
+    p = player(fake, device_name="iPhone")
+    p.device_id = "airpods-that-went-away"
+    assert p.ensure_device() == "phone"
+
+
+def test_the_sound_ends_up_on_the_pinned_device():
+    """The whole point of pinning. Laptop playing, phone pinned: everything
+    the player does must be aimed at the phone."""
+    fake = two_devices(playing_on_laptop=True)
+    p = player(fake, device_name="iPhone")
+
+    p.play(Track(id="t", title="Bodies", artist="Drowning Pool", vibe=Vibe(),
+                 uri="spotify:track:x"), mode="queue")
+
+    aimed = [c[1] for c in fake.calls if c[0] in ("queue", "play", "transfer")]
+    assert aimed, "it did nothing at all"
+    assert all(d == "phone" for d in aimed), f"something was aimed elsewhere: {aimed}"
+
+
+def test_it_knows_which_device_is_playing_not_just_that_one_is():
+    """`is anything playing` and `is THIS playing` are different questions, and
+    answering the wrong one is how a track queued for a phone comes out of a
+    laptop: Spotify's queue follows the ACTIVE device, not the one named."""
+    fake = two_devices(playing_on_laptop=True)
+    p = player(fake, device_name="iPhone")
+
+    assert p._is_playing() is True
+    assert p._is_playing_on("laptop") is True
+    assert p._is_playing_on("phone") is False
+
+
+def test_it_still_queues_politely_on_the_right_speaker():
+    """The point of queue mode is not disturbing what is already playing. That
+    must survive the fix above."""
+    fake = two_devices()
+    for d in fake._devices:
+        d["is_active"] = d["id"] == "phone"
+    fake._playing = True
+    p = player(fake, device_name="iPhone")
+
+    p.play(Track(id="t", title="Bodies", artist="Drowning Pool", vibe=Vibe(),
+                 uri="spotify:track:x"), mode="queue")
+
+    assert [c for c in fake.calls if c[0] == "queue"], "it interrupted instead"
+
+
+def test_a_missing_pinned_device_can_refuse_rather_than_wander():
+    """Filming only. The default is still to make a sound, because silence is
+    normally this project's one real bug. While a camera is running the
+    trade inverts: a take where the audio came out of the laptop is worse
+    than a take with none, because you find that one out in the edit."""
+    fake = FakeSpotify(devices=[
+        {"id": "laptop", "name": "DESKTOP-TPMTA8G", "type": "Computer",
+         "is_active": True},
+    ])
+
+    lenient = player(fake, device_name="iPhone")
+    assert lenient.ensure_device() == "laptop", "the default must still play"
+
+    strict = player(fake, device_name="iPhone", require_device=True)
+    with pytest.raises(SpotifyError) as e:
+        strict.ensure_device()
+    assert "not awake" in str(e.value)
+    assert "DESKTOP-TPMTA8G" in str(e.value), "it should say what it CAN see"
