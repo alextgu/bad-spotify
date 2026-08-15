@@ -50,7 +50,7 @@ export default function HeroCollage() {
 
           `pointer-events-auto` because the wrapper turns them off — the
           collage is decoration, this one is not. `z-40` to clear the notes. */}
-      <div className="pointer-events-auto absolute bottom-[16%] right-[20%] z-40">
+      <div className="pointer-events-auto absolute bottom-[14%] right-[20%] z-40">
         <NowPlayingCard />
       </div>
 
