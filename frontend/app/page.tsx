@@ -7,7 +7,7 @@ import SectionInvite from "@/components/SectionInvite";
 import SectionStatement from "@/components/SectionStatement";
 import SectionTrio from "@/components/SectionTrio";
 import SectionUnderHood from "@/components/SectionUnderHood";
-import Smoother from "@/components/Smoother";
+import ScrollController from "@/components/ScrollController";
 
 /**
  * The launch page. Nine sections, no navbar.
@@ -39,21 +39,24 @@ import Smoother from "@/components/Smoother";
  * Nine is a ceiling, not a target. Each screen holds one idea; if something
  * new goes in, something here comes out.
  *
- * `data-snap` on a section marks it as somewhere the page is allowed to settle
- * — see `Smoother`. Not every section carries it: the ones that are taller
- * than a screen would drag you back out of themselves.
+ * Scrolling is discrete — one gesture, one screenful — and `ScrollController`
+ * owns it. The wrapping `<div>`s around each section are not decorative: the
+ * controller measures the direct children of `<main>` to work out where the
+ * stops are, so each child is one block of the page.
  */
 export default function Home() {
   return (
-    <Smoother>
+    <>
+      <ScrollController />
+
       <main>
         {/* 1 — one image, and the promise. */}
-        <div data-snap>
+        <div>
           <SectionHero />
         </div>
 
         {/* 2 — the turn. One sentence, and a lot of nothing around it. */}
-        <div data-snap>
+        <div>
           <SectionStatement />
         </div>
 
@@ -61,7 +64,7 @@ export default function Home() {
         <SectionTrio />
 
         {/* 4 — proof. The film and the three moments are one section now. */}
-        <div data-snap>
+        <div>
           <SectionEvidence />
         </div>
 
@@ -69,7 +72,7 @@ export default function Home() {
         <SectionDay />
 
         {/* 6 — the eye rests, and the claims get precise. */}
-        <div data-snap>
+        <div>
           <SectionUnderHood />
         </div>
 
@@ -77,15 +80,15 @@ export default function Home() {
         <SectionBroke />
 
         {/* 8 — the ask. */}
-        <div data-snap>
+        <div>
           <SectionInvite />
         </div>
 
         {/* 9 — the questions a sceptic is already forming. */}
-        <div data-snap>
+        <div>
           <SectionFAQ />
         </div>
       </main>
-    </Smoother>
+    </>
   );
 }

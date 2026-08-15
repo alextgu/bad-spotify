@@ -77,7 +77,7 @@ export default function SectionDay() {
   }, []);
 
   return (
-    <section ref={root} data-snap className="bg-bone">
+    <section ref={root} className="bg-bone">
       <div className="lg:grid lg:h-svh lg:grid-cols-[36%_64%] lg:overflow-hidden">
         {/* ------------------------------------------------------- the copy -- */}
         <div className="flex flex-col justify-center border-hairline px-gutter py-section-sm lg:border-r lg:py-0 lg:pl-[max(1.5rem,calc((100vw-1320px)/2))] lg:pr-rest">
