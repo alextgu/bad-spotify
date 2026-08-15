@@ -1,7 +1,6 @@
 import Label from "@/components/Label";
 import HeroCollage from "@/components/HeroCollage";
 import LogoMark from "@/components/LogoMark";
-import NowPlayingCard from "@/components/NowPlayingCard";
 import Slot from "@/components/Slot";
 import { brand } from "@/lib/brand";
 import { hero } from "@/lib/site";
@@ -63,39 +62,16 @@ export default function SectionHero() {
             </p>
           </div>
 
-          <footer className="flex items-end justify-between gap-6">
-            {/* The cinematic, bottom left. A card rather than a line of text,
-                because it is a placeholder for a piece of film and should
-                occupy roughly the space that film will.
+          {/* The cinematic "coming soon" card is gone. It was inert -- a card
+              shaped like a control with nothing behind it -- and the same
+              reasoning that kept its play triangle off applies to the card
+              itself: a thing that looks pressable and is not costs more trust
+              than the placeholder was worth. `hero.clip` still holds its
+              filename and shoot direction for when the cut exists.
 
-                No play triangle, and the border is dimmed: there is nothing
-                behind it yet. A play button with nothing to play is the same
-                trap as the gated upload on the try-it screen — the click is
-                the moment someone finds out, and it costs more than the
-                affordance is worth. When the cut exists this goes back to
-                rendering a `Slot` from `hero.clip`, which still carries its
-                filename and direction. */}
-            <div className="w-[min(272px,34vw)] overflow-hidden rounded-card border border-paper/20 bg-[rgba(8,8,10,.5)] backdrop-blur-[2px]">
-              <div className="grid aspect-[16/10] place-items-center px-4 text-center">
-                <span>
-                  {/* Plain spans rather than `Label`: this file no longer
-                      imports it, and a card in the hero is not worth adding a
-                      dependency back for. */}
-                  <span className="block font-mono text-label uppercase text-paper/80">
-                    Cinematic demo
-                  </span>
-                  <p className="mt-2 font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-paper/45">
-                    Coming soon
-                  </p>
-                </span>
-              </div>
-            </div>
-
-            {/* The sticker sits between the cinematic card and the credit,
-                so the foot of the hero reads left to right as: what is coming,
-                what is playing, who made it. */}
-            <NowPlayingCard />
-
+              The now-playing bar moved onto the photograph, so the foot of the
+              hero is now just the credit. */}
+          <footer className="flex items-end justify-end">
             <a
               href="https://devpost.com/software/spotify-cj"
               target="_blank"

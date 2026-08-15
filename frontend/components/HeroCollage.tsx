@@ -1,4 +1,5 @@
 import Image from "next/image";
+import NowPlayingCard from "@/components/NowPlayingCard";
 
 /**
  * The three-piece title-page collage.
@@ -34,6 +35,19 @@ export default function HeroCollage() {
           a shadowed empty rectangle with an alt string nobody could see. A
           frame around nothing is worse than one less frame. If the photo turns
           up, this is where it goes. */}
+
+      {/* The track, straddling the bottom edge of the walk.
+          It hangs half off the photograph rather than sitting inside it: on
+          the image it reads as a caption belonging to the picture, and beside
+          it in the footer it read as a widget belonging to the page. Across
+          the edge it reads as the thing playing OVER that scene, which is the
+          entire claim of the product.
+
+          `pointer-events-auto` because the wrapper turns them off — the
+          collage is decoration, this one is not. `z-40` to clear the notes. */}
+      <div className="pointer-events-auto absolute -bottom-[7%] left-[6%] z-40">
+        <NowPlayingCard />
+      </div>
 
       <figure
         className="group pointer-events-auto absolute -right-[2%] -top-[5%] z-30 h-[82%] w-[48%]
