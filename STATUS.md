@@ -34,7 +34,7 @@ Last updated: 15 Aug 2026
 | Screens — DJ face and engineering view | Built, unproven | |
 | Live camera/shared-screen HUD | Built, unproven — chosen song and playback errors reach the live response; browser not exercised | |
 | Site — scaffold + demo ground | Built, unproven | |
-| Site — launch page | Built, visual check pending — forest and library placeholders now use real local photos; runtime mapping and served file hashes verified 15 Aug | |
+| Site — launch page | Built, visual check pending — real example photos plus a first-viewport forest/rock/notes hero collage; runtime sources and production build verified 15 Aug | |
 | Site — pipeline diagram | Built, unproven — updated to the six-strategy fan-out; `tsc --noEmit` and `next build` pass, visual check pending | |
 | Local video upload and mood timeline | Built, unproven | |
 | Video sampler (`src/videofeed/`) | Done — 17 tests, incl. a real generated clip | |
@@ -294,6 +294,15 @@ Don't re-open these without a reason.
 - **15 Aug** — **The logo visually inverts the category.** Some major music
   apps are dark, round, and green; Slopify is light, square, and purple. The
   contrast mirrors the product choosing music that opposes the moment.
+- **15 Aug** — **The hero's right side is a three-image collage.** A large
+  rounded forest walk anchors it, the rock photo overlaps from the lower right,
+  and transparent pink notes sweep over both. It exists only in the first
+  viewport; each layer gets a small, slow scale-and-rotation hover response.
+  A full-frame copy wrapper originally intercepted those hover targets; its
+  decorative area now ignores pointer input while its real link remains live.
+  The collage transforms are 3.5–4% scale with 1.5–2.5-degree rotation,
+  while the notes also float through a reduced-motion-safe six-pixel cycle.
+  The frontend lint and production build passed 15 Aug.
 - **13 Aug** — No inversion dial. Always fully invert; measure and report the
   mismatch instead. `Verdict.mismatch` is an outcome, never an input.
 - **13 Aug** — One decision path. Anything holding a scene already enters the

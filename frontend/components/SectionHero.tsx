@@ -1,4 +1,5 @@
 import Label from "@/components/Label";
+import HeroCollage from "@/components/HeroCollage";
 import LogoMark from "@/components/LogoMark";
 import Slot from "@/components/Slot";
 import { brand } from "@/lib/brand";
@@ -32,7 +33,9 @@ export default function SectionHero() {
                      bg-[linear-gradient(90deg,rgba(5,5,7,.94)_0%,rgba(5,5,7,.84)_30%,rgba(5,5,7,.48)_55%,rgba(5,5,7,.1)_78%),linear-gradient(180deg,rgba(5,5,7,.42)_0%,transparent_28%,transparent_72%,rgba(5,5,7,.52)_100%)]"
         />
 
-        <div className="absolute inset-0 z-10 flex flex-col px-6 py-6 text-paper sm:px-10 sm:py-8 lg:px-14 lg:py-10">
+        <HeroCollage />
+
+        <div className="pointer-events-none absolute inset-0 z-10 flex flex-col px-6 py-6 text-paper sm:px-10 sm:py-8 lg:px-14 lg:py-10">
           <header>
             <div className="flex items-center gap-3">
               <LogoMark size={48} />
@@ -88,7 +91,7 @@ export default function SectionHero() {
               href="https://devpost.com/software/spotify-cj"
               target="_blank"
               rel="noopener noreferrer"
-              className="pb-1 font-mono text-label uppercase text-paper/60 transition-colors duration-interaction ease-calm hover:text-paper"
+              className="pointer-events-auto pb-1 font-mono text-label uppercase text-paper/60 transition-colors duration-interaction ease-calm hover:text-paper"
             >
               CUTC hackathon
             </a>

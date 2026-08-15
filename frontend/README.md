@@ -49,6 +49,7 @@ app/
   demo/page.tsx    the demo ground             [working]
 components/
   LogoMark         animated pink-and-purple mark [working]
+  HeroCollage      forest, rock and notes title stack [working]
   BlurFade         fade-and-unblur on scroll
   MomentCard       one decision, explained     [working]
   Timeline         where each song lands       [working]

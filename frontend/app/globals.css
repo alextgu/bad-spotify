@@ -162,6 +162,16 @@ video {
   }
 }
 
+@keyframes notes-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+  }
+}
+
 /* A slow bloom behind the mark. Barely visible, and the reason the thing reads
    as lit rather than pasted on. */
 @keyframes halo {
