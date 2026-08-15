@@ -24,6 +24,6 @@
   "hero.mp4": "",
   "clip-teaser.mp4": "",
   "demo.mp4": "",
-  "example-park.jpg": "",
-  "example-library.jpg": ""
+  "example-park.jpg": "/images/forest.jpg",
+  "example-library.jpg": "/images/library.jpg"
 }

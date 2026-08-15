@@ -100,10 +100,11 @@ export default function LogoMark({ size = 36 }: { size?: number }) {
           element. */}
       <span className="relative block h-full w-full transition-transform duration-interaction ease-calm group-hover:-translate-y-0.5 group-hover:rotate-[6deg] group-hover:scale-110">
         <Image
-          src="/logo.png"
+          src="/logo-192.png"
           alt=""
           width={size * 2}
           height={size * 2}
+          unoptimized
           priority
           className="h-full w-full object-contain transition-[filter] duration-interaction ease-calm
                      group-hover:brightness-110 group-hover:saturate-150

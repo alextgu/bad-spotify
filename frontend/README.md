@@ -19,6 +19,10 @@ npm install
 npm run dev          # http://localhost:3000
 ```
 
+The launch-page photo and film slots are mapped at runtime in
+`public/media.json`. Local photos live in `public/images/`; the current park
+and library examples use `forest.jpg` and `library.jpg` there.
+
 ## How it connects to the agent
 
 There is exactly one seam, and it's a file:
@@ -44,7 +48,7 @@ app/
   page.tsx         the launch page             [working]
   demo/page.tsx    the demo ground             [working]
 components/
-  Wordmark         PLACEHOLDER name, set in type
+  LogoMark         animated pink-and-purple mark [working]
   BlurFade         fade-and-unblur on scroll
   MomentCard       one decision, explained     [working]
   Timeline         where each song lands       [working]
