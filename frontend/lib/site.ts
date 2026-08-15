@@ -26,8 +26,8 @@ export interface Shot {
 
 /* -------------------------------------------------------------- 1 · hero -- */
 export const hero = {
-  headline: "Music for the room you're",
-  headlineAccent: "in",
+  headline: "Music that narrates your",
+  headlineAccent: "life",
   /**
    * The caption under the headline, and the punchline of the screen.
    *
@@ -36,7 +36,7 @@ export const hero = {
    * so it stays a single deadpan line — explaining it here would spend the
    * whole hero, and the FAQ is where the reasoning lives.
    */
-  sub: "Picks the worst possible music for your life.",
+  sub: "Picks the worst possible song for every scene.",
   shot: {
     file: "hero.mp4",
     note: [
@@ -69,12 +69,41 @@ export const description = {
     { title: "Drops the needle", body: "Perfect, or exactly wrong" },
   ],
   /**
-   * The examples, which do more work than the three abstractions above them.
-   * Both are real output — `park -> Drowning Pool` and `library -> Sandstorm`
-   * are what the loop actually produces, and are the two cases the headless
-   * run is checked against.
+   * Two worked examples, shown one at a time as the section is scrolled.
+   *
+   * **Both are real output.** `park -> Bodies` is lifted from the recorded run
+   * in public/sessions/sample.json, down to the 0.911 score and the genres the
+   * inversion went hunting for. `library -> Sandstorm` is the other case the
+   * headless run is checked against — see the verified commands in AGENTS.md.
+   *
+   * Two, not four. The point lands on the second one; a third is a list.
    */
-  examples: "A sunlit park gets Drowning Pool. A quiet library gets Sandstorm. Never at random — random isn't funny.",
+  examples: [
+    {
+      id: "park",
+      scene: "A sunlit park",
+      read: "peaceful · confidence 0.90 · slow",
+      track: "Bodies",
+      artist: "Drowning Pool",
+      why: "It scored the park as about as pleasant as a scene gets, inverted that, and went looking for funeral doom, drone and noise. Nu metal was the closest thing in the corpus, at 0.911 — the highest wrongness score of anything it considered.",
+      shot: {
+        file: "example-park.jpg",
+        note: ["16:9 · grass, low sun, people sitting", "no faces, nothing happening"],
+      } satisfies Shot,
+    },
+    {
+      id: "library",
+      scene: "A quiet library",
+      read: "still · low arousal · steady",
+      track: "Sandstorm",
+      artist: "Darude",
+      why: "A different strategy wins here. Nothing in the room is loud, so genre distance has little to work with — tempo_clash takes it instead, on the grounds that the one thing a silent room cannot survive is relentless arousal.",
+      shot: {
+        file: "example-library.jpg",
+        note: ["16:9 · long desks, warm lamps, stacks behind", "one person, far away"],
+      } satisfies Shot,
+    },
+  ],
 } as const;
 
 /* -------------------------------------------------------------- 3 · demo -- */
