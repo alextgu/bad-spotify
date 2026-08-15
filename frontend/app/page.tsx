@@ -8,6 +8,7 @@ import SectionStatement from "@/components/SectionStatement";
 import SectionTrio from "@/components/SectionTrio";
 import SectionUnderHood from "@/components/SectionUnderHood";
 import ScrollController from "@/components/ScrollController";
+import Strings from "@/components/Strings";
 
 /**
  * The launch page. Nine sections, no navbar.
@@ -48,6 +49,7 @@ export default function Home() {
   return (
     <>
       <ScrollController />
+      <Strings />
 
       <main>
         {/* 1 — one image, and the promise. */}
