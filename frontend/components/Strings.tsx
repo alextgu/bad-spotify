@@ -3,107 +3,75 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Four strings along the bottom of the window, drifting, pluckable.
+ * Four quiet strings moving behind the foot of the page.
  *
- * The first version put seven of them across the whole viewport and held them
- * perfectly straight until touched. Two things were wrong with that: lines
- * through the middle of the screen are lines through the middle of the
- * reading, and a background that is motionless until poked doesn't read as
- * alive, it reads as broken. This one lives in a band at the foot of the
- * window and is always moving slightly, the way a string that has just been
- * put down is.
+ * They are intentionally atmospheric rather than playable. Each line is a
+ * layered set of long travelling waves whose speed and phase wander slowly,
+ * so the composition keeps changing without settling into a visible loop.
+ * The pointer adds a very broad, shallow pressure field: nearby lines shift by
+ * only a few pixels and ease back into their own motion. There is no click,
+ * pluck, or state for the visitor to operate.
  *
- * ---------------------------------------------------------------------------
- * The drift
- * ---------------------------------------------------------------------------
- * Each string is the sum of three travelling waves with different wavelengths
- * and speeds, times a slow breath that swells and settles the whole line.
- * Nothing in that stack shares a period with anything else, so the pattern
- * never visibly repeats — which is the only thing that makes ambient motion
- * bearable for longer than about ten seconds. Every constant is jittered per
- * string at mount, so no two runs of the page are quite the same and the four
- * lines never drift into agreement with each other.
+ * The wide translucent under-stroke gives every string depth without turning
+ * it into a glow effect. A sharper core keeps the shape legible on the paper
+ * background. The green line is the brand accent; the other three stay close
+ * to ink, warm graphite, and a deep blue so the group reads as one object.
  *
- * Amplitudes are small on purpose: 3-5px of travel. Enough that you can see it
- * is not a ruled line, not so much that it becomes something happening.
- *
- * ---------------------------------------------------------------------------
- * The pluck
- * ---------------------------------------------------------------------------
- * Crossing a string with the cursor adds the fundamental mode of a real
- * plucked string on top of the drift — fixed at both ends, maximum
- * displacement in the middle, decaying over about a second and a half:
- *
- *     sin(pi·x/w) · cos(omega·t) · e^(-t/tau)
- *
- * Amplitude from the speed of the crossing, sign from its direction, so an
- * upward flick throws the string upward.
- *
- * ---------------------------------------------------------------------------
- * Where it disappears
- * ---------------------------------------------------------------------------
- * Any section marked `data-strings="off"` fades the whole band out while it
- * holds the viewport. Used on the two screens that are purely reading — the
- * statement, which is one sentence alone on purpose, and the FAQ. A moving
- * line under a paragraph is a moving line under a paragraph.
- *
- * Sections with their own background — the dark ones and the day — cover the
- * band without needing the attribute.
+ * Any direct child of `main` marked `data-strings="off"` fades the canvas out
+ * while it holds the middle of the viewport. Reduced-motion visitors receive
+ * the same composition as a still image, with no pointer response.
  */
 
-/** Four strings, low to high. */
 const COUNT = 4;
 
-/** The band's height as a fraction of the window. Only this is ever drawn. */
-const BAND = 0.34;
+/** A low band: present at the foot of a screen, absent from the reading area. */
+const BAND = 0.42;
 
-/** Peak displacement from one crossing, px. */
-const MAX_PLUCK = 20;
+const SAMPLE_STEP = 5;
+const POINTER_RADIUS_X = 760;
+const POINTER_RADIUS_Y = 150;
+const POINTER_PUSH = 4;
 
-/** Seconds for a pluck to fall to silence. */
-const DECAY = 1.5;
-
-/**
- * One per string, faintly different. Not a gradient and not a rainbow — four
- * colours that could all plausibly be "a light line", pulled a few degrees
- * apart so the band has depth instead of looking like one object drawn four
- * times. Green sits third, where it is noticed without leading.
- */
 const COLOURS = [
-  { r: 26, g: 25, b: 23, a: 0.1 }, // ink
-  { r: 121, g: 115, b: 106, a: 0.14 }, // graphite, warm
-  { r: 28, g: 168, b: 92, a: 0.17 }, // the accent
-  { r: 46, g: 74, b: 110, a: 0.12 }, // phase blue
-];
+  { r: 22, g: 21, b: 19, a: 0.14 },
+  { r: 116, g: 101, b: 82, a: 0.17 },
+  { r: 24, g: 148, b: 80, a: 0.23 },
+  { r: 34, g: 58, b: 92, a: 0.16 },
+] as const;
 
 interface Wave {
-  /** Wavelength, as a multiple of the band width. */
+  /** Wavelength as a fraction of the viewport width. */
   length: number;
-  /** Peak contribution, px. */
   amp: number;
-  /** Travel speed, rad/s. Slow — everything here is under half a radian. */
   speed: number;
-  /** Starting offset, so the strings never begin aligned. */
   phase: number;
+  /** A second, slower oscillation that prevents a mechanically even march. */
+  meander: number;
+  meanderSpeed: number;
+  meanderPhase: number;
 }
 
 interface StringLine {
-  /** Resting y within the band, 0 at the top of it. */
   base: number;
   waves: Wave[];
-  /** Period and offset of the slow swell over the whole line. */
   breathSpeed: number;
   breathPhase: number;
-  /** Fundamental frequency when plucked. */
-  omega: number;
-  /** Current pluck displacement, signed px. */
-  pluck: number;
-  /** Seconds since plucked. */
-  age: number;
+  roam: number;
+  roamSpeed: number;
+  roamPhase: number;
+  width: number;
   colour: (typeof COLOURS)[number];
 }
 
-/** Random in [min, max). Called once per string at mount, never per frame. */
+interface PointerField {
+  x: number;
+  y: number;
+  targetX: number;
+  targetY: number;
+  strength: number;
+  targetStrength: number;
+}
+
 const between = (min: number, max: number) => min + Math.random() * (max - min);
 
 export default function Strings() {
@@ -118,24 +86,54 @@ export default function Strings() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const lines: StringLine[] = Array.from({ length: COUNT }, (_, i) => ({
-      // Spread through the band, each nudged so they are not evenly ruled.
-      base: (i + 0.7) / (COUNT + 0.4) + between(-0.035, 0.035),
-      // Wavelengths under one screen-width, so each line actually bends
-      // several times across the window rather than bowing once. The first
-      // pass used 1.5-2.1 widths at 2-4px, which is a straight line with a
-      // slight lean on it — technically curved, not visibly so.
+      // Deliberately irregular spacing keeps the group from looking ruled.
+      base: [0.2, 0.43, 0.67, 0.88][i] + between(-0.018, 0.018),
       waves: [
-        { length: between(1.0, 1.5), amp: between(7, 11), speed: between(0.15, 0.24), phase: between(0, Math.PI * 2) },
-        { length: between(0.5, 0.8), amp: between(3.5, 6), speed: between(0.28, 0.44), phase: between(0, Math.PI * 2) },
-        { length: between(0.26, 0.42), amp: between(1.5, 3), speed: between(0.46, 0.72), phase: between(0, Math.PI * 2) },
+        {
+          length: between(1.35, 2.05),
+          amp: between(14, 23),
+          speed: between(0.11, 0.19),
+          phase: between(0, Math.PI * 2),
+          meander: between(0.35, 0.7),
+          meanderSpeed: between(0.035, 0.065),
+          meanderPhase: between(0, Math.PI * 2),
+        },
+        {
+          length: between(0.74, 1.18),
+          amp: between(7, 13),
+          speed: between(-0.28, -0.16),
+          phase: between(0, Math.PI * 2),
+          meander: between(0.22, 0.52),
+          meanderSpeed: between(0.055, 0.095),
+          meanderPhase: between(0, Math.PI * 2),
+        },
+        {
+          length: between(0.42, 0.68),
+          amp: between(2, 5),
+          speed: between(0.24, 0.39),
+          phase: between(0, Math.PI * 2),
+          meander: between(0.12, 0.3),
+          meanderSpeed: between(0.08, 0.14),
+          meanderPhase: between(0, Math.PI * 2),
+        },
       ],
-      breathSpeed: between(0.07, 0.14),
+      breathSpeed: between(0.045, 0.085),
       breathPhase: between(0, Math.PI * 2),
-      omega: 9 + i * 2.3 + between(-0.6, 0.6),
-      pluck: 0,
-      age: 0,
-      colour: COLOURS[i % COLOURS.length],
+      roam: between(5, 11),
+      roamSpeed: between(0.035, 0.075),
+      roamPhase: between(0, Math.PI * 2),
+      width: [1.15, 1.05, 1.5, 1.1][i],
+      colour: COLOURS[i],
     }));
+
+    const pointer: PointerField = {
+      x: window.innerWidth / 2,
+      y: 0,
+      targetX: window.innerWidth / 2,
+      targetY: 0,
+      strength: 0,
+      targetStrength: 0,
+    };
 
     let width = 0;
     let height = 0;
@@ -149,112 +147,110 @@ export default function Strings() {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
     };
 
     const draw = (t: number) => {
       ctx.clearRect(0, 0, width, height);
 
       for (const line of lines) {
-        const y0 = line.base * height;
-
-        // The swell: the whole line grows and settles on its own slow period.
-        const breath = 0.72 + 0.42 * Math.sin(t * line.breathSpeed + line.breathPhase);
-
-        const pluckNow = line.pluck
-          ? line.pluck * Math.cos(line.omega * line.age) * Math.exp(-line.age / DECAY)
-          : 0;
-
-        const loud = Math.min(Math.abs(pluckNow) / MAX_PLUCK, 1);
-        const c = line.colour;
-
-        // Ringing, a string pulls toward the accent green and brightens.
-        ctx.strokeStyle = `rgba(${Math.round(c.r + (28 - c.r) * loud)}, ${Math.round(
-          c.g + (168 - c.g) * loud,
-        )}, ${Math.round(c.b + (92 - c.b) * loud)}, ${c.a + loud * 0.45})`;
-        ctx.lineWidth = 1 + loud * 0.7;
+        const breath = 0.82 + 0.24 * Math.sin(t * line.breathSpeed + line.breathPhase);
+        const y0 =
+          line.base * height +
+          line.roam * Math.sin(t * line.roamSpeed + line.roamPhase) +
+          line.roam * 0.28 * Math.sin(t * line.roamSpeed * 1.73 + line.roamPhase * 0.7);
 
         ctx.beginPath();
-        // Finer sampling than before: at 10px the shortest wave was being
-        // drawn with about four points per period and came out as a
-        // zigzag rather than a curve.
-        const step = 6;
-        for (let x = 0; x <= width; x += step) {
+
+        for (let x = -SAMPLE_STEP; x <= width + SAMPLE_STEP; x += SAMPLE_STEP) {
           let y = y0;
 
-          for (const w of line.waves) {
-            y += w.amp * breath * Math.sin((Math.PI * 2 * x) / (w.length * width) + w.phase + t * w.speed);
+          for (const wave of line.waves) {
+            const wanderingPhase =
+              Math.sin(t * wave.meanderSpeed + wave.meanderPhase) * wave.meander;
+            y +=
+              wave.amp *
+              breath *
+              Math.sin(
+                (Math.PI * 2 * x) / (wave.length * width) +
+                  wave.phase +
+                  t * wave.speed +
+                  wanderingPhase,
+              );
           }
 
-          // The pluck is pinned at both ends, so it fades out toward the edges
-          // while the drift keeps running underneath it.
-          y += pluckNow * Math.sin((Math.PI * x) / width);
+          // The field is intentionally much broader than the visible response.
+          // It nudges a long section of string together instead of making the
+          // sharp local bend that a pluck or direct cursor tracker produces.
+          if (pointer.strength > 0.001) {
+            const dx = (x - pointer.x) / POINTER_RADIUS_X;
+            const dy = y - pointer.y;
+            const vertical = Math.max(0, 1 - Math.abs(dy) / POINTER_RADIUS_Y);
+            const horizontal = Math.exp(-dx * dx * 0.65);
+            const direction = Math.sign(dy) || (line.base < 0.5 ? -1 : 1);
+            y +=
+              direction *
+              POINTER_PUSH *
+              horizontal *
+              vertical *
+              vertical *
+              pointer.strength;
+          }
 
-          if (x === 0) ctx.moveTo(x, y);
+          if (x === -SAMPLE_STEP) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
         }
+
+        const colour = line.colour;
+
+        // A restrained translucent bed gives the line physical depth.
+        ctx.strokeStyle = `rgba(${colour.r}, ${colour.g}, ${colour.b}, ${colour.a * 0.12})`;
+        ctx.lineWidth = line.width + 4;
+        ctx.stroke();
+
+        // The precise core prevents the large motion from feeling blurry.
+        ctx.strokeStyle = `rgba(${colour.r}, ${colour.g}, ${colour.b}, ${colour.a})`;
+        ctx.lineWidth = line.width;
         ctx.stroke();
       }
     };
 
-    /* ---------------------------------------------------------------- loop --
-       Runs continuously now, because the drift never stops. It is four
-       polylines over a third of the window; the earlier stop-when-idle
-       machinery bought nothing once there was no idle state to detect. */
     let frame = 0;
     let start = 0;
+    let previous = 0;
 
     const tick = (now: number) => {
       if (!start) start = now;
+      if (!previous) previous = now;
       const t = (now - start) / 1000;
+      const dt = Math.min((now - previous) / 1000, 0.05);
+      previous = now;
 
-      for (const line of lines) {
-        if (!line.pluck) continue;
-        line.age += 1 / 60;
-        if (Math.abs(line.pluck) * Math.exp(-line.age / DECAY) < 0.05) {
-          line.pluck = 0;
-          line.age = 0;
-        }
-      }
+      // Easing the field is what makes entering and leaving it feel like
+      // pressure in material instead of direct cursor tracking.
+      const positionEase = 1 - Math.exp(-dt * 5.5);
+      const strengthEase = 1 - Math.exp(-dt * 3.4);
+      pointer.x += (pointer.targetX - pointer.x) * positionEase;
+      pointer.y += (pointer.targetY - pointer.y) * positionEase;
+      pointer.strength += (pointer.targetStrength - pointer.strength) * strengthEase;
 
       draw(t);
       frame = requestAnimationFrame(tick);
     };
 
-    /* --------------------------------------------------------------- pluck --
-       A crossing is the cursor being on one side of a string and then the
-       other. Only the band's own vertical range is considered. */
-    let prevY: number | null = null;
-    let prevTime = 0;
-
-    const onMove = (event: MouseEvent) => {
-      const now = performance.now();
+    const onPointerMove = (event: PointerEvent) => {
       const bandTop = window.innerHeight - height;
       const y = event.clientY - bandTop;
-
-      if (prevY === null) {
-        prevY = y;
-        prevTime = now;
-        return;
-      }
-
-      const dt = Math.max((now - prevTime) / 1000, 0.001);
-      const speed = Math.abs(y - prevY) / dt;
-      const direction = Math.sign(y - prevY) || 1;
-
-      for (const line of lines) {
-        const lineY = line.base * height;
-        if ((prevY - lineY) * (y - lineY) > 0 || prevY === y) continue;
-        line.pluck = direction * Math.min(2 + speed * 0.012, MAX_PLUCK);
-        line.age = 0;
-      }
-
-      prevY = y;
-      prevTime = now;
+      pointer.targetX = event.clientX;
+      pointer.targetY = y;
+      pointer.targetStrength = y >= -POINTER_RADIUS_Y && y <= height + POINTER_RADIUS_Y ? 1 : 0;
     };
 
-    /* ------------------------------------------------------------- fade out --
-       Whichever block holds the middle of the viewport decides whether the
-       band is shown. */
+    const releasePointer = () => {
+      pointer.targetStrength = 0;
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -266,25 +262,27 @@ export default function Strings() {
       { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
     );
 
-    document
-      .querySelectorAll("main > *")
-      .forEach((block) => observer.observe(block));
+    document.querySelectorAll("main > *").forEach((block) => observer.observe(block));
 
     resize();
     window.addEventListener("resize", resize);
 
-    if (!reduced) {
-      window.addEventListener("mousemove", onMove, { passive: true });
-      frame = requestAnimationFrame(tick);
-    } else {
+    if (reduced) {
       draw(0);
+    } else {
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      window.addEventListener("blur", releasePointer);
+      document.documentElement.addEventListener("mouseleave", releasePointer);
+      frame = requestAnimationFrame(tick);
     }
 
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
       window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("blur", releasePointer);
+      document.documentElement.removeEventListener("mouseleave", releasePointer);
     };
   }, []);
 

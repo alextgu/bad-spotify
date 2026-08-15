@@ -26,7 +26,8 @@ export interface Shot {
 
 /* -------------------------------------------------------------- 1 · hero -- */
 export const hero = {
-  headline: "Music that narrates your",
+  headline: "Music that",
+  headlineRest: "narrates your",
   headlineAccent: "life",
   /**
    * The caption under the headline, and the punchline of the screen.

@@ -26,10 +26,10 @@ export const brand = {
    */
   positioning: "No history · No requests · Only vibes",
 
-  tagline: "Music for the room you're in.",
+  tagline: "Music that narrates your life.",
 
   description:
-    "A DJ that picks from the room you're standing in, rather than from what you played last week.",
+    "A DJ that reads the moment and picks the song that narrates it — usually the worst possible one.",
 } as const;
 
 /**

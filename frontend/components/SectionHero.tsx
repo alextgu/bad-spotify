@@ -85,13 +85,12 @@ export default function SectionHero() {
             </div>
 
             <a
-              href="#what"
-              className="flex items-center gap-3 pb-1 font-mono text-label uppercase text-paper/60 transition-colors duration-interaction ease-calm hover:text-paper"
+              href="https://devpost.com/software/spotify-cj"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pb-1 font-mono text-label uppercase text-paper/60 transition-colors duration-interaction ease-calm hover:text-paper"
             >
               CUTC hackathon
-              <span aria-hidden className="text-xl leading-none">
-                ↓
-              </span>
             </a>
           </footer>
         </div>
