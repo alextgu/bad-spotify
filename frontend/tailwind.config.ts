@@ -88,12 +88,20 @@ export default {
        * geometric faces set loose at large sizes look like a slide deck.
        */
       fontSize: {
+        /* `min(vw, vh)`, not `vw` alone.
+           Every section is exactly one viewport tall, so type that grows only
+           with WIDTH will overflow a wide, short screen -- and `Screen` clips
+           it, which is the bug you can see on a 1080p laptop: the last row of
+           a section disappears behind the next one, mid-sentence. Sizing off
+           whichever axis is scarcer keeps the one-screen rule true on a
+           16:10 laptop and on an ultrawide alike, without shrinking the type
+           on the displays where it does fit. */
         display: [
-          "clamp(2.75rem, 6.6vw, 5.75rem)",
+          "clamp(2.75rem, min(6.6vw, 8.6vh), 5.75rem)",
           { lineHeight: "1.02", letterSpacing: "-0.032em", fontWeight: "600" },
         ],
         headline: [
-          "clamp(1.9rem, 3.9vw, 3.4rem)",
+          "clamp(1.9rem, min(3.9vw, 5.2vh), 3.4rem)",
           { lineHeight: "1.08", letterSpacing: "-0.028em", fontWeight: "600" },
         ],
         title: [
@@ -132,10 +140,16 @@ export default {
        */
       spacing: {
         gutter: "1.5rem", // 24px — page edge
-        block: "2.5rem", // 40px — between a heading and its body
-        rest: "4.5rem", // 72px — between grouped items
+        /* The three vertical steps give height back on a short screen.
+           Same reason as the type above: a section is one viewport, so a
+           rhythm fixed in rem is a rhythm that overflows a laptop. The
+           maximum is unchanged, so nothing moves on the displays where the
+           page already looked right -- these only compress when there is
+           genuinely no room, instead of clipping a paragraph in half. */
+        block: "clamp(1.5rem, 3.2vh, 2.5rem)", // 40px — heading to its body
+        rest: "clamp(2.25rem, 5.6vh, 4.5rem)", // 72px — between grouped items
         section: "13.75rem", // 220px — between sections, desktop
-        "section-sm": "7rem", // 112px — below md
+        "section-sm": "clamp(3rem, 8vh, 7rem)", // 112px — below md
         card: "0.75rem",
         play: "76px",
         /* LEGACY — /demo only. */

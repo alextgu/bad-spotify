@@ -374,12 +374,17 @@ export default function SectionTryIt() {
           )}
 
           {/* The decision log, newest first, exactly as the HUD prints it. */}
-          <div className="min-h-0 flex-1 overflow-y-auto border-t border-hairline px-4 py-3">
+          {/* `overflow-x-hidden` as well as y: setting only `overflow-y`
+              makes the x axis `auto` too, and the log lines were `pre`, so a
+              long one produced a second scrollbar across the bottom of the
+              panel. Two scrollbars on a 300px card reads as broken. The lines
+              wrap now instead, which is what a log should do at this width. */}
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden border-t border-hairline px-4 py-3">
             <ul className="space-y-1.5">
               {cue.log.map((line) => (
                 <li
                   key={line}
-                  className="whitespace-pre font-mono text-[0.6875rem] leading-relaxed tracking-normal text-graphite"
+                  className="whitespace-pre-wrap break-words font-mono text-[0.6875rem] leading-relaxed tracking-normal text-graphite"
                 >
                   {line}
                 </li>
