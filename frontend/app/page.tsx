@@ -1,90 +1,91 @@
-import SectionAd from "@/components/SectionAd";
-import SectionBuild from "@/components/SectionBuild";
-import SectionDepth from "@/components/SectionDepth";
+import SectionBroke from "@/components/SectionBroke";
+import SectionDay from "@/components/SectionDay";
+import SectionEvidence from "@/components/SectionEvidence";
 import SectionFAQ from "@/components/SectionFAQ";
-import SectionFilm from "@/components/SectionFilm";
-import SectionLearned from "@/components/SectionLearned";
-import SectionNext from "@/components/SectionNext";
-import SectionProduct from "@/components/SectionProduct";
-import PlaceholderBanner from "@/components/PlaceholderBanner";
-import SectionTryIt from "@/components/SectionTryIt";
-import Wordmark from "@/components/Wordmark";
-import { brand } from "@/lib/brand";
+import SectionHero from "@/components/SectionHero";
+import SectionInvite from "@/components/SectionInvite";
+import SectionStatement from "@/components/SectionStatement";
+import SectionTrio from "@/components/SectionTrio";
+import SectionUnderHood from "@/components/SectionUnderHood";
+import Smoother from "@/components/Smoother";
 
 /**
- * The launch page. Seven sections, no navbar.
+ * The launch page. Nine sections, no navbar.
  *
- * Ordered the way a product page is ordered, not the way a submission form is.
- * Every Devpost field is still answered — inspiration, what it does, how we
- * built it, challenges, accomplishments, what we learned, what's next — but
- * the page never uses those headings. "Challenges we ran into" as a headline
- * breaks the deadpan instantly; "A useless product, built properly" says the
- * same thing and stays in character.
+ * ---------------------------------------------------------------------------
+ * THE ORDER IS THE WIREFRAME. It is the one part of this page that has been
+ * agreed, and it survived the visual restart. Everything else — type, colour,
+ * spacing, motion — is open; this is not.
+ * ---------------------------------------------------------------------------
  *
- *   1  Ad          the pitch                      → Inspiration
- *   2  Film        watch it happen                → the hook
- *   3  Product     what it actually does          → What it does
- *   4  Build+TryIt how, in detail, and proof      → How we built it / Accomplishments
- *   5  Depth+Learn what was hard, what we changed → Challenges / What we learned
- *   6  Next        the ask                        → What's next
- *   7  FAQ         the awkward questions
+ *   1  Hero        the film, framed in paper       one image carries the pitch
+ *   2  Statement   one sentence, alone             the turn
+ *   3  Trio        what it does, in three moves
+ *   4  Evidence    the film, then three moments    proof
+ *   5  Day         one day, six cues, pinned       the argument at length
+ *   6  Under hood  the numbers, on dark            rest, and precision
+ *   7  Broke       what failed, struck through     credibility
+ *   8  Invite      the ask
+ *   9  FAQ         the awkward questions
  *
- * The film sits at 2, before anything is explained. That is the opposite of
- * how a technical writeup should be ordered — there, a video is proof and
- * belongs after the argument. Here it is the hook, and an ad that explains
- * before it shows has already lost the reader. Nobody watches a product film
- * because they were persuaded to.
+ * **Sections 4 and 5 of the original mockup are section 4 here.** They were a
+ * full-bleed film and then a separate three-up grid; grouped, they read as one
+ * piece of evidence rather than as a film followed by an unexplained grid.
  *
- * Seven is a ceiling, not a target. This layout only works because each screen
- * holds one idea, so if something new goes in, something here comes out.
+ * The film sits at 4, after the statement and the trio but before anything is
+ * argued at length. It is the hook, not the proof — a page that explains
+ * before it shows has already lost the reader.
+ *
+ * Nine is a ceiling, not a target. Each screen holds one idea; if something
+ * new goes in, something here comes out.
+ *
+ * `data-snap` on a section marks it as somewhere the page is allowed to settle
+ * — see `Smoother`. Not every section carries it: the ones that are taller
+ * than a screen would drag you back out of themselves.
  */
 export default function Home() {
   return (
-    <>
-      {/* No navbar. One product, one page — navigation would only offer to
-          take you away from the single thing we want you to read. */}
-      <header className="fixed left-0 top-0 z-50 p-6">
-        <Wordmark size="nav" />
-      </header>
-
+    <Smoother>
       <main>
-        {/* 1 — the pitch. */}
-        <SectionAd />
+        {/* 1 — one image, and the promise. */}
+        <div data-snap>
+          <SectionHero />
+        </div>
 
-        {/* 2 — the hook. Show it before explaining a thing. */}
-        <SectionFilm />
+        {/* 2 — the turn. One sentence, and a lot of nothing around it. */}
+        <div data-snap>
+          <SectionStatement />
+        </div>
 
-        {/* 3 — now that they've seen it, what it is. */}
-        <SectionProduct />
+        {/* 3 — what it actually does. */}
+        <SectionTrio />
 
-        {/* 4 — how, in detail, and then the part they can poke. Letting them
-            run it themselves is the accomplishment; saying so would be worth
-            much less than handing it over. */}
-        <SectionBuild />
-        <SectionTryIt />
+        {/* 4 — proof. The film and the three moments are one section now. */}
+        <div data-snap>
+          <SectionEvidence />
+        </div>
 
-        {/* 5 — what was hard, and what we got wrong. Kept adjacent on purpose:
-            one is decisions we'd defend, the other is decisions we reversed. A
-            page with only the first reads as marketing. */}
-        <SectionDepth />
-        <SectionLearned />
+        {/* 5 — the long argument. Pins itself; marks its own snap point. */}
+        <SectionDay />
 
-        {/* 6 — the ask. */}
-        <SectionNext />
+        {/* 6 — the eye rests, and the claims get precise. */}
+        <div data-snap>
+          <SectionUnderHood />
+        </div>
 
-        {/* 7 — the questions a sceptical judge is already forming. */}
-        <SectionFAQ />
+        {/* 7 — and here is what didn't work. */}
+        <SectionBroke />
+
+        {/* 8 — the ask. */}
+        <div data-snap>
+          <SectionInvite />
+        </div>
+
+        {/* 9 — the questions a sceptic is already forming. */}
+        <div data-snap>
+          <SectionFAQ />
+        </div>
       </main>
-
-      {/* Dev-only. Renders nothing in production, and nothing once the real
-          footage is in — see lib/clips.ts. */}
-      <PlaceholderBanner />
-
-      <footer className="border-t border-subtle px-6 py-10 text-center">
-        <p className="text-xs text-ink-muted">
-          {brand.name} — {brand.description}
-        </p>
-      </footer>
-    </>
+    </Smoother>
   );
 }

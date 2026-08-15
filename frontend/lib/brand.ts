@@ -1,31 +1,34 @@
-
+/**
+ * The name, and the two lines that describe the product.
+ *
+ * `name` is a placeholder and is meant to look like one — it renders as
+ * literally `[name]` in the wordmark, the tab title and the footer, so nobody
+ * can mistake it for a decision that was made. Change it here and it changes
+ * everywhere; don't hardcode it anywhere else.
+ *
+ * Everything else the page says lives in `lib/site.ts`.
+ */
 export const brand = {
+  name: "[name]",
 
-  name: "DJ 180",
-
-
-  eyebrow: "Introducing",
-
-  tagline: "The worst music for the best moments.",
-  taglineSecond: "And vice versa.",
-
+  tagline: "Music for the room you're in.",
 
   description:
-    "A wearable agent that reads the room, works out exactly what it should play, and plays the opposite.",
-
-
-  creed: ["It watches you.", "It understands you.", "It does not help you."],
+    "It reads the room you're standing in, not the songs you played last Tuesday.",
 } as const;
 
-
-export const specs = [
-  { value: "5s", label: "between looks at the room" },
-  { value: "3", label: "competing theories of wrong" },
-  { value: "47", label: "songs, chosen by hand" },
-  { value: "0", label: "requests taken" },
-] as const;
-
-
+/**
+ * The six steps of the loop, as drawn by `components/PipelineDiagram.tsx`.
+ *
+ * **Nothing on the current landing page renders either of them.** The page was
+ * rebuilt around the mockup, which has no diagram section; the component
+ * survived that rebuild because it was updated to the six-strategy fan-out at
+ * the same time and is a working, accurate drawing of the real pipeline.
+ *
+ * So this is a component waiting for a home rather than dead code — but if the
+ * page never grows a place for it, delete the component and this export
+ * together rather than leaving it to rot.
+ */
 export const steps = [
   { n: "01", title: "Look", body: "A picture, and the last few seconds of sound." },
   {
@@ -42,7 +45,7 @@ export const steps = [
   {
     n: "05",
     title: "Choose",
-    body: "Three ideas of “worst” compete. The funniest wins.",
+    body: "Competing ideas of “worst”. The funniest wins.",
   },
   {
     n: "06",

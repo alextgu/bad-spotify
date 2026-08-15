@@ -83,7 +83,12 @@ export default function DemoPage() {
   const moment = session && active >= 0 ? session.moments[active] : null;
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12">
+    // The landing page moved to paper; this one has not been redesigned yet,
+    // so it carries its own dark surface rather than inheriting the body's.
+    // When /demo is reworked, this and the LEGACY block in tailwind.config.ts
+    // go together.
+    <main className="min-h-screen bg-plane px-6 py-12 text-ink-primary">
+      <div className="mx-auto max-w-6xl">
       <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Demo ground</h1>
@@ -180,6 +185,7 @@ export default function DemoPage() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </main>
   );
