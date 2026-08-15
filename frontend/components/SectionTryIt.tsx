@@ -162,17 +162,27 @@ export default function SectionTryIt() {
               Use the sample clip
             </button>
 
-            {/* Inert until the uploader is wired; it starts the same run so
-                the layout can be judged either way. */}
+            {/* Gated, and gated visibly. It could have been wired to start the
+                sample run so the button did *something*, but a control that
+                silently does the other thing is worse than one that is plainly
+                switched off — the first time someone uploads a clip and
+                watches the kitchen footage play, they stop trusting the rest
+                of the screen. */}
             <button
               type="button"
-              onClick={() => setStarted(true)}
-              className="rounded-full border border-ink/25 px-8 py-4 font-mono text-label uppercase
-                         transition-colors duration-interaction ease-calm hover:border-ink"
+              disabled
+              aria-disabled
+              title="Not wired up yet"
+              className="cursor-not-allowed rounded-full border border-ink/15 px-8 py-4
+                         font-mono text-label uppercase text-graphite/60"
             >
-              Use your own
+              Upload your own
             </button>
           </div>
+
+          <p className="mt-block font-mono text-label uppercase text-graphite/70">
+            Uploading is not wired up yet
+          </p>
 
           <p className="mt-rest">
             <a
@@ -201,24 +211,25 @@ export default function SectionTryIt() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="rounded-full border border-hairline px-4 py-2 font-mono text-label uppercase text-graphite transition-colors duration-interaction ease-calm hover:border-ink hover:text-ink"
-          >
-            Sample clip
-          </button>
-          <button
-            type="button"
-            className="rounded-full border border-hairline px-4 py-2 font-mono text-label uppercase text-graphite transition-colors duration-interaction ease-calm hover:border-ink hover:text-ink"
-          >
-            Use your own
-          </button>
+          {/* Goes back to the chooser. That is also the way out of the
+              section, which is why there is no separate close: two controls
+              that both mean "stop looking at this" is one too many. */}
           <button
             type="button"
             onClick={() => setStarted(false)}
-            className="rounded-full px-4 py-2 font-mono text-label uppercase text-graphite transition-colors duration-interaction ease-calm hover:text-ink"
+            className="rounded-full border border-hairline px-4 py-2 font-mono text-label uppercase text-graphite transition-colors duration-interaction ease-calm hover:border-ink hover:text-ink"
           >
-            Close
+            Change sample clip
+          </button>
+
+          <button
+            type="button"
+            disabled
+            aria-disabled
+            title="Not wired up yet"
+            className="cursor-not-allowed rounded-full border border-hairline/60 px-4 py-2 font-mono text-label uppercase text-graphite/50"
+          >
+            Upload your own
           </button>
         </div>
       </header>
