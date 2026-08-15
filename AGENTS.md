@@ -48,7 +48,7 @@ Plus one README beside each part that ships on its own: `frontend/`,
 Every one of these was run on 14 Aug 2026 and did what it says.
 
 ```bash
-# tests — 209 pass
+# tests — 215 pass
 source .venv/bin/activate && python -m pytest tests/ -q
 # on Windows: .venv\Scripts\python.exe -m pytest tests -q
 
@@ -77,7 +77,7 @@ cd frontend && npx tsc --noEmit && npm run build
 `pytest` and `gradio` are in `requirements.txt`. `ffmpeg` on PATH is needed for
 video audio; without it the sampler runs vision-only rather than failing.
 
-### Test inventory (209, verified by `--collect-only`)
+### Test inventory (215, verified by `--collect-only`)
 
 | File | Count | Guards |
 |---|---|---|
@@ -93,7 +93,7 @@ video audio; without it the sampler runs vision-only rather than failing.
 | `tests/test_semantic_opposite.py` | 7 | model-inferred fast-food chain, no lookup, zero Spotify calls |
 | `tests/test_service.py` | 13 | `Engine`: describe / look / watch, no speakers by default, no bus leak |
 | `tests/test_spotify_match.py` | 13 | search-result matching (karaoke, tribute bands, wrong artists) |
-| `tests/test_spotify_player.py` | 16 | player behavior against a stand-in Spotify |
+| `tests/test_spotify_player.py` | 22 | player behavior against a stand-in Spotify |
 | `tests/test_tls.py` | 6 | HTTPS certificate generation and server configuration |
 | `tests/test_video_and_session.py` | 7 | video-as-live and the recorded session format |
 | `tests/test_videofeed.py` | 17 | sampling a real generated mp4: cadence, triggers, rate limiting, sinks |
@@ -209,7 +209,7 @@ concurrently and a judge picks between them.
 Before you say you're done:
 
 ```bash
-pytest tests/ -q                      # all 209, not just yours
+pytest tests/ -q                      # all 215, not just yours
 python run.py --ticks 6 --no-hud      # the loop still runs on mocks
 ```
 

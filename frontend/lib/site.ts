@@ -200,7 +200,7 @@ export const results = {
    */
   metrics: [
     { value: "1.17", unit: "s", label: "Scene read, median" },
-    { value: "192", unit: "", label: "Tests" },
+    { value: "215", unit: "", label: "Tests" },
     { value: "47", unit: "", label: "Songs, by hand" },
     { value: "0", unit: "", label: "Images stored" },
   ],
@@ -216,7 +216,7 @@ export const results = {
     },
     {
       title: "Nothing here is faked",
-      body: "Where something is a placeholder the interface says so. The upload button is switched off and labelled rather than quietly playing the sample instead.",
+      body: "Where something is a placeholder the interface says so. The bundled clips carry real Gemini sessions, and an upload either shows its own analysis or fails plainly.",
     },
   ],
 } as const;
@@ -236,8 +236,12 @@ export const faq = [
     a: "From your history, not from the room you're standing in.",
   },
   {
+    q: "Why is the logo the opposite?",
+    a: "Some of the biggest music apps go dark, round, and green. Ours goes light, square, and purple for the same reason the music does: it flips what the moment expects.",
+  },
+  {
     q: "What's faked for the demo?",
-    a: "The vision step is real and has run against the live model, but every frame it has seen so far was synthetic — it has never been pointed at real footage. The Spotify player is built and tested against a stand-in, and nobody has yet heard it come out of a real speaker. Uploading your own clip is switched off rather than quietly playing the sample.",
+    a: "The vision step ran on all three real sample clips, and the site replays those recorded sessions. The Spotify player is built and tested against a stand-in, and nobody has yet heard it come out of a real speaker. Your own upload only works when the local agent is running.",
   },
   {
     q: "Isn't this one prompt in a trenchcoat?",

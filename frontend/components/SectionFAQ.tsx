@@ -10,11 +10,10 @@ import { faq, footer } from "@/lib/site";
  * keyboard accessible for free, search engines read the answers while
  * collapsed, and it cannot get stuck half-open on a resize.
  *
- * Five questions collapsed fit one screen with the footer under them. Opening
+ * Seven questions collapsed fit one screen with the footer under them. Opening
  * one pushes the rest down inside a fixed-height screen, so the last answer
  * can clip — which is the correct trade here: closed is the state the screen
  * is designed for, and anyone opening the fifth question can close the others.
- * If a sixth question is ever added, one of these comes out.
  *
  * Second question down is the one that gives the whole thing away. It is left
  * exactly as plain as the others.

@@ -40,7 +40,7 @@ Last updated: 15 Aug 2026
 | Video sampler (`src/videofeed/`) | Done — 17 tests, incl. a real generated clip | |
 | Engine (`service.py`) — one decision, no loop | Built, unproven | |
 | Gradio app (`app.py`) | Built, unproven | |
-| Naming and logo | Name done — **Slopify**, 15 Aug, in `frontend/lib/brand.ts`. Logo still a dashed placeholder in the hero | |
+| Naming and logo | Built, visual check pending — **Slopify** plus the square purple mark in the hero and app icon; production build and served asset hashes verified 15 Aug | |
 | Glasses | Not started — and not needed | |
 
 "Built, unproven" is not a criticism. Everything was deliberately built to run
@@ -59,7 +59,7 @@ the single biggest risk to the demo.
   off when the room really changed *and* the current song has had a fair run.
 - **Backup list.** If anything upstream dies, a pre-picked list of always-wrong
   songs plays anyway. It is never silent.
-- **Tests.** 209 of them, each guarding a specific way the demo could break.
+- **Tests.** 215 of them, each guarding a specific way the demo could break.
 - **Timeouts on the model calls.** A slow answer is abandoned and retried
   rather than freezing the loop. A late answer is worth less than a fast fallback.
 
@@ -74,7 +74,7 @@ active; the offline fallback leaves the semantic chain empty. The local
 one perception call, resolves to opera/classical candidates, and triggers the
 genre-aware DJ path. The offline reader returns no special fast-food answer.
 Seven focused tests cover the model boundary, identity filtering, Engine path,
-genre gating, and zero-Spotify-call candidate generation. All 209 tests pass.
+genre gating, and zero-Spotify-call candidate generation. All 215 tests pass.
 *Still unknown:* whether the live model reaches the useful chain from a real
 fast-food photo without an example in its prompt.
 
@@ -110,7 +110,7 @@ and asks before the expensive work: two rooms that invert to the same music
 don't cost a track.
 *Proven by:* a scene held perfectly constant for 62s went from **6 tracks to 1**,
 and a hard cut is still answered within one read (2.5s). 11 new tests in
-`tests/test_dj_timing.py`; 209 pass.
+`tests/test_dj_timing.py`; 215 pass.
 *Thresholds are measured, not taste:* jitter moves the target ≤0.23 and flips
 the top pick 37% of the time; the smallest real scene change moves it 0.56.
 The deadband sits in that gap at 0.30.
@@ -126,7 +126,7 @@ aren't declared on the TypedDict.
 video, samples it through the current video source, and returns a mood and music
 timeline to `/demo`. Stable mood samples keep the current song choice. A new
 choice needs a different mood and enough vibe distance, and carries a two-second
-crossfade marker. Four focused tests pass, all 209 project tests pass, and the
+crossfade marker. Four focused tests pass, all 215 project tests pass, and the
 frontend type check and production build pass. It has been tried with rain footage.
 
 ## Built, but nobody has run it for real
@@ -291,6 +291,9 @@ Don't re-open these without a reason.
   no Spotify mark, and the accent green is deliberately not theirs.
   (Supersedes the 13 Aug placeholder decision; the old working title contained
   "Spotify", which their developer terms forbid. "Slopify" does not.)
+- **15 Aug** — **The logo visually inverts the category.** Some major music
+  apps are dark, round, and green; Slopify is light, square, and purple. The
+  contrast mirrors the product choosing music that opposes the moment.
 - **13 Aug** — No inversion dial. Always fully invert; measure and report the
   mismatch instead. `Verdict.mismatch` is an outcome, never an input.
 - **13 Aug** — One decision path. Anything holding a scene already enters the
@@ -304,10 +307,11 @@ Don't re-open these without a reason.
 1. **Run the Spotify setup script.** It's the only part that can quietly fail on
    the day, and it has the fiddliest setup. Everything else can be improved up to
    the deadline; this one either works or it doesn't.
-2. **Point the photo-reader at real photos.** Everything downstream is judged on
-   whether this is any good, and right now it's guesswork.
-3. **Film a real demo clip and run it.** Everything needed to do this now exists.
-   Whatever comes out of `--record` is the raw material for the site.
+2. **Run the Gemini judge against its real API.** Perception is proven on real
+   clips; the model-backed final judge remains the untested model boundary.
+3. **Visually check the rebuilt site in a browser.** The production build and
+   served assets are verified, but the logo and seven-question FAQ still need
+   a real viewport pass.
 
 ---
 

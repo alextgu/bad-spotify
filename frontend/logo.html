@@ -1,149 +1,55 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>CJ mark — variants</title>
-<style>
-  body{margin:0;background:#0d0d0d;color:#fff;font-family:system-ui,-apple-system,sans-serif;padding:40px}
-  h1{font-size:14px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#898781;margin:0 0 32px}
-  .row{display:grid;grid-template-columns:200px 1fr;gap:36px;align-items:center;
-    padding:28px 0;border-top:1px solid rgba(255,255,255,.08)}
-  .meta b{display:block;font-size:17px;letter-spacing:-.01em;margin-bottom:6px}
-  .meta span{font-size:13px;color:#898781;line-height:1.5}
-  .sizes{display:flex;align-items:center;gap:44px}
-  .s{display:flex;flex-direction:column;align-items:center;gap:10px}
-  .s i{font-size:11px;color:#898781;font-style:normal;font-family:ui-monospace,monospace}
-  .lockup{display:flex;align-items:center;gap:14px;margin-top:8px}
-  .lockup span{font-size:26px;font-weight:650;letter-spacing:-.03em}
-</style></head><body>
-<h1>CJ mark — square ripples</h1>
-
-<!-- A ---------------------------------------------------------------- -->
-<div class="row">
-  <div class="meta"><b>A — Sharp</b><span>Hard corners, even ripples. The most
-    direct inversion of Spotify's soft circle.</span></div>
-  <div class="sizes">
-    <div class="s"><svg width="120" height="120" viewBox="0 0 100 100">
-      <defs><linearGradient id="gA" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#3987e5"/><stop offset="1" stop-color="#d95926"/></linearGradient></defs>
-      <rect x="6"  y="6"  width="88" height="88" fill="none" stroke="#d95926" stroke-width="2" opacity=".18"/>
-      <rect x="19" y="19" width="62" height="62" fill="none" stroke="#d95926" stroke-width="2" opacity=".38"/>
-      <rect x="30" y="30" width="40" height="40" fill="none" stroke="#d95926" stroke-width="2" opacity=".62"/>
-      <rect x="39" y="39" width="22" height="22" fill="url(#gA)"/>
-    </svg><i>120px</i></div>
-    <div class="s"><svg width="32" height="32" viewBox="0 0 100 100">
-      <rect x="6"  y="6"  width="88" height="88" fill="none" stroke="#d95926" stroke-width="5" opacity=".18"/>
-      <rect x="19" y="19" width="62" height="62" fill="none" stroke="#d95926" stroke-width="5" opacity=".38"/>
-      <rect x="30" y="30" width="40" height="40" fill="none" stroke="#d95926" stroke-width="5" opacity=".62"/>
-      <rect x="39" y="39" width="22" height="22" fill="#3987e5"/></svg><i>32px</i></div>
-    <div class="s"><svg width="16" height="16" viewBox="0 0 100 100">
-      <rect x="19" y="19" width="62" height="62" fill="none" stroke="#d95926" stroke-width="8" opacity=".5"/>
-      <rect x="36" y="36" width="28" height="28" fill="#3987e5"/></svg><i>16px</i></div>
-  </div>
-</div>
-
-<!-- B ---------------------------------------------------------------- -->
-<div class="row">
-  <div class="meta"><b>B — Softened</b><span>2px corner radius. Sits better beside
-    modern UI, loses a little of the hardness.</span></div>
-  <div class="sizes">
-    <div class="s"><svg width="120" height="120" viewBox="0 0 100 100">
-      <defs><linearGradient id="gB" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#3987e5"/><stop offset="1" stop-color="#d95926"/></linearGradient></defs>
-      <rect x="6"  y="6"  width="88" height="88" rx="6" fill="none" stroke="#d95926" stroke-width="2" opacity=".18"/>
-      <rect x="19" y="19" width="62" height="62" rx="5" fill="none" stroke="#d95926" stroke-width="2" opacity=".38"/>
-      <rect x="30" y="30" width="40" height="40" rx="4" fill="none" stroke="#d95926" stroke-width="2" opacity=".62"/>
-      <rect x="39" y="39" width="22" height="22" rx="3" fill="url(#gB)"/>
-    </svg><i>120px</i></div>
-    <div class="s"><svg width="32" height="32" viewBox="0 0 100 100">
-      <rect x="6"  y="6"  width="88" height="88" rx="6" fill="none" stroke="#d95926" stroke-width="5" opacity=".18"/>
-      <rect x="19" y="19" width="62" height="62" rx="5" fill="none" stroke="#d95926" stroke-width="5" opacity=".38"/>
-      <rect x="30" y="30" width="40" height="40" rx="4" fill="none" stroke="#d95926" stroke-width="5" opacity=".62"/>
-      <rect x="39" y="39" width="22" height="22" rx="3" fill="#3987e5"/></svg><i>32px</i></div>
-    <div class="s"><svg width="16" height="16" viewBox="0 0 100 100">
-      <rect x="19" y="19" width="62" height="62" rx="5" fill="none" stroke="#d95926" stroke-width="8" opacity=".5"/>
-      <rect x="36" y="36" width="28" height="28" rx="4" fill="#3987e5"/></svg><i>16px</i></div>
-  </div>
-</div>
-
-<!-- C ---------------------------------------------------------------- -->
-<div class="row">
-  <div class="meta"><b>C — Off-axis core</b><span>Ripples square, core rotated 12°.
-    The centre doesn't line up with what surrounds it.</span></div>
-  <div class="sizes">
-    <div class="s"><svg width="120" height="120" viewBox="0 0 100 100">
-      <defs><linearGradient id="gC" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#3987e5"/><stop offset="1" stop-color="#d95926"/></linearGradient></defs>
-      <rect x="6"  y="6"  width="88" height="88" fill="none" stroke="#d95926" stroke-width="2" opacity=".18"/>
-      <rect x="19" y="19" width="62" height="62" fill="none" stroke="#d95926" stroke-width="2" opacity=".38"/>
-      <rect x="30" y="30" width="40" height="40" fill="none" stroke="#d95926" stroke-width="2" opacity=".62"/>
-      <rect x="39" y="39" width="22" height="22" fill="url(#gC)" transform="rotate(12 50 50)"/>
-    </svg><i>120px</i></div>
-    <div class="s"><svg width="32" height="32" viewBox="0 0 100 100">
-      <rect x="6"  y="6"  width="88" height="88" fill="none" stroke="#d95926" stroke-width="5" opacity=".18"/>
-      <rect x="19" y="19" width="62" height="62" fill="none" stroke="#d95926" stroke-width="5" opacity=".38"/>
-      <rect x="30" y="30" width="40" height="40" fill="none" stroke="#d95926" stroke-width="5" opacity=".62"/>
-      <rect x="39" y="39" width="22" height="22" fill="#3987e5" transform="rotate(12 50 50)"/></svg><i>32px</i></div>
-    <div class="s"><svg width="16" height="16" viewBox="0 0 100 100">
-      <rect x="19" y="19" width="62" height="62" fill="none" stroke="#d95926" stroke-width="8" opacity=".5"/>
-      <rect x="36" y="36" width="28" height="28" fill="#3987e5" transform="rotate(12 50 50)"/></svg><i>16px</i></div>
-  </div>
-</div>
-
-<!-- D ---------------------------------------------------------------- -->
-<div class="row">
-  <div class="meta"><b>D — Offset ripples</b><span>Rings drift down-right instead of
-    radiating evenly. Reads as sound coming from somewhere else.</span></div>
-  <div class="sizes">
-    <div class="s"><svg width="120" height="120" viewBox="0 0 100 100">
-      <defs><linearGradient id="gD" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#3987e5"/><stop offset="1" stop-color="#d95926"/></linearGradient></defs>
-      <rect x="2"  y="10" width="88" height="88" fill="none" stroke="#d95926" stroke-width="2" opacity=".18"/>
-      <rect x="16" y="21" width="62" height="62" fill="none" stroke="#d95926" stroke-width="2" opacity=".38"/>
-      <rect x="29" y="31" width="40" height="40" fill="none" stroke="#d95926" stroke-width="2" opacity=".62"/>
-      <rect x="39" y="39" width="22" height="22" fill="url(#gD)"/>
-    </svg><i>120px</i></div>
-    <div class="s"><svg width="32" height="32" viewBox="0 0 100 100">
-      <rect x="2"  y="10" width="88" height="88" fill="none" stroke="#d95926" stroke-width="5" opacity=".18"/>
-      <rect x="16" y="21" width="62" height="62" fill="none" stroke="#d95926" stroke-width="5" opacity=".38"/>
-      <rect x="29" y="31" width="40" height="40" fill="none" stroke="#d95926" stroke-width="5" opacity=".62"/>
-      <rect x="39" y="39" width="22" height="22" fill="#3987e5"/></svg><i>32px</i></div>
-    <div class="s"><svg width="16" height="16" viewBox="0 0 100 100">
-      <rect x="16" y="21" width="62" height="62" fill="none" stroke="#d95926" stroke-width="8" opacity=".5"/>
-      <rect x="36" y="36" width="28" height="28" fill="#3987e5"/></svg><i>16px</i></div>
-  </div>
-</div>
-
-<!-- E ---------------------------------------------------------------- -->
-<div class="row">
-  <div class="meta"><b>E — Solid, no rings</b><span>Just the gradient square. The
-    ripples become motion on the site rather than part of the mark.</span></div>
-  <div class="sizes">
-    <div class="s"><svg width="120" height="120" viewBox="0 0 100 100">
-      <defs><linearGradient id="gE" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#3987e5"/><stop offset="1" stop-color="#d95926"/></linearGradient></defs>
-      <rect x="14" y="14" width="72" height="72" fill="url(#gE)"/>
-    </svg><i>120px</i></div>
-    <div class="s"><svg width="32" height="32" viewBox="0 0 100 100">
-      <defs><linearGradient id="gE2" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#3987e5"/><stop offset="1" stop-color="#d95926"/></linearGradient></defs>
-      <rect x="14" y="14" width="72" height="72" fill="url(#gE2)"/></svg><i>32px</i></div>
-    <div class="s"><svg width="16" height="16" viewBox="0 0 100 100">
-      <defs><linearGradient id="gE3" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#3987e5"/><stop offset="1" stop-color="#d95926"/></linearGradient></defs>
-      <rect x="14" y="14" width="72" height="72" fill="url(#gE3)"/></svg><i>16px</i></div>
-  </div>
-</div>
-
-<!-- lockup ------------------------------------------------------------ -->
-<div class="row">
-  <div class="meta"><b>Lockup</b><span>A at 40px beside the wordmark.</span></div>
-  <div class="lockup">
-    <svg width="40" height="40" viewBox="0 0 100 100">
-      <defs><linearGradient id="gL" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#3987e5"/><stop offset="1" stop-color="#d95926"/></linearGradient></defs>
-      <rect x="6"  y="6"  width="88" height="88" fill="none" stroke="#d95926" stroke-width="4" opacity=".18"/>
-      <rect x="19" y="19" width="62" height="62" fill="none" stroke="#d95926" stroke-width="4" opacity=".38"/>
-      <rect x="30" y="30" width="40" height="40" fill="none" stroke="#d95926" stroke-width="4" opacity=".62"/>
-      <rect x="39" y="39" width="22" height="22" fill="url(#gL)"/></svg>
-    <span>CJ</span>
-  </div>
-</div>
-</body></html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Slopify logo preview</title>
+    <style>
+      :root { color-scheme: light; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #f5f0e8;
+        color: #17151d;
+        font-family: system-ui, sans-serif;
+      }
+      main { width: min(880px, calc(100% - 48px)); }
+      h1 { margin: 0 0 32px; font-size: 20px; }
+      .sizes {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: end;
+        gap: 40px;
+      }
+      figure { margin: 0; text-align: center; }
+      img { display: block; object-fit: contain; }
+      figcaption { margin-top: 12px; font: 12px ui-monospace, monospace; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Slopify — pink and purple mark</h1>
+      <div class="sizes">
+        <figure>
+          <img src="public/logo.png" width="320" height="320" alt="Slopify logo" />
+          <figcaption>320px</figcaption>
+        </figure>
+        <figure>
+          <img src="public/logo.png" width="120" height="120" alt="" />
+          <figcaption>120px</figcaption>
+        </figure>
+        <figure>
+          <img src="public/logo.png" width="48" height="48" alt="" />
+          <figcaption>48px</figcaption>
+        </figure>
+        <figure>
+          <img src="public/logo.png" width="24" height="24" alt="" />
+          <figcaption>24px</figcaption>
+        </figure>
+      </div>
+    </main>
+  </body>
+</html>

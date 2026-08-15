@@ -3,11 +3,9 @@ import Image from "next/image";
 /**
  * The Slopify mark, twinkling.
  *
- * The icon is deliberate AI slop — a gradient bubble, four-pointed stars, a
- * misspelt wordmark, and "amde by AI" tiled across the art. The animation
- * commits to that rather than trying to dignify it: the stars twinkle, the
- * mark bobs, and a soft halo breathes behind it, which is exactly what every
- * generated app icon on the internet does.
+ * The square, purple mark deliberately points away from the category defaults:
+ * light instead of dark, angular instead of round, and violet instead of
+ * green. The stars twinkle, the mark bobs, and a soft halo breathes behind it.
  *
  * It is the one place on the page allowed to be tacky, and it works *because*
  * everything around it is not. A page that behaved like this throughout would
@@ -23,7 +21,7 @@ import Image from "next/image";
  */
 
 /**
- * The four-pointed star that is already drawn inside the icon art.
+ * A four-pointed star orbiting the icon art.
  *
  * Two nested elements rather than one, and that is the whole trick behind the
  * hover: the outer span owns *position and hover scale* as a transition, the
