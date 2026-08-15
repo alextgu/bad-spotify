@@ -64,8 +64,12 @@ export default function Home() {
           <SectionDemo />
         </div>
 
-        {/* 4 — letting someone run it is worth more than describing it. */}
-        <div>
+        {/* 4 — letting someone run it is worth more than describing it.
+            Strings off, and the section carries its own opaque background:
+            this is the one screen with a draggable control on it, and drifting
+            lines behind a timeline you are aiming at is noise exactly where
+            precision is wanted. */}
+        <div data-strings="off">
           <SectionTryIt />
         </div>
 
