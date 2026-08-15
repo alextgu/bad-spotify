@@ -16,8 +16,15 @@
 export const brand = {
   name: "Slopify",
 
-  /** Sits above the hero headline, set small in mono. */
-  positioning: "Spotify DJ, if it went on vibes instead of history",
+  /**
+   * Sits above the hero headline, set small in mono beside a pulsing dot.
+   *
+   * Deliberately says what it *doesn't* do first. "No history, no requests"
+   * tells you the whole shape of the thing before the headline arrives, and
+   * refusing to explain the rest is most of why the top of the page reads as
+   * mysterious rather than as a feature list.
+   */
+  positioning: "No history · No requests · Only vibes",
 
   tagline: "Music for the room you're in.",
 

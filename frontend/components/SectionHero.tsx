@@ -27,11 +27,16 @@ export default function SectionHero() {
         <Slot shot={hero.shot} className="absolute inset-0" />
 
         {/* Feathered, not flat: the type stays legible on the left without
-            the right half of the frame being dimmed to pay for it. */}
+            the right half of the frame being dimmed to pay for it.
+
+            Deepened for the mysterious read. The left third now goes to
+            near-black and the frame darkens at the bottom as well as the top,
+            so the picture emerges out of the dark rather than sitting on it.
+            A vignette on the right keeps the corners from lifting. */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0
-                     bg-[linear-gradient(to_right,rgba(10,10,12,.72)_0%,rgba(10,10,12,.58)_12%,rgba(10,10,12,.4)_26%,rgba(10,10,12,.22)_40%,rgba(10,10,12,.08)_54%,transparent_68%),linear-gradient(to_bottom,rgba(10,10,12,.4)_0%,rgba(10,10,12,.16)_14%,transparent_28%)]"
+                     bg-[linear-gradient(to_right,rgba(6,6,8,.94)_0%,rgba(6,6,8,.86)_14%,rgba(6,6,8,.66)_28%,rgba(6,6,8,.4)_42%,rgba(6,6,8,.16)_58%,transparent_74%),linear-gradient(to_bottom,rgba(6,6,8,.55)_0%,rgba(6,6,8,.2)_16%,transparent_34%,rgba(6,6,8,.35)_86%,rgba(6,6,8,.6)_100%),radial-gradient(120%_90%_at_78%_50%,transparent_45%,rgba(6,6,8,.45))]"
         />
 
         {/* One flow column rather than three absolutely-placed blocks. The
@@ -76,13 +81,19 @@ export default function SectionHero() {
           </div>
 
           <div className="max-w-[38rem]">
-            {/* What it is, said by pointing at the thing everyone already
-                has. It goes ABOVE the headline because the headline is a
-                promise and this is the category — a reader who doesn't know
-                what kind of object this is cannot evaluate the promise. */}
-            <Label tone="offset" className="block !text-offset">
-              {brand.positioning}
-            </Label>
+            {/* Says what it does NOT do, beside a dot that is quietly
+                pulsing. Three refusals and no explanation — that withholding
+                is the whole reason the top of the screen reads as something
+                already running rather than as a product being introduced. */}
+            <span className="flex items-center gap-2.5">
+              <span
+                aria-hidden
+                className="h-1.5 w-1.5 rounded-full bg-offset motion-safe:animate-[listening_3.4s_ease-in-out_infinite]"
+              />
+              <Label tone="offset" className="!text-offset">
+                {brand.positioning}
+              </Label>
+            </span>
 
             <h1 className="mt-block max-w-[13ch] font-display text-display">
               {hero.headline}{" "}
@@ -91,7 +102,13 @@ export default function SectionHero() {
               <span className="text-offset">{hero.headlineAccent}</span>.
             </h1>
 
-            <p className="mt-block max-w-[30ch] text-body text-paper/85">
+            {/* The punchline, set as flat as it will go: mono, uppercase,
+                widely tracked, and no larger than it has to be. The headline
+                above is atmospheric and admits nothing; this states the actual
+                product in a voice that sounds like a system label rather than
+                a boast. Said in the display face at body size it would read as
+                a tagline — which is a claim — instead of as a fact. */}
+            <p className="mt-block max-w-[34ch] font-mono text-[0.8125rem] uppercase leading-relaxed tracking-[0.2em] text-paper/75">
               {hero.sub}
             </p>
           </div>

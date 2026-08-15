@@ -28,7 +28,15 @@ export interface Shot {
 export const hero = {
   headline: "Music for the room you're",
   headlineAccent: "in",
-  sub: "Everything else picks from what you have already played. This picks from the room you are standing in.",
+  /**
+   * The caption under the headline, and the punchline of the screen.
+   *
+   * The headline is atmospheric and gives nothing away; this lands flat and
+   * admits what the thing actually does. The gap between the two is the joke,
+   * so it stays a single deadpan line — explaining it here would spend the
+   * whole hero, and the FAQ is where the reasoning lives.
+   */
+  sub: "Picks the worst possible music for your life.",
   shot: {
     file: "hero.mp4",
     note: [
