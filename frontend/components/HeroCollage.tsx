@@ -42,9 +42,15 @@ export default function HeroCollage() {
           than hanging off it — measured against the photo, not eyeballed
           against the section, which is why they are odd numbers.
 
+          It now crosses the bottom edge rather than clearing it. There were
+          only 11px of photograph left below it at 20%, so "down more" had
+          nowhere to go inside the frame — it straddles instead, which reads
+          as a sticker laid on the picture rather than a bar squeezed into a
+          corner. The right margin stays clear of the 2rem corner radius.
+
           `pointer-events-auto` because the wrapper turns them off — the
           collage is decoration, this one is not. `z-40` to clear the notes. */}
-      <div className="pointer-events-auto absolute bottom-[22%] right-[21%] z-40">
+      <div className="pointer-events-auto absolute bottom-[14%] right-[20%] z-40">
         <NowPlayingCard />
       </div>
 

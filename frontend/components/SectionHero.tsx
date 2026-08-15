@@ -50,10 +50,15 @@ export default function SectionHero() {
               <span className="block">{hero.headline}</span>
               <span className="mt-1 block">
                 {hero.headlineRest}{" "}
-                <span className="text-brand-pink">{hero.headlineAccent}</span>,
+                <span className="text-brand-pink">{hero.headlineAccent}</span>.
               </span>
-              <span className="mt-3 block text-[0.58em] leading-[1.08] tracking-[-0.025em] text-paper/90 sm:mt-4">
-                {hero.headlineTail}.
+              {/* Parenthesised, and smaller. The full stop lands on "life", so
+                  the sentence is already complete and this arrives as an aside
+                  — which is the joke. Run on as a second clause it read as the
+                  promise itself, and the promise is meant to sound sincere
+                  right up until this. */}
+              <span className="mt-3 block text-[0.5em] leading-[1.08] tracking-[-0.02em] text-paper/70 sm:mt-4">
+                ({hero.headlineTail})
               </span>
             </h1>
 
