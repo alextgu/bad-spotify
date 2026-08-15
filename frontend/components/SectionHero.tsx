@@ -115,15 +115,23 @@ export default function SectionHero() {
 
           <div className="flex items-end justify-between gap-4">
             {/* The floating clip sits over the film rather than beside it, so
-                the hero stays one image. */}
-            <div className="w-[min(300px,30vw)] overflow-hidden rounded-card border-2 border-paper/90">
-              <div className="relative aspect-[16/10]">
-                <Slot shot={hero.clip} className="absolute inset-0" />
-                <span
-                  aria-hidden
-                  className="absolute inset-0 grid place-items-center"
-                >
-                  <span className="ml-1 border-y-[13px] border-l-[20px] border-y-transparent border-l-paper drop-shadow-[0_2px_12px_rgba(0,0,0,.5)]" />
+                the hero stays one image.
+
+                It is a coming-soon card until the cinematic is cut, and it has
+                NO play triangle. A play button with nothing behind it is the
+                same trap as the upload button on the try-it screen: the click
+                is the moment someone finds out, and it costs more trust than
+                the affordance was worth. Saying so up front costs nothing.
+
+                The border is dimmed to match — at full strength it read as an
+                active control. */}
+            <div className="w-[min(300px,30vw)] overflow-hidden rounded-card border border-paper/25 bg-[rgba(8,8,10,.55)] backdrop-blur-[2px]">
+              <div className="relative grid aspect-[16/10] place-items-center px-4 text-center">
+                <span>
+                  <Label className="block !text-paper/80">Cinematic demo</Label>
+                  <p className="mt-2 font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-paper/45">
+                    Coming soon
+                  </p>
                 </span>
               </div>
             </div>

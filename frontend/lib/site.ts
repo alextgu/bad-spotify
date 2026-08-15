@@ -46,9 +46,15 @@ export const hero = {
       "keep the LEFT THIRD dark — the type sits there",
     ],
   } satisfies Shot,
+  /**
+   * The floating card in the hero. Currently a coming-soon state rather than a
+   * slot, because the cinematic has not been cut — kept here so that when it
+   * exists this is where its filename and direction go, and the card in
+   * `SectionHero` goes back to rendering a `Slot`.
+   */
   clip: {
     file: "clip-teaser.mp4",
-    note: ["15s loop"],
+    note: ["15s loop", "not shot yet"],
   } satisfies Shot,
 };
 
