@@ -2,13 +2,14 @@
 
 ## Try It inputs
 
-The launch page presents both routes without pretending they are the same:
+The launch page keeps the two routes separate:
 
-- **Any video** lists the three bundled samples immediately and can analyze an
-  upload against the local Python agent.
-- **Meta glasses · live** explains that DAT runs in a native companion and
-  checks the local Wearables API v1 readiness. The browser never asks for or
-  claims access to the glasses camera.
+- **Video** stays in the landing-page Try It section. It lists the three
+  bundled samples immediately and can analyze an upload against the local
+  Python agent.
+- **Meta glasses · live** is a separate `/glasses` route. It explains that DAT
+  runs in a native companion and checks Wearables API v1 readiness. It never
+  mounts video samples, upload state, or video analysis controls.
 
 The Meta explanation is compatible with static hosting. Its readiness check is
 for the locally served site: browsers can block an HTTPS page from reaching an
@@ -62,8 +63,9 @@ scene is usually read a few seconds before the song actually lands.
 
 ```
 app/
-  page.tsx         the launch page — seven screens, discrete scroll
-  demo/page.tsx    the demo ground
+  page.tsx          the launch page — seven screens, discrete scroll
+  demo/page.tsx     the video demo ground
+  glasses/page.tsx  the isolated native Meta companion setup
 components/
   SectionHero..FAQ the seven screens, one file each
   ScrollController one gesture, one stop; reads data-stops/data-page-transition

@@ -216,10 +216,10 @@ room. Duplicate sequence numbers do not trigger another model call.
 
 The Android transport, the DAT 0.9 hook, setup instructions, protocol, security
 notes and physical-device proof checklist live in
-[`integrations/meta-dat/`](integrations/meta-dat/README.md). The browser's Try
-It section offers two honest inputs: the native Meta companion for live use, or
-any bundled/uploaded video. The browser itself never claims direct glasses
-access.
+[`integrations/meta-dat/`](integrations/meta-dat/README.md). The browser keeps
+the inputs separate: Try It is always the bundled/uploaded video version, while
+`/glasses` is the native Meta companion setup. Neither surface mounts the
+other's controls or state, and the browser never claims direct glasses access.
 
 ## Free local video upload app
 

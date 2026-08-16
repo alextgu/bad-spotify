@@ -1,20 +1,15 @@
 import { expect, test } from "playwright/test";
 
-test("Try It offers Meta glasses without hiding the video samples", async ({ page }) => {
+test("Try It stays video-only and links to the separate glasses surface", async ({ page }) => {
   await page.goto("/#try");
 
-  await expect(page.getByRole("button", { name: "Any video" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Meta glasses · live" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Library → Birthday → Gym/ })).toBeVisible();
-
-  await page.getByRole("button", { name: "Meta glasses · live" }).click();
-
-  await expect(page.getByText("Native companion required")).toBeVisible();
-  await expect(page.getByText(/browser does not connect to the glasses directly/i)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Check connection" })).toBeVisible();
-
-  await page.getByRole("button", { name: "Any video" }).click();
-  await expect(page.getByRole("button", { name: /Library → Birthday → Gym/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Upload your own" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Open Meta glasses live/i })).toHaveAttribute(
+    "href",
+    "/glasses",
+  );
+  await expect(page.getByRole("button", { name: "Check connection" })).toHaveCount(0);
 });
 
 test("Meta connection check uses the wearable capabilities endpoint", async ({ page }) => {
@@ -30,12 +25,24 @@ test("Meta connection check uses the wearable capabilities endpoint", async ({ p
       }),
     });
   });
-  await page.goto("/#try");
-  await page.getByRole("button", { name: "Meta glasses · live" }).click();
+  await page.goto("/glasses");
 
   await page.getByRole("button", { name: "Check connection" }).click();
 
   await expect(page.getByText("Wearables API v1 is ready")).toBeVisible();
+});
+
+test("glasses surface never mounts video samples or upload controls", async ({ page }) => {
+  await page.goto("/glasses");
+
+  await expect(page.getByText("Native companion required")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Check connection" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Upload your own" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Library → Birthday → Gym/ })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Back to video demo/i })).toHaveAttribute(
+    "href",
+    "/#try",
+  );
 });
 
 test("video inputs remain reachable on a phone-sized page", async ({ page }) => {

@@ -71,14 +71,14 @@ authenticated, ordered Wearables API. The server turns each one into the same
 `Observation` as other cameras and calls the same `graph.tick`;
 session-scoped duplicates do not cost a model call, and a busy graph returns
 retry timing rather than queueing stale scenes. The launch-page Try It section
-now chooses between `Meta glasses · live` and `Any video`, with samples still
-listed immediately.
+is video-only, with samples listed immediately; `/glasses` is a separate Meta
+companion surface and neither route mounts the other route's controls.
 *Proven by:* thirteen new FastAPI tests cover authentication, metadata,
 app-session restarts, streamed JPEG byte/pixel validation, ordering, duplicate
 suppression, LAN fail-closed behavior, cross-origin capability reads and
 concurrent-frame backpressure; five Kotlin/JVM tests compile and cover the exact
 raw-JPEG request, sequence, single-flight scheduling and retry delay; the
-frontend production build and three Playwright input-flow tests pass.
+frontend production build and four Playwright route-isolation tests pass.
 *Still unknown:* the DAT-specific hook matches Meta's official 0.9 API but has
 not been resolved against the private package, signed, registered, or run on
 physical glasses.

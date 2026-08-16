@@ -210,7 +210,7 @@ scripts/io/*.py       one step each, JSON in and out, pipeable.
 | `src/badspotify/session.py` | records a run to the JSON the site replays |
 | `src/badspotify/log.py` | `notice()` → stderr. See the stdout trap below |
 | `src/videofeed/` | standalone sampler: cadence + triggers, audio window, handoff stub |
-| `frontend/` | Next.js site. Two routes: `/` and `/demo` |
+| `frontend/` | Next.js site. Three routes: `/`, video-only `/demo`, and Meta-only `/glasses` |
 | `integrations/meta-dat/` | Kotlin transport plus Android DAT 0.9 companion hook |
 
 **LangGraph, both entry points** (`agents/graph.py`):

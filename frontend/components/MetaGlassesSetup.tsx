@@ -36,8 +36,8 @@ export default function MetaGlassesSetup() {
           <h3 className="mt-2 font-display text-title">Wear the camera. Keep the brain here.</h3>
           <p className="mt-2 max-w-[58ch] text-caption text-graphite">
             The browser does not connect to the glasses directly. Meta&apos;s Device Access
-            Toolkit runs in an Android companion, which sends fresh frames into the same
-            Slopify pipeline as every video below.
+            Toolkit runs in an Android companion, which sends fresh frames through its own
+            live endpoint into the Slopify decision engine.
           </p>
         </div>
         <span className="rounded-full border border-offset-ink/25 px-3 py-1 font-mono text-label uppercase text-offset-ink">

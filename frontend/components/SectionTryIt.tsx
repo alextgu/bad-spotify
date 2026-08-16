@@ -1,11 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ClipPicker from "@/components/ClipPicker";
 import Label from "@/components/Label";
-import MetaGlassesSetup from "@/components/MetaGlassesSetup";
 import { AnalyzeError, analyze, durationOf } from "@/lib/analyze";
 import { cueAt, cuesFor, cuesFromSession, type Cue } from "@/lib/cues";
 import { samples, type Sample } from "@/lib/samples";
@@ -91,7 +91,6 @@ export default function SectionTryIt() {
    * screen you pass in one gesture. Started, it grows to four and takes them.
    */
   const [started, setStarted] = useState(false);
-  const [inputMode, setInputMode] = useState<"video" | "meta">("video");
 
   const [picking, setPicking] = useState(false);
   const [clip, setClip] = useState<Sample>(samples[0]);
@@ -299,113 +298,103 @@ export default function SectionTryIt() {
             {tryIt.body}
           </p>
 
-          <div
-            className="mx-auto mt-block inline-flex rounded-full border border-ink/15 bg-paper p-1"
-            aria-label="Choose an input"
-          >
-            {([
-              ["video", "Any video"],
-              ["meta", "Meta glasses · live"],
-            ] as const).map(([mode, label]) => (
+          <div className="mx-auto mt-block grid max-w-[48rem] gap-2 text-left sm:grid-cols-2">
+            <div className="rounded-card border border-ink bg-ink px-5 py-4 text-paper">
+              <h3 className="font-display text-title">Video version</h3>
+              <p className="mt-1 text-caption text-paper/70">
+                Samples and uploads stay on this page.
+              </p>
+            </div>
+            <Link
+              href="/glasses"
+              aria-label="Open Meta glasses live"
+              className="rounded-card border border-ink/20 bg-paper px-5 py-4 transition hover:border-ink"
+            >
+              <h3 className="font-display text-title">Meta glasses · live</h3>
+              <p className="mt-1 text-caption text-graphite">
+                Open the separate live setup →
+              </p>
+            </Link>
+          </div>
+
+          <div className="mx-auto mt-block grid max-w-[72rem] gap-3 text-left lg:grid-cols-3">
+            {samples.map((sample) => (
               <button
-                key={mode}
+                key={sample.id}
+                data-sample-card
                 type="button"
-                onClick={() => setInputMode(mode)}
-                aria-pressed={inputMode === mode}
-                className={`rounded-full px-5 py-2.5 font-mono text-label uppercase transition
-                  ${inputMode === mode ? "bg-ink text-paper" : "text-graphite hover:text-ink"}`}
+                onClick={(event) =>
+                  choose(sample, event.currentTarget.getBoundingClientRect())
+                }
+                className="group flex w-full flex-col overflow-hidden rounded-card border border-hairline bg-paper text-left
+                           transition-[transform,border-color] duration-interaction ease-calm
+                           hover:-translate-y-1 hover:border-ink focus-visible:-translate-y-1"
               >
-                {label}
+                <div className="relative aspect-[16/9] overflow-hidden bg-ink">
+                  <video
+                    className="h-full w-full object-cover"
+                    src={sample.src}
+                    muted
+                    playsInline
+                    preload="metadata"
+                  />
+                  <span className="absolute bottom-3 right-3">
+                    <Label className="!text-paper/70">{sample.length}</Label>
+                  </span>
+                </div>
+
+                <div className="flex flex-col justify-center p-5 sm:p-6">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="font-display text-title">{sample.title}</h3>
+                    {sample.placeholder && (
+                      <Label className="shrink-0 !text-graphite/70">placeholder</Label>
+                    )}
+                  </div>
+                  <p className="mt-2 text-caption text-graphite">{sample.blurb}</p>
+                </div>
               </button>
             ))}
           </div>
 
-          {inputMode === "meta" ? (
-            <MetaGlassesSetup />
-          ) : (
-            <>
-              <div className="mx-auto mt-block grid max-w-[72rem] gap-3 text-left lg:grid-cols-3">
-                {samples.map((sample) => (
-                  <button
-                    key={sample.id}
-                    data-sample-card
-                    type="button"
-                    onClick={(event) =>
-                      choose(sample, event.currentTarget.getBoundingClientRect())
-                    }
-                    className="group flex w-full flex-col overflow-hidden rounded-card border border-hairline bg-paper text-left
-                               transition-[transform,border-color] duration-interaction ease-calm
-                               hover:-translate-y-1 hover:border-ink focus-visible:-translate-y-1"
-                  >
-                    <div className="relative aspect-[16/9] overflow-hidden bg-ink">
-                      <video
-                        className="h-full w-full object-cover"
-                        src={sample.src}
-                        muted
-                        playsInline
-                        preload="metadata"
-                      />
-                      <span className="absolute bottom-3 right-3">
-                        <Label className="!text-paper/70">{sample.length}</Label>
-                      </span>
-                    </div>
+          <div className="mt-block flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => file.current?.click()}
+              disabled={busy}
+              className="rounded-full border border-ink/25 px-8 py-4 font-mono
+                         text-label uppercase transition hover:border-ink/60
+                         disabled:cursor-wait disabled:text-graphite/60"
+            >
+              {busy ? "Watching it…" : "Upload your own"}
+            </button>
+            <input
+              ref={file}
+              type="file"
+              accept="video/*"
+              hidden
+              onChange={(e) => {
+                const chosen = e.target.files?.[0];
+                e.target.value = "";
+                if (chosen) void useOwnClip(chosen);
+              }}
+            />
+          </div>
 
-                    <div className="flex flex-col justify-center p-5 sm:p-6">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <h3 className="font-display text-title">{sample.title}</h3>
-                        {sample.placeholder && (
-                          <Label className="shrink-0 !text-graphite/70">
-                            placeholder
-                          </Label>
-                        )}
-                      </div>
-                      <p className="mt-2 text-caption text-graphite">{sample.blurb}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-block flex flex-wrap items-center justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => file.current?.click()}
-                  disabled={busy}
-                  className="rounded-full border border-ink/25 px-8 py-4 font-mono
-                             text-label uppercase transition hover:border-ink/60
-                             disabled:cursor-wait disabled:text-graphite/60"
-                >
-                  {busy ? "Watching it…" : "Upload your own"}
-                </button>
-                <input
-                  ref={file}
-                  type="file"
-                  accept="video/*"
-                  hidden
-                  onChange={(e) => {
-                    const chosen = e.target.files?.[0];
-                    e.target.value = "";
-                    if (chosen) void useOwnClip(chosen);
-                  }}
-                />
-              </div>
-
-              {problem ? (
-                <p className="mt-block max-w-prose font-mono text-label uppercase text-graphite">
-                  {problem.what}
-                  {problem.hint && (
-                    <span className="mt-2 block normal-case tracking-normal text-graphite/70">
-                      {problem.hint}
-                    </span>
-                  )}
-                </p>
-              ) : (
-                <p className="mt-2 font-mono text-label uppercase text-graphite/70">
-                  {busy
-                    ? "Reading your clip — one model call per moment it notices"
-                    : "Uploading needs the agent running on this machine"}
-                </p>
+          {problem ? (
+            <p className="mt-block max-w-prose font-mono text-label uppercase text-graphite">
+              {problem.what}
+              {problem.hint && (
+                <span className="mt-2 block normal-case tracking-normal text-graphite/70">
+                  {problem.hint}
+                </span>
               )}
-            </>
+            </p>
+          ) : (
+            <p className="mt-2 font-mono text-label uppercase text-graphite/70">
+              {busy
+                ? "Reading your clip — one model call per moment it notices"
+                : "Uploading needs the agent running on this machine"}
+            </p>
           )}
         </div>
 
