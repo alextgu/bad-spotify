@@ -165,7 +165,14 @@ export default {
       letterSpacing: { eyebrow: "0.2em" },
 
       width: { banner: "min(92vw, 44rem)" },
-      minWidth: { diagram: "700px" },
+      /* The floor the loop diagram scrolls at rather than shrinks past.
+         Was 700px, which is 49% of its 1438px viewBox — the mono labels
+         landed at ~5px. Each node now carries a third line naming the
+         mechanism, so the floor moved to where that line is still readable:
+         900px is 63%, putting the 10.5px label at ~6.6px and the 16px title
+         at ~10px. Below that the wrapper scrolls sideways, which is the
+         behaviour the comment in PipelineDiagram already promised. */
+      minWidth: { diagram: "900px" },
       height: { "hero-slot": "38vh" },
 
       maxWidth: {

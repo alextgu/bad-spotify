@@ -44,27 +44,61 @@ export const brand = {
  * page never grows a place for it, delete the component and this export
  * together rather than leaving it to rot.
  */
+/**
+ * The six steps.
+ *
+ * `body` is the plain-English version, for anywhere the step is explained in
+ * a sentence. `mech` is what the step actually IS — the component or the
+ * measured number — and it is what the diagram prints under each title.
+ *
+ * The diagram used to show titles alone, and "Notice / Understand / Invert"
+ * on their own read as an agent-shaped drawing rather than as this agent:
+ * six words that could caption anyone's pipeline. `mech` is the difference
+ * between a shape and a system, so every value in it is checkable:
+ *
+ *   local, no model   `capture/gate.py` — the gate runs before perception
+ *   1.17s median      four models benchmarked, three calls each (STATUS.md)
+ *   taboo rules       `music/vibe.py` — the rules that survive the inversion
+ *   T 0.20            `judge.selection_temperature` in config.yaml
+ *   deadband 0.30     `config.yaml:93-103`, measured against sensor jitter
+ */
 export const steps = [
-  { n: "01", title: "Look", body: "A picture, and the last few seconds of sound." },
+  {
+    n: "01",
+    title: "Look",
+    mech: "frame + 3s audio",
+    body: "A picture, and the last few seconds of sound.",
+  },
   {
     n: "02",
     title: "Notice",
+    mech: "local, no model",
     body: "Has anything changed? If not, don't waste the thinking.",
   },
   {
     n: "03",
     title: "Understand",
+    mech: "Gemini · 1.17s",
     body: "Where we are, what people are doing, how it feels.",
   },
-  { n: "04", title: "Invert", body: "Work out the exact opposite of that feeling." },
+  {
+    n: "04",
+    title: "Invert",
+    /* "reflect + taboo rules" measured 742px against a node ending at 744 —
+       two pixels of clearance, which reads as text touching the border. */
+    mech: "reflect + taboo",
+    body: "Work out the exact opposite of that feeling.",
+  },
   {
     n: "05",
     title: "Choose",
+    mech: "judge · T 0.20",
     body: "Competing ideas of “worst”. The funniest wins.",
   },
   {
     n: "06",
     title: "Commit",
+    mech: "queue, or cut in",
     body: "Queue it — or cut the music off, if the moment deserves it.",
   },
 ] as const;

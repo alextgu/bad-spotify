@@ -87,7 +87,7 @@ A frame goes in. A song comes out. In between:
 7. Spotify resolves the winning name to a real track and plays it.
 
 Python, LangGraph, FastAPI, Gemini, Spotify Web API, Next.js for the site.
-222 tests, because the demo is the product and every one of them guards a
+238 tests, because the demo is the product and every one of them guards a
 specific way it could break on stage.
 
 The design decision we would defend hardest is that **the reasoning is the
@@ -231,7 +231,7 @@ Every number above is reproducible:
 | 0.173 noise vs 0.563 real change | 6 reads of one unchanged frame vs pairwise across the demo scenes |
 | 82,058 seconds | the actual rate limit response from Spotify |
 | 14 searches to 1 | measured before and after, counting requests on one decision |
-| 222 tests | `pytest tests -q` |
+| 238 tests | `pytest tests -q` |
 | confidence 0.10 refusal | live run against unreadable frames |
 
 Still missing before submission:

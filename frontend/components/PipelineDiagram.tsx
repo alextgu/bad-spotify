@@ -15,7 +15,7 @@ import { steps } from "@/lib/brand";
  *
  * Inline SVG, no dependency, no runtime. One viewBox that scales to whatever
  * width the container gives it — `SectionProduct` wraps this in `min-w-diagram`
- * and `overflow-x-auto`, so below ~700px it scrolls sideways rather than
+ * and `overflow-x-auto`, so below ~900px it scrolls sideways rather than
  * shrinking the type past legibility.
  *
  * Colour follows the tokens' stated meanings, so the diagram doesn't invent a
@@ -27,8 +27,8 @@ import { steps } from "@/lib/brand";
  * the constant — every connector is computed from them, so nothing drifts.
  */
 
-const NODE_W = 132;
-const NODE_H = 64;
+const NODE_W = 150;
+const NODE_H = 78;
 const GAP = 40;
 /** The 04 -> 05 stretch is wide because the strategy lanes live in it. */
 const FAN_GAP = 330;
@@ -95,11 +95,11 @@ export default function PipelineDiagram() {
     >
       <title id="loop-title">The loop, as a diagram</title>
       <desc id="loop-desc">
-        Six steps in sequence: {steps.map((s) => s.title).join(", ")}. If
-        nothing has changed, step two returns to step one without calling a
-        model. Between Invert and Choose, six strategies run at once and a
-        judge picks one. After Commit, the loop returns to Look, about every
-        five seconds.
+        Six steps in sequence:{" "}
+        {steps.map((s) => `${s.title} (${s.mech})`).join(", ")}. If nothing has
+        changed, step two returns to step one without calling a model. Between
+        Invert and Choose, six strategies run at once and a judge picks one.
+        After Commit, the loop returns to Look, about every five seconds.
       </desc>
 
       <defs>
@@ -236,17 +236,26 @@ export default function PipelineDiagram() {
           />
           <text
             x={X[i] + 16}
-            y={TOP + 24}
+            y={TOP + 22}
             className={`${accent(i)} font-mono text-[11px]`}
           >
             {s.n}
           </text>
           <text
             x={X[i] + 16}
-            y={TOP + 46}
-            className="fill-ink-primary text-[15px] font-medium"
+            y={TOP + 44}
+            className="fill-ink-primary text-[16px] font-medium"
           >
             {s.title}
+          </text>
+          {/* What the step actually is. Without this the drawing is six
+              generic verbs that would caption anyone's pipeline. */}
+          <text
+            x={X[i] + 16}
+            y={TOP + 62}
+            className="fill-ink-muted font-mono text-[10.5px]"
+          >
+            {s.mech}
           </text>
         </g>
       ))}
