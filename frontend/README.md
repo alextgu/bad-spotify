@@ -1,5 +1,22 @@
 # Slopify — presentation site
 
+## Try It inputs
+
+The launch page presents both routes without pretending they are the same:
+
+- **Any video** lists the three bundled samples immediately and can analyze an
+  upload against the local Python agent.
+- **Meta glasses · live** explains that DAT runs in a native companion and
+  checks the local Wearables API v1 readiness. The browser never asks for or
+  claims access to the glasses camera.
+
+The Meta explanation is compatible with static hosting. Its readiness check is
+for the locally served site: browsers can block an HTTPS page from reaching an
+HTTP service on a private address even though the capability response permits
+cross-origin reads. On the hosted page, use the documented `curl` check instead.
+The native companion, not this site, sends frames. See
+`../integrations/meta-dat/README.md` for setup.
+
 ## Analyze an uploaded video
 
 Start the Python API with `python run.py --serve`. Then run this frontend with

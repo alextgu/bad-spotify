@@ -79,7 +79,8 @@ apart within a day.
 | `STATUS.md` | **state**: Done / Built-unproven / Not started, and how each was proven | explanations |
 
 Plus one README beside each part that ships on its own: `frontend/`,
-`src/videofeed/`, `scripts/io/`. Those stay with their code.
+`src/videofeed/`, `scripts/io/`, `integrations/meta-dat/`. Those stay with
+their code.
 
 ---
 
@@ -88,7 +89,7 @@ Plus one README beside each part that ships on its own: `frontend/`,
 Every one of these was run on 14 Aug 2026 and did what it says.
 
 ```bash
-# tests — 215 pass
+# tests — 228 pass
 source .venv/bin/activate && python -m pytest tests/ -q
 # on Windows: .venv\Scripts\python.exe -m pytest tests -q
 
@@ -117,7 +118,7 @@ cd frontend && npx tsc --noEmit && npm run build
 `pytest` and `gradio` are in `requirements.txt`. `ffmpeg` on PATH is needed for
 video audio; without it the sampler runs vision-only rather than failing.
 
-### Test inventory (215, verified by `--collect-only`)
+### Test inventory (228, verified by `--collect-only`)
 
 | File | Count | Guards |
 |---|---|---|
@@ -138,6 +139,7 @@ video audio; without it the sampler runs vision-only rather than failing.
 | `tests/test_video_and_session.py` | 7 | video-as-live and the recorded session format |
 | `tests/test_videofeed.py` | 17 | sampling a real generated mp4: cadence, triggers, rate limiting, sinks |
 | `tests/test_voice_lines.py` | 26 | voice-line selection, startup behavior, renderer/site agreement |
+| `tests/test_wearables_api.py` | 13 | Meta bearer, metadata, session restarts, ordering, size limits, CORS, backpressure |
 
 ---
 
@@ -194,7 +196,8 @@ scripts/io/*.py       one step each, JSON in and out, pipeable.
 
 | Path | What is actually in it |
 |---|---|
-| `src/badspotify/capture/` | `base` (Observation + factory), `gate` (change gate), `replay`, `video`, `webcam`, `glasses` (stub) |
+| `src/badspotify/capture/` | `base` (Observation + factory), `gate` (change gate), `replay`, `video`, `webcam`, `glasses` (legacy headless receiver) |
+| `src/badspotify/wearables/` | Wearables API v1: authenticated, ordered Meta companion frames into `graph.tick` |
 | `src/badspotify/perceive/` | `scene` (mock + Gemini + Hugging Face perceivers, `scene_from_text`), `audio_features` (librosa) |
 | `src/badspotify/music/` | `vibe` (reflection, taboo rules), `corpus`, `discover`, six strategies |
 | `src/badspotify/agents/` | `graph` (LangGraph, two entry points), `judge` (mock + Gemini) |
@@ -208,6 +211,7 @@ scripts/io/*.py       one step each, JSON in and out, pipeable.
 | `src/badspotify/log.py` | `notice()` → stderr. See the stdout trap below |
 | `src/videofeed/` | standalone sampler: cadence + triggers, audio window, handoff stub |
 | `frontend/` | Next.js site. Two routes: `/` and `/demo` |
+| `integrations/meta-dat/` | Kotlin transport plus Android DAT 0.9 companion hook |
 
 **LangGraph, both entry points** (`agents/graph.py`):
 
@@ -249,7 +253,7 @@ concurrently and a judge picks between them.
 Before you say you're done:
 
 ```bash
-pytest tests/ -q                      # all 215, not just yours
+pytest tests/ -q                      # all 228, not just yours
 python run.py --ticks 6 --no-hud      # the loop still runs on mocks
 ```
 

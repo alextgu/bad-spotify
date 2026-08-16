@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ClipPicker from "@/components/ClipPicker";
 import Label from "@/components/Label";
+import MetaGlassesSetup from "@/components/MetaGlassesSetup";
 import { AnalyzeError, analyze, durationOf } from "@/lib/analyze";
 import { cueAt, cuesFor, cuesFromSession, type Cue } from "@/lib/cues";
 import { samples, type Sample } from "@/lib/samples";
@@ -90,6 +91,7 @@ export default function SectionTryIt() {
    * screen you pass in one gesture. Started, it grows to four and takes them.
    */
   const [started, setStarted] = useState(false);
+  const [inputMode, setInputMode] = useState<"video" | "meta">("video");
 
   const [picking, setPicking] = useState(false);
   const [clip, setClip] = useState<Sample>(samples[0]);
@@ -286,7 +288,7 @@ export default function SectionTryIt() {
       <section
         ref={root}
         id="try"
-        className="flex h-svh flex-col justify-center overflow-hidden bg-bone px-gutter"
+        className="flex min-h-svh flex-col bg-bone px-gutter py-16 lg:h-svh lg:justify-center lg:overflow-hidden lg:py-0"
       >
         <div className="mx-auto w-full max-w-content text-center">
           <Label tone="offset">Try it</Label>
@@ -297,97 +299,113 @@ export default function SectionTryIt() {
             {tryIt.body}
           </p>
 
-          <div className="mx-auto mt-rest max-w-[48rem] space-y-3 text-left">
-            {samples.map((sample) => (
+          <div
+            className="mx-auto mt-block inline-flex rounded-full border border-ink/15 bg-paper p-1"
+            aria-label="Choose an input"
+          >
+            {([
+              ["video", "Any video"],
+              ["meta", "Meta glasses · live"],
+            ] as const).map(([mode, label]) => (
               <button
-                key={sample.id}
-                data-sample-card
+                key={mode}
                 type="button"
-                onClick={(event) =>
-                  choose(sample, event.currentTarget.getBoundingClientRect())
-                }
-                className="group grid w-full overflow-hidden rounded-card border border-hairline bg-paper text-left
-                           transition-[transform,border-color] duration-interaction ease-calm
-                           hover:-translate-y-1 hover:border-ink focus-visible:-translate-y-1
-                           sm:grid-cols-[minmax(220px,0.9fr)_1.1fr]"
+                onClick={() => setInputMode(mode)}
+                aria-pressed={inputMode === mode}
+                className={`rounded-full px-5 py-2.5 font-mono text-label uppercase transition
+                  ${inputMode === mode ? "bg-ink text-paper" : "text-graphite hover:text-ink"}`}
               >
-                <div className="relative aspect-[16/10] overflow-hidden bg-ink sm:aspect-auto">
-                  <video
-                    className="h-full w-full object-cover"
-                    src={sample.src}
-                    muted
-                    playsInline
-                    preload="metadata"
-                  />
-                  <span className="absolute bottom-3 right-3">
-                    <Label className="!text-paper/70">{sample.length}</Label>
-                  </span>
-                </div>
-
-                <div className="flex flex-col justify-center p-5 sm:p-6">
-                  <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="font-display text-title">{sample.title}</h3>
-                    {sample.placeholder && (
-                      <Label className="shrink-0 !text-graphite/70">
-                        placeholder
-                      </Label>
-                    )}
-                  </div>
-                  <p className="mt-2 text-caption text-graphite">{sample.blurb}</p>
-                </div>
+                {label}
               </button>
             ))}
           </div>
 
-          {/* Wired now, and wired honestly. The rule that kept this disabled
-              still holds -- a control that silently does the OTHER thing is
-              worse than one plainly switched off -- so it never falls back to
-              the sample. It either shows your footage with your reasoning
-              beside it, or it says exactly why it cannot.
-
-              The row wrapper is what the merge lost: the upload control used
-              to sit in a flex row beside a "use a sample" button, and when the
-              chooser became a list of cards the button survived while its
-              container did not. */}
-          <div className="mt-rest flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => file.current?.click()}
-              disabled={busy}
-              className="rounded-full border border-ink/25 px-8 py-4 font-mono
-                         text-label uppercase transition hover:border-ink/60
-                         disabled:cursor-wait disabled:text-graphite/60"
-            >
-              {busy ? "Watching it…" : "Upload your own"}
-            </button>
-            <input
-              ref={file}
-              type="file"
-              accept="video/*"
-              hidden
-              onChange={(e) => {
-                const chosen = e.target.files?.[0];
-                e.target.value = "";
-                if (chosen) void useOwnClip(chosen);
-              }}
-            />
-          </div>
-
-          {problem ? (
-            <p className="mt-block max-w-prose font-mono text-label uppercase text-graphite">
-              {problem.what}
-              {problem.hint && (
-                <span className="mt-2 block normal-case tracking-normal text-graphite/70">
-                  {problem.hint}
-                </span>
-              )}
-            </p>
+          {inputMode === "meta" ? (
+            <MetaGlassesSetup />
           ) : (
-            <p className="mt-block font-mono text-label uppercase text-graphite/70">
-              {busy
-                ? "Reading your clip — one model call per moment it notices"
-                : "Uploading needs the agent running on this machine"}
-            </p>
+            <>
+              <div className="mx-auto mt-block grid max-w-[72rem] gap-3 text-left lg:grid-cols-3">
+                {samples.map((sample) => (
+                  <button
+                    key={sample.id}
+                    data-sample-card
+                    type="button"
+                    onClick={(event) =>
+                      choose(sample, event.currentTarget.getBoundingClientRect())
+                    }
+                    className="group flex w-full flex-col overflow-hidden rounded-card border border-hairline bg-paper text-left
+                               transition-[transform,border-color] duration-interaction ease-calm
+                               hover:-translate-y-1 hover:border-ink focus-visible:-translate-y-1"
+                  >
+                    <div className="relative aspect-[16/9] overflow-hidden bg-ink">
+                      <video
+                        className="h-full w-full object-cover"
+                        src={sample.src}
+                        muted
+                        playsInline
+                        preload="metadata"
+                      />
+                      <span className="absolute bottom-3 right-3">
+                        <Label className="!text-paper/70">{sample.length}</Label>
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col justify-center p-5 sm:p-6">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <h3 className="font-display text-title">{sample.title}</h3>
+                        {sample.placeholder && (
+                          <Label className="shrink-0 !text-graphite/70">
+                            placeholder
+                          </Label>
+                        )}
+                      </div>
+                      <p className="mt-2 text-caption text-graphite">{sample.blurb}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-block flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => file.current?.click()}
+                  disabled={busy}
+                  className="rounded-full border border-ink/25 px-8 py-4 font-mono
+                             text-label uppercase transition hover:border-ink/60
+                             disabled:cursor-wait disabled:text-graphite/60"
+                >
+                  {busy ? "Watching it…" : "Upload your own"}
+                </button>
+                <input
+                  ref={file}
+                  type="file"
+                  accept="video/*"
+                  hidden
+                  onChange={(e) => {
+                    const chosen = e.target.files?.[0];
+                    e.target.value = "";
+                    if (chosen) void useOwnClip(chosen);
+                  }}
+                />
+              </div>
+
+              {problem ? (
+                <p className="mt-block max-w-prose font-mono text-label uppercase text-graphite">
+                  {problem.what}
+                  {problem.hint && (
+                    <span className="mt-2 block normal-case tracking-normal text-graphite/70">
+                      {problem.hint}
+                    </span>
+                  )}
+                </p>
+              ) : (
+                <p className="mt-2 font-mono text-label uppercase text-graphite/70">
+                  {busy
+                    ? "Reading your clip — one model call per moment it notices"
+                    : "Uploading needs the agent running on this machine"}
+                </p>
+              )}
+            </>
           )}
         </div>
 
