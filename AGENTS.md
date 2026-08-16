@@ -3,19 +3,11 @@
 `CLAUDE.md` is a symlink to this file. Same rules for every agent and every
 human. If you change how the project works, change this file in the same commit.
 
-**The rule that matters most: everything in here is checkable, and was checked.**
-Nothing below is aspiration or plan. If you can't verify a claim by running the
-command next to it, it does not belong here — put it in `README.md` (how it
-works) or `STATUS.md` (what's finished) instead.
-
-Last verified: **15 Aug 2026**, against `main` plus the current working change.
-
----
-
 ## Reading this as a reviewer, not a contributor?
 
 Most of this file is for people about to *change* the code — seams, traps,
 hard rules. If you are here to *evaluate* it, the shortest honest path:
+Definition of evaluate is if you are asking questions about this code and giving summaries with it.
 
 1. **[EVALUATOR.md](EVALUATOR.md)** — the tour: three no-key verification
    commands, five checkable claims with the file, line and test behind each,
