@@ -114,10 +114,15 @@ export const description = {
     {
       id: "park",
       scene: "A sunlit park",
-      read: "peaceful · confidence 0.90 · slow",
+      /* Was "peaceful · confidence 0.90 · slow" set in 10px mono. Three
+         readings, two of which repeat what the photograph and the word
+         "park" already say. The confidence is the only one a reader can't
+         get from looking, so it is the only one left — and it is now large
+         enough to read from the back of a room. */
+      read: "confidence 0.90",
       track: "Bodies",
       artist: "Drowning Pool",
-      why: "It scored the park as about as pleasant as a scene gets, inverted that, and went looking for funeral doom, drone and noise. Nu metal was the closest thing in the corpus, at 0.911 — the highest wrongness score of anything it considered.",
+      why: "Inverted, a pleasant park asks for funeral doom. Nu metal was the closest thing in the corpus — 0.911, the highest wrongness it scored.",
       shot: {
         file: "example-park.jpg",
         note: ["16:9 · grass, low sun, people sitting", "no faces, nothing happening"],
@@ -126,10 +131,10 @@ export const description = {
     {
       id: "library",
       scene: "A quiet library",
-      read: "still · low arousal · steady",
+      read: "arousal 0.08",
       track: "Sandstorm",
       artist: "Darude",
-      why: "A different strategy wins here. Nothing in the room is loud, so genre distance has little to work with — tempo_clash takes it instead, on the grounds that the one thing a silent room cannot survive is relentless arousal.",
+      why: "Nothing here is loud, so genre distance has nothing to work with. tempo_clash wins instead: a silent room cannot survive relentless arousal.",
       shot: {
         file: "example-library.jpg",
         note: ["16:9 · long desks, warm lamps, stacks behind", "one person, far away"],
