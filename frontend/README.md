@@ -3,8 +3,9 @@
 ## Analyze an uploaded video
 
 Start the Python API with `python run.py --serve`. Then run this frontend with
-`npm run dev` and open `/demo`. The page posts the selected video to
-`http://127.0.0.1:8420/api/analyze-video` and displays the returned session.
+`npm run dev`. Every upload link on `/` hands off to `/demo`; that route posts
+the selected video to `http://127.0.0.1:8420/api/analyze-video` and displays
+the returned session.
 
 If `player.backend` is `spotify`, `/demo` also checks the configured account and
 device and displays **Spotify playback connected** when both are reachable.
@@ -99,8 +100,9 @@ wireframe. Everything else about how the page looks is open.
 ## What's left
 
 Everything this list used to hold is built: the landing page is seven finished
-screens, upload works against the local agent (and says exactly why when the
-agent isn't running, rather than falling back to the sample), and the try-it
+screens, every upload affordance hands off to `/demo`, upload there works
+against the local agent (and says exactly why when the agent isn't running),
+and the try-it
 panel shows the losing candidates with their scores. What actually remains:
 
 - **The hero and demo films.** Both are labelled placeholder slots in

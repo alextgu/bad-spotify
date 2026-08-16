@@ -276,7 +276,7 @@ export default function DemoPage() {
           </div>
         </div>
 
-        <div className="pointer-events-auto mx-6 mb-16">
+        <div className="pointer-events-auto mx-6 mb-24">
           {videoBroken && (
             <p className="mb-2 text-sm text-ink-muted">
               This browser could not play the video codec. The mood timeline is

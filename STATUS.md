@@ -142,12 +142,16 @@ aren't declared on the TypedDict.
 
 **The local video upload path is built.** FastAPI accepts a bounded temporary
 video, samples it through the current video source, and returns a mood and music
-timeline to `/demo`. The page checks Spotify without starting sound, starts only
-corpus tracks at timeline changes, and pauses Spotify with the video. Stable mood
+timeline to `/demo`. Both upload controls on the launch page link there, so the
+live upload and playback path has one owner. The page checks Spotify without
+starting sound, starts only corpus tracks at timeline changes, and pauses Spotify
+with the video. Stable mood
 samples keep the current song choice. A new
 choice needs a different mood and enough vibe distance, and carries a two-second
 crossfade marker. Six focused tests pass, all 225 project tests pass, and the
-frontend type check and production build pass. It has been tried with rain footage.
+frontend type check and production build pass. A local HTTP check returned 200 for
+both `/` and `/demo`, and the rendered launch page contained the `/demo` link. It
+has been tried with rain footage.
 
 ## Built, but nobody has run it for real
 
