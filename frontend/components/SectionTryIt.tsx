@@ -365,7 +365,12 @@ export default function SectionTryIt() {
           The video is the subject of this screen; the previous split gave it
           barely half and then centred the result, which made it look like an
           illustration of a video rather than one. */}
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[2.05fr_1fr]">
+      {/* The reasoning column got wider when it gained a player. At 1fr the
+          log lines and the "looking for" list each wrapped to two or three
+          rows, and every wrapped row is vertical space the player now needs.
+          Widening the column is cheaper than deleting evidence: same content,
+          fewer lines, and the video is still the larger half. */}
+      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[1.72fr_1fr]">
         <div
           ref={stage}
           className="relative min-h-0 overflow-hidden rounded-card bg-ink"
@@ -413,28 +418,21 @@ export default function SectionTryIt() {
               {cue.tempo} · {cue.meter}
             </p>
 
-            {/* The palette pulled out of the frame. */}
-            <div className="mt-3 flex gap-1.5">
-              {cue.palette.map((colour) => (
-                <span
-                  key={colour}
-                  className="h-6 w-6 rounded-sm border border-hairline"
-                  style={{ backgroundColor: colour }}
-                  title={colour}
-                />
-              ))}
-            </div>
+            {/* The palette used to be four 24px swatches here. It was the
+                least informative thing in a column that now has to fit a
+                player as well, and the colours are already the loudest fact
+                about the frame sitting next to it. Still on the cue and still
+                in the session JSON if it earns its way back. */}
           </div>
 
-          {/* What it was hunting for, straight out of the inversion. */}
-          {cue.lookingFor.length > 0 && (
-            <div className="shrink-0 border-t border-hairline px-4 py-3">
-              <Label>Looking for</Label>
-              <p className="mt-1.5 font-mono text-[0.6875rem] leading-relaxed tracking-normal text-graphite">
-                {cue.lookingFor.join(" · ")}
-              </p>
-            </div>
-          )}
+          {/* The "Looking for" block was here: the genres the inversion went
+              hunting for, as a 91px strip of mono text. It said the same thing
+              as the log line directly beneath it — `INVERT - looking for punk,
+              metal, dance` — and cost the decision log and the losing
+              candidates almost all of their height once the player arrived.
+              The panel had four stacked blocks fighting over 470px; it has
+              three. `cue.lookingFor` is untouched and still drives that log
+              line. */}
 
           {/* The decision log, newest first, exactly as the HUD prints it. */}
           {/* `overflow-x-hidden` as well as y: setting only `overflow-y`
@@ -494,8 +492,50 @@ export default function SectionTryIt() {
           <div className="shrink-0 border-t border-hairline bg-bone p-4">
             <Label>Now playing</Label>
             <p className="mt-2 font-display text-title leading-tight">{cue.track}</p>
-            <p className="text-caption text-graphite">{cue.artist}</p>
+            {/* The artist line is dropped when the embed is up: Spotify's
+                player prints the artist under the title already, and two of
+                them in 80px of each other reads as a card inside a card. It
+                stays when there is no embed, because then nothing else says
+                who made this. */}
+            {!cue.spotifyId && (
+              <p className="text-caption text-graphite">{cue.artist}</p>
+            )}
             <p className="mt-2 text-caption italic text-graphite">{cue.why}</p>
+
+            {/* ------------------------------------------------ the record --
+                Reading "Bodies — Drowning Pool" and hearing it are different
+                arguments, and the second one is the product. The embed is
+                Spotify's own player: their licence, their artwork, their
+                stream, and no audio file of ours on the server.
+
+                `key` on the id, not just `src`. Changing an iframe's src
+                navigates it, and a cross-origin frame mid-navigation keeps
+                playing the previous track for a beat — so scrolling to the
+                next moment would leave the last song audible under the new
+                one's title. Keying it makes React discard the frame and mount
+                a fresh one, which stops the sound with the moment it belonged
+                to.
+
+                It never autoplays. Browsers block it and Spotify requires a
+                gesture, which is the behaviour we want anyway: a page that
+                starts making noise while you scroll is a page people close.
+
+                No player at all when the track was never resolved to Spotify
+                — `cue.spotifyId` is null and this collapses rather than
+                shipping an embed that 404s. */}
+            {cue.spotifyId && (
+              <iframe
+                key={cue.spotifyId}
+                title={`${cue.track} by ${cue.artist} on Spotify`}
+                src={`https://open.spotify.com/embed/track/${cue.spotifyId}?utm_source=generator`}
+                width="100%"
+                height="80"
+                loading="lazy"
+                frameBorder="0"
+                allow="clipboard-write; encrypted-media; picture-in-picture"
+                className="mt-3 rounded-card"
+              />
+            )}
           </div>
         </div>
       </div>

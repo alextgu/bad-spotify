@@ -189,7 +189,13 @@ export default function SectionDescription() {
         </div>
 
         <div>
-          <h2 className="max-w-[18ch] font-display text-headline">
+          {/* The statement is the section's whole claim and was set at
+              `text-headline`, the same size as every other section heading —
+              which made it a heading rather than the sentence the page is
+              built around. It gets `text-display` and the column, and the
+              measure widens with it so it still breaks in three lines rather
+              than five. */}
+          <h2 className="max-w-[20ch] font-display text-display">
             {description.statement}
           </h2>
 
@@ -198,13 +204,13 @@ export default function SectionDescription() {
               paragraphs and four dividers made a specification sheet out of
               what should be a single readable idea. The step label carries the
               sequence, so the horizontal rules were saying it twice. */}
-          <ol className="mt-rest space-y-5">
+          <ol className="mt-rest space-y-6">
             {description.chain.map((link) => (
-              <li key={link.step} className="flex items-baseline gap-5">
-                <Label tone="offset" className="w-14 shrink-0">
+              <li key={link.step} className="flex items-baseline gap-6">
+                <Label tone="offset" className="w-16 shrink-0">
                   {link.step}
                 </Label>
-                <p className="font-display text-[clamp(1.5rem,2.3vw,2.1rem)] font-semibold leading-tight tracking-[-0.03em]">
+                <p className="font-display text-[clamp(1.75rem,2.8vw,2.6rem)] font-semibold leading-tight tracking-[-0.03em]">
                   {link.title}
                 </p>
               </li>

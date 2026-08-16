@@ -21,7 +21,7 @@ import SectionTryIt from "@/components/SectionTryIt";
  *   4  Try it        hand it over; the whole screen is one link
  *   5  Pipeline      a closer look at the actual mechanism
  *   6  Results       the numbers, then every decision it has made
- *   7  FAQ           the awkward questions, and the end of the page
+ *   7  FAQ           the questions, and the end of the page
  *
  * This order is the wireframe and is not open. The one-viewport rule is not
  * open either, and it is enforced by `Screen` rather than by good intentions:

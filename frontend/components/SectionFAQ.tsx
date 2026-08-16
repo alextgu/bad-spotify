@@ -9,7 +9,7 @@ import { brand } from "@/lib/brand";
 import { faq, footer } from "@/lib/site";
 
 /**
- * 7 — the awkward questions, and the end of the page.
+ * 7 — the questions, and the end of the page.
  *
  * One controlled accordion keeps at most one answer open. The button and
  * region attributes preserve disclosure semantics while a grid-row transition
@@ -27,9 +27,11 @@ export default function SectionFAQ() {
   return (
     <Screen id="faq">
       <Reveal className="mx-auto w-full max-w-content">
-        <Label className="block">The awkward questions</Label>
-
-        <div className="mt-rest">
+        {/* The eyebrow is gone. "The awkward questions" told the reader how to
+            feel about a list they had not read yet, and it undersold it — the
+            answers are the straightest writing on the page. The questions are
+            their own heading. */}
+        <div>
           {faq.map((item, index) => {
             const isOpen = openIndex === index;
             const buttonId = "faq-question-" + index;

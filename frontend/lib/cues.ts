@@ -1,4 +1,5 @@
 import type { Session } from "@/lib/types";
+import { spotifyIdFor } from "@/lib/spotify-ids";
 import { momentTime, stamp } from "@/lib/types";
 
 /** One point on the timeline: something the agent did, at a time in the clip. */
@@ -18,6 +19,16 @@ export interface Cue {
   log: string[];
   considered: { strategy: string; title: string; artist: string; score: number }[];
   lookingFor: string[];
+  /**
+   * The Spotify track id, so the panel can play the thing it is describing.
+   *
+   * Resolved from the session's own `played.track_id` through the same map the
+   * agent resolves against, NOT by searching for the title — a search would
+   * happily return a karaoke cover and the panel would be quietly lying about
+   * what it chose. Null when a track was never resolved to Spotify, and the
+   * panel simply shows no player rather than an embed that 404s.
+   */
+  spotifyId: string | null;
 }
 
 const fallbackCue: Cue = {
@@ -36,6 +47,7 @@ const fallbackCue: Cue = {
   log: ["HOLD - no recorded decision"],
   considered: [],
   lookingFor: [],
+  spotifyId: null,
 };
 
 function buildCues(session: Session, durationS: number): Cue[] {
@@ -87,6 +99,7 @@ function buildCues(session: Session, durationS: number): Cue[] {
         ],
         considered,
         lookingFor,
+        spotifyId: spotifyIdFor(played.track_id),
       },
     ];
   });
