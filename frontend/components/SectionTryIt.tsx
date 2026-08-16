@@ -282,11 +282,12 @@ export default function SectionTryIt() {
                 onClick={(event) =>
                   choose(sample, event.currentTarget.getBoundingClientRect())
                 }
-                className="group flex w-full flex-col overflow-hidden rounded-card border border-hairline bg-paper text-left
+                className="group grid w-full overflow-hidden rounded-card border border-hairline bg-paper text-left
                            transition-[transform,border-color] duration-interaction ease-calm
-                           hover:-translate-y-1 hover:border-ink focus-visible:-translate-y-1"
+                           hover:-translate-y-1 hover:border-ink focus-visible:-translate-y-1
+                           sm:grid-cols-[minmax(220px,0.9fr)_1.1fr]"
               >
-                <div className="relative aspect-[16/9] overflow-hidden bg-ink">
+                <div className="relative aspect-[16/10] overflow-hidden bg-ink sm:aspect-auto">
                   <video
                     className="h-full w-full object-cover"
                     src={sample.src}
@@ -303,7 +304,9 @@ export default function SectionTryIt() {
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-display text-title">{sample.title}</h3>
                     {sample.placeholder && (
-                      <Label className="shrink-0 !text-graphite/70">placeholder</Label>
+                      <Label className="shrink-0 !text-graphite/70">
+                        placeholder
+                      </Label>
                     )}
                   </div>
                   <p className="mt-2 text-caption text-graphite">{sample.blurb}</p>

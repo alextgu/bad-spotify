@@ -2,11 +2,11 @@ import { defineConfig } from "playwright/test";
 
 export default defineConfig({
   testDir: "./tests",
-  use: { baseURL: "http://127.0.0.1:3417" },
+  use: { baseURL: "http://127.0.0.1:3000" },
   webServer: {
-    command: "npm run dev -- --hostname 127.0.0.1 --port 3417",
-    url: "http://127.0.0.1:3417",
-    reuseExistingServer: false,
+    command: "npm run dev -- --hostname 127.0.0.1 --port 3000",
+    url: "http://127.0.0.1:3000",
+    reuseExistingServer: true,
     timeout: 120_000,
   },
 });

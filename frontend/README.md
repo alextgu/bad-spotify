@@ -47,7 +47,9 @@ npm run dev          # http://localhost:3000
 
 The launch-page photo and film slots are mapped at runtime in
 `public/media.json`. Local photos live in `public/images/`; the current park
-and library examples use `forest.jpg` and `library.jpg` there.
+and library examples use `forest.jpg` and `library.jpg` there. The playable
+demo film lives in `public/videos/` and is tracked with Git LFS; after a clone,
+run `git lfs pull` if that MP4 was not fetched automatically.
 
 ## How it connects to the agent
 
@@ -124,8 +126,8 @@ against the local agent (and says exactly why when the agent isn't running),
 and the try-it
 panel shows the losing candidates with their scores. What actually remains:
 
-- **The hero and demo films.** Both are labelled placeholder slots in
-  `lib/site.ts`; the shoot notes are written into the slots themselves.
+- **The hero film.** It remains a labelled placeholder slot in `lib/site.ts`;
+  the full-screen demo film is present and wired through `public/media.json`.
 - **A 375px pass.** The pins and the discrete scroll switch off below 1000px
   and the stacked fallbacks exist, but nobody has verified a phone visually.
 

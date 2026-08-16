@@ -41,7 +41,7 @@ export default function SectionDemo() {
       <div
         className={[
           "pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-5",
-          "px-gutter pb-rest text-paper transition-opacity duration-interaction ease-calm",
+          "px-gutter pb-24 text-paper transition-opacity duration-interaction ease-calm",
           "lg:flex-row lg:items-end lg:justify-between",
           isPlaying ? "opacity-0" : "opacity-100",
         ].join(" ")}

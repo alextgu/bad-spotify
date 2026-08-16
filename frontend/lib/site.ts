@@ -224,7 +224,7 @@ export const results = {
    */
   metrics: [
     { value: "1.17", unit: "s", label: "Scene read, median" },
-    { value: "225", unit: "", label: "Tests" },
+    { value: "238", unit: "", label: "Tests" },
     { value: "47", unit: "", label: "Songs, by hand" },
     { value: "0", unit: "", label: "Images stored" },
   ],
@@ -278,7 +278,7 @@ export const faq = [
   {
     q: "What's real and what isn't?",
     callout: "Local Spotify setup required: copy .env.example to .env, add SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET from your Spotify Developer Dashboard, register the exact SPOTIFY_REDIRECT_URI there, then run python scripts/spotify_setup.py.",
-    a: "Real: Gemini perception produced 29 setting-correct reads across three filmed clips, the site replays six recorded decisions with candidates and scores, and a Premium Spotify setup resolved 46 of 47 tracks and played Sandstorm through a real speaker. Still unproven: the live Gemini judge, glasses capture beyond its stub, and the upload-to-synchronized-playback flow beyond automated checks.",
+    a: "Real: Gemini perception produced 29 setting-correct reads across three filmed clips, the site replays six recorded decisions with candidates and scores, and a Premium Spotify setup resolved 46 of 47 tracks and played Sandstorm through a real speaker. Still unproven: the live Gemini judge, the Meta companion on registered physical glasses, and the upload-to-synchronized-playback flow beyond automated checks.",
   },
   {
     q: "Isn't this one prompt in a trenchcoat?",

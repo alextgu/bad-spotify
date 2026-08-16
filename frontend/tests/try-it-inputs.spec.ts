@@ -1,22 +1,22 @@
 import { expect, test } from "playwright/test";
 
-test("Try It stays video-only and links to the separate glasses surface", async ({ page }) => {
+test("Try It preserves the three-sample chooser and prominent upload link", async ({ page }) => {
   await page.goto("/#try");
 
+  await expect(page.locator("[data-sample-card]")).toHaveCount(3);
   await expect(page.getByRole("button", { name: /Library → Birthday → Gym/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Upload your own" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Open Meta glasses live/i })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: /Upload your own video/i })).toHaveAttribute(
     "href",
-    "/glasses",
+    "/demo",
   );
   await expect(page.getByRole("button", { name: "Check connection" })).toHaveCount(0);
 });
-
 test("Meta connection check uses the wearable capabilities endpoint", async ({ page }) => {
   await page.route("**/api/wearables/v1/capabilities", async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({
         service: "slopify",
         protocol_version: 1,
@@ -25,7 +25,7 @@ test("Meta connection check uses the wearable capabilities endpoint", async ({ p
       }),
     });
   });
-  await page.goto("/glasses");
+  await page.goto("/glasses", { waitUntil: "networkidle" });
 
   await page.getByRole("button", { name: "Check connection" }).click();
 
@@ -48,7 +48,7 @@ test("glasses surface never mounts video samples or upload controls", async ({ p
 test("video inputs remain reachable on a phone-sized page", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/#try");
-  const upload = page.getByRole("button", { name: "Upload your own" });
+  const upload = page.getByRole("link", { name: /Upload your own video/i });
   const chooser = page.locator("#try");
 
   expect(await chooser.evaluate((element) => getComputedStyle(element).overflowY)).not.toBe(
