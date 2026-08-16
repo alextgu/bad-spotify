@@ -141,14 +141,18 @@ export const description = {
 /* -------------------------------------------------------------- 3 · demo -- */
 export const demo = {
   film: {
-    file: "demo.mp4",
+    file: "example_of_music_determination_2.mp4",
     note: [
-      "full bleed · 21:9 · unedited screen capture",
-      "phone in hand, song audibly changing",
-      "keep under 60s",
+      "full bleed pipeline demonstration",
+      "scene read, opposite genre mapping, and selected track",
     ],
   } satisfies Shot,
-  caption: { left: "Live capture", right: "vision read: 1.17s median" },
+  title: "The scene becomes its musical opposite.",
+  body: "Footage from Meta glasses—or a video uploaded in the web app—enters the same pipeline. It reads the setting, maps its musical associations, and selects the genre and track that oppose the moment.",
+  caption: {
+    left: "Pipeline playback",
+    right: "video input → opposite genre → track",
+  },
 };
 
 /* ------------------------------------------------------------ 4 · try it -- */
@@ -200,7 +204,7 @@ export const results = {
    */
   metrics: [
     { value: "1.17", unit: "s", label: "Scene read, median" },
-    { value: "222", unit: "", label: "Tests" },
+    { value: "225", unit: "", label: "Tests" },
     { value: "47", unit: "", label: "Songs, by hand" },
     { value: "0", unit: "", label: "Images stored" },
   ],
@@ -237,15 +241,15 @@ export const results = {
 export const faq = [
   {
     q: "Is it watching me all day?",
-    a: "It takes one frame about every five seconds, gets a sentence back from the model, and discards the image. Nothing is stored — the read it keeps is text like “sunlit public park, people reading on the grass”. Most ticks never reach a model at all: a local change gate drops the frame when the room hasn't moved.",
+    a: "While running, it samples a frame every two seconds. A local change gate skips the model when the scene has not moved; when a read does happen, the image is discarded and only structured text and mood values are kept in the session.",
   },
   {
     q: "Why would anyone want the wrong song?",
-    a: "Because deliberately wrong is the only version you can check. A recommender aiming to be right hides its failures in taste; when the goal is the opposite of the room, every pick is falsifiable — you can see the read, the inversion, and whether it followed. Flip one sign and the same machinery hunts for the best song instead.",
+    a: "Because deliberately wrong is the only version you can check. A recommender aiming to be right can hide its failures in taste; here you can inspect the scene read, the inversion, and whether the choice followed. The same representation could support a best-song mode with the sign flipped, but that mode is a design idea, not implemented code.",
   },
   {
     q: "Doesn't Spotify already do this?",
-    a: "Spotify recommends from listening history. The input here is the physical scene in front of a camera: setting, activity, light, and how confident the read is. Spotify is playback only — their audio-features endpoints closed to new apps in 2024, so scoring runs on our own hand-built corpus of 47 tracks.",
+    a: "Spotify recommends from listening history. Slopify starts with the physical scene: setting, activity, light, and confidence. Spotify is the playback layer; audio features and related recommendation endpoints were restricted for new apps in 2024, so scoring runs in our own five-axis space against 47 hand-built tracks.",
   },
   {
     q: "Why is the logo the opposite?",
@@ -253,11 +257,12 @@ export const faq = [
   },
   {
     q: "What's real and what isn't?",
-    a: "Perception has run live on three filmed clips, and the site replays those recorded sessions with the losing candidates and scores. Unproven: the Spotify player is tested only against a stand-in, and nobody has heard a track from a real speaker yet. Your own upload needs the local agent running, and says so.",
+    callout: "Local Spotify setup required: copy .env.example to .env, add SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET from your Spotify Developer Dashboard, register the exact SPOTIFY_REDIRECT_URI there, then run python scripts/spotify_setup.py.",
+    a: "Real: Gemini perception produced 29 setting-correct reads across three filmed clips, the site replays six recorded decisions with candidates and scores, and a Premium Spotify setup resolved 46 of 47 tracks and played Sandstorm through a real speaker. Still unproven: the live Gemini judge, glasses capture beyond its stub, and the upload-to-synchronized-playback flow beyond automated checks.",
   },
   {
     q: "Isn't this one prompt in a trenchcoat?",
-    a: "The prompt is the cheapest part — two model calls per decision at most. Around it: a change gate that skips perception when nothing moved, six strategies that genuinely disagree about what “wrong” means, a judge that picks between them, and a sampler at temperature 0.20 so one room doesn't produce one answer forever.",
+    a: "The model calls are only the boundaries: one perception read and, when enabled, one optional judge call. Around them are a local change gate, mood inversion, score sampling, and five active strategies that disagree about what wrong means. A sixth catalogue-search strategy is implemented but disabled for the recorded demo to avoid rate-limited picks that cannot play.",
   },
   {
     q: "What broke along the way?",

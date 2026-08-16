@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import Label from "@/components/Label";
+import Reveal from "@/components/Reveal";
 import Screen from "@/components/Screen";
 import { brand } from "@/lib/brand";
 import { faq, footer } from "@/lib/site";
@@ -25,7 +26,7 @@ export default function SectionFAQ() {
 
   return (
     <Screen id="faq">
-      <div className="mx-auto w-full max-w-content">
+      <Reveal className="mx-auto w-full max-w-content">
         <Label className="block">The awkward questions</Label>
 
         <div className="mt-rest">
@@ -74,6 +75,11 @@ export default function SectionFAQ() {
                   ].join(" ")}
                 >
                   <div className="overflow-hidden">
+                    {"callout" in item && item.callout && (
+                      <p className="mb-3 max-w-measure rounded-card border border-offset-ink/25 bg-offset/10 px-4 py-3 text-caption font-medium text-offset-ink">
+                        {item.callout}
+                      </p>
+                    )}
                     <p
                       className={[
                         "max-w-measure pb-4 text-body text-graphite",
@@ -97,7 +103,7 @@ export default function SectionFAQ() {
           </span>
           <Label>{footer.right}</Label>
         </footer>
-      </div>
+      </Reveal>
     </Screen>
   );
 }

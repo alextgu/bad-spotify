@@ -244,7 +244,36 @@ export default function SectionTryIt() {
             {tryIt.body}
           </p>
 
-          <div className="mx-auto mt-rest max-w-[48rem] space-y-3 text-left">
+          <div className="mx-auto mt-block w-full max-w-[48rem] text-left">
+            <Link
+              href={tryIt.action.href}
+              className="group flex w-full items-center justify-between gap-6 rounded-card border border-ink bg-ink px-7 py-5 text-paper
+                         transition-[transform,background-color,border-color] duration-interaction ease-calm
+                         hover:-translate-y-1 hover:border-offset-ink hover:bg-offset-ink
+                         focus-visible:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            >
+              <span>
+                <span className="block font-mono text-label uppercase text-paper/60">
+                  Try it with your footage
+                </span>
+                <span className="mt-1 block font-display text-title">
+                  Upload your own video
+                </span>
+                <span className="mt-1 block text-caption text-paper/70">
+                  Open the demo workspace for analysis and synchronized playback.
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-paper text-title text-ink
+                           transition-transform duration-interaction ease-calm group-hover:translate-x-1"
+              >
+                →
+              </span>
+            </Link>
+          </div>
+
+          <div className="mx-auto mt-block max-w-[48rem] space-y-3 text-left">
             {samples.map((sample) => (
               <button
                 key={sample.id}
@@ -286,19 +315,6 @@ export default function SectionTryIt() {
             ))}
           </div>
 
-          <div className="mt-rest flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href={tryIt.action.href}
-              className="rounded-full border border-ink/25 px-8 py-4 font-mono
-                         text-label uppercase transition hover:border-ink/60"
-            >
-              Upload your own
-            </Link>
-          </div>
-
-          <p className="mt-block font-mono text-label uppercase text-graphite/70">
-            Opens the demo upload workspace with synchronized Spotify playback
-          </p>
         </div>
 
         <ClipPicker

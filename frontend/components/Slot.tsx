@@ -21,9 +21,9 @@ import type { Shot } from "@/lib/site";
  *
  * What changed is where the footage comes from. The film will not exist until
  * after the code is frozen, so the source is read from `public/media.json` at
- * RUNTIME. Putting a YouTube link against `demo.mp4` in that file makes this
- * render the film. No component changes, no rebuild, and the placeholder is
- * still the fallback if the link is empty, wrong, or the file is missing.
+ * RUNTIME. A media URL under the matching key in that file makes this
+ * component render the film. No component changes, no rebuild, and the
+ * placeholder remains the fallback if the URL is empty, wrong, or missing.
  *
  * The key is `shot.file`, which is exactly what the placeholder already prints
  * on screen, so there is nothing to look up: whatever it says it is waiting
@@ -34,10 +34,12 @@ export default function Slot({
   className = "",
   /** Background slots autoplay muted and loop. A film you choose to watch does not. */
   background = true,
+  onPlaybackChange,
 }: {
   shot: Shot;
   className?: string;
   background?: boolean;
+  onPlaybackChange?: (playing: boolean) => void;
 }) {
   const [map, setMap] = useState<Record<string, MediaValue> | null>(null);
 
@@ -91,6 +93,9 @@ export default function Slot({
         loop={loop}
         playsInline
         controls={!autoplay}
+        onPlay={() => onPlaybackChange?.(true)}
+        onPause={() => onPlaybackChange?.(false)}
+        onEnded={() => onPlaybackChange?.(false)}
         className={className}
         data-shot={shot.file}
       />

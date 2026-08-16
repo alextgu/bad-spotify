@@ -61,7 +61,7 @@ export default function Home() {
         </div>
 
         {/* 3 */}
-        <div data-page-transition="wipe">
+        <div data-page-transition="fade">
           <SectionDemo />
         </div>
 
@@ -105,7 +105,7 @@ export default function Home() {
         </div>
 
         {/* 7 — the one screen anybody reads at length. */}
-        <div data-page-transition="wipe">
+        <div data-page-transition="fade">
           <SectionFAQ />
         </div>
       </main>
