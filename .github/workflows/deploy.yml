@@ -41,11 +41,13 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # The site lives in a subdirectory; the repository root is the Python
-    # project. This is the setting that catches everyone out.
-    defaults:
-      run:
-        working-directory: frontend
+    # Runs from the REPOSITORY ROOT, not from frontend/.
+    #
+    # The project's Root Directory is set to `frontend` in Vercel, so
+    # `vercel build` adds that itself. Running from inside frontend/ as well
+    # would make it look for frontend/frontend and fail. The npm steps below
+    # say `working-directory` individually because those genuinely are in the
+    # subdirectory; only the vercel commands must not be.
 
     steps:
       - uses: actions/checkout@v4
@@ -60,12 +62,43 @@ jobs:
 
       - name: Install
         run: npm ci
+        working-directory: frontend
 
       # Typecheck before deploying. Vercel would catch a broken build anyway,
       # but it is faster and clearer to fail here, and it keeps a red X on the
       # commit that caused it rather than on a deployment page.
       - name: Typecheck
         run: npx tsc --noEmit
+        working-directory: frontend
+
+      # Say what is missing, in the words you need, rather than letting the
+      # Vercel CLI fail three commands later with "No existing credentials
+      # found" -- which is true, unhelpful, and buried in a log.
+      - name: Check the deploy credentials exist
+        run: |
+          missing=""
+          [ -n "$VERCEL_TOKEN" ]      || missing="$missing VERCEL_TOKEN"
+          [ -n "$VERCEL_ORG_ID" ]     || missing="$missing VERCEL_ORG_ID"
+          [ -n "$VERCEL_PROJECT_ID" ] || missing="$missing VERCEL_PROJECT_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing"
+            echo ""
+            echo "The site itself is fine -- install and typecheck passed."
+            echo "Only the deploy step is unconfigured. Add these under"
+            echo "Settings -> Secrets and variables -> Actions:"
+            echo ""
+            echo "  VERCEL_TOKEN       create at https://vercel.com/account/tokens"
+            echo "  VERCEL_ORG_ID      team_cVmPwGPbA7kVfEsuAyxPjjBd"
+            echo "  VERCEL_PROJECT_ID  prj_1M54T7Fo3sqdSvQa7fduSw01M9eJ"
+            echo ""
+            echo "Only the token is secret. The other two are in frontend/.vercel."
+            exit 1
+          fi
+          echo "All three present."
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Deploy to production
         run: |
