@@ -235,45 +235,11 @@ def create_app(runtime=None):
                 None, runtime.graph.tick,
                 Observation(frame=img, meta={"source": "live"}))
 
-        scene = state.get("scene")
-        decision = state.get("decision")
-        current = runtime.graph.dj.state.current
-        #What it CHOSE, which is not the same as what it managed to play. A
-        #sleeping speaker used to make the whole decision invisible -- the page
-        #showed nothing at all while the log had a verdict and a reason -- so
-        #the pick and the failure both have to reach the screen.
-        verdict = state.get("verdict")
-        chosen = None if verdict is None else {
-            "title": verdict.track.title,
-            "artist": verdict.track.artist,
-            "strategy": verdict.strategy,
-            "why": verdict.track.why or verdict.reasoning or verdict.quip,
-        }
-        return JSONResponse({
-            "chosen": chosen,
-            "error": state.get("play_error"),
-            "scene": None if scene is None else {
-                "setting": scene.setting,
-                "activity": scene.activity,
-                "mood": scene.mood_label,
-                "confidence": scene.confidence,
-                "colors": scene.dominant_colors,
-                "references": scene.references,
-                "setting_attributes": scene.setting_attributes,
-                "opposite_attributes": scene.opposite_attributes,
-                "opposite_genres": scene.opposite_genres,
-                "latency_ms": scene.latency_ms,
-                "source": scene.source,
-            },
-            "action": None if decision is None else decision.action.value,
-            "reason": None if decision is None else decision.reason,
-            "playing": None if current is None else {
-                "title": current.track.title,
-                "artist": current.track.artist,
-                "strategy": current.strategy,
-                "quip": current.quip,
-            },
-        })
+        # What it CHOSE is not the same as what it managed to play. Native and
+        # browser live inputs share this serializer so neither can hide a pick
+        # just because the speaker was sleeping.
+        from ..wearables.api import live_payload
+        return JSONResponse(live_payload(runtime, state))
 
     @app.post("/api/analyze-video")
     async def analyze_video(file: UploadFile = File(...)):
@@ -353,6 +319,12 @@ def create_app(runtime=None):
             print(f"[hud] websocket stream ended: {type(e).__name__}: {e}")
         finally:
             BUS.drop_queue(q)
+
+    # Keep the included router after the long-standing direct routes. Some
+    # integrations inspect `app.routes` in declaration order, and FastAPI's
+    # included-router sentinel is not itself an APIRoute with a `.path`.
+    from ..wearables.api import create_wearables_router
+    app.include_router(create_wearables_router(runtime, frame_lock))
 
     if STATIC.exists():
         app.mount("/static", StaticFiles(directory=STATIC), name="static")

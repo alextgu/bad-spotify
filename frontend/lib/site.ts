@@ -153,8 +153,8 @@ export const demo = {
 
 /* ------------------------------------------------------------ 4 · try it -- */
 export const tryIt = {
-  title: "Try it on your own footage.",
-  body: "Drop in a video. It reads the mood every few seconds and shows you which track it would have put on, and where.",
+  title: "Try it on a video.",
+  body: "Choose a sample or upload your own footage. It reads each moment and shows what it chose — and why.",
   /** The demo ground is a real route in this app — see app/demo/page.tsx. */
   action: { label: "Open the demo", href: "/demo" },
   note: "Runs against a local model. Ships with a sample clip, so it works with nothing plugged in.",

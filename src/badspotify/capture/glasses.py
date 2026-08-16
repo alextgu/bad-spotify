@@ -17,10 +17,11 @@ Bluetooth audio device: pair them, make them the output, and Spotify plays the
 wrong song out of them today, with no toolkit and no preview access. Only the
 camera half needs the SDK.
 
-`/phone` is the stand-in for the companion app and speaks this exact protocol
-from a phone browser, so the pipeline can be driven from a pocket before
-anyone has hardware — and when the native app arrives it posts to the same
-endpoint and nothing here changes.
+This class remains the headless `--source glasses` receiver on port 8899. The
+preferred native integration when the HUD is running is Wearables API v1 at
+`/api/wearables/v1/frames`: it adds bearer auth, capture metadata, ordering,
+backpressure and the decision response. `/phone` and `/api/frame` remain the
+browser stand-ins and keep their existing protocol.
 """
 from __future__ import annotations
 

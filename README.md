@@ -1,6 +1,6 @@
 # Slopify
 
-**A wearable-style agent whose only feature is playing the worst possible music for the moment.** (No hardware exists; a camera, a screen share, or a video file stands in for the glasses.)
+**A wearable-style agent whose only feature is playing the worst possible music for the moment.** It accepts a camera, screen, video file, or a native Meta AI glasses companion as the eyes.
 
 It watches what's around you, works out what the moment feels like and what the
 setting implies, computes the opposites, and plays that. It talks to you, but
@@ -19,7 +19,7 @@ No API keys, no accounts. Everything below runs on the built-in mocks.
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -r requirements.txt   # one-time, ~2 min
-.venv/bin/pytest -q                                                  # 225 tests, ~10 s
+.venv/bin/pytest -q                                                  # 238 tests, ~10 s
 PYTHONPATH=src .venv/bin/python run.py --source replay --ticks 8 --no-hud
 ```
 
@@ -45,7 +45,7 @@ drifted apart within a day.
 | **STATUS.md** | what's actually done, and what's only *built but unproven*. **Update it when you finish something** |
 
 Plus one README beside each part that ships on its own: `frontend/`,
-`src/videofeed/`, `scripts/io/`.
+`src/videofeed/`, `scripts/io/`, `integrations/meta-dat/`.
 
 README never says what's finished; STATUS never explains how anything works.
 That's what stops them drifting apart.
@@ -188,8 +188,38 @@ python run.py --video clip.mp4 --realtime       # ...at its true speed
 python run.py --video clip.mp4 --record demo1   # + write data/sessions/demo1.json
 python run.py --source webcam                   # real camera + mic
 python run.py --ticks 10 --no-hud               # bounded headless run
-pytest tests/ -q                                # 225 tests
+pytest tests/ -q                                # 238 tests
 ```
+
+## Meta AI glasses
+
+Meta's SDK runs in a native phone companion, not in Python and not in the
+browser. Slopify keeps that platform-specific layer narrow:
+
+```text
+Meta AI glasses → DAT 0.9 Android companion → Wearables API v1
+    → Observation → the existing graph → Spotify / Bluetooth audio
+```
+
+Start the backend on the same Wi-Fi with a shared token:
+
+```bash
+export SLOPIFY_WEARABLE_TOKEN="$(openssl rand -hex 24)"
+python run.py --serve --lan
+```
+
+The companion posts ordered JPEG observations to
+`/api/wearables/v1/frames`. They pass through the same change gate, perception,
+six strategies, judge and DJ as every other live source. A busy model returns
+backpressure immediately, so the phone drops time rather than answering an old
+room. Duplicate sequence numbers do not trigger another model call.
+
+The Android transport, the DAT 0.9 hook, setup instructions, protocol, security
+notes and physical-device proof checklist live in
+[`integrations/meta-dat/`](integrations/meta-dat/README.md). The browser keeps
+the inputs separate: Try It is always the bundled/uploaded video version, while
+`/glasses` is the native Meta companion setup. Neither surface mounts the
+other's controls or state, and the browser never claims direct glasses access.
 
 ## Local video upload app
 
@@ -328,8 +358,8 @@ Copy `.env.example` to `.env`, fill in what you have, and flip the matching
 ## Architecture
 
 ```
-  CAPTURE          a frame + the last few seconds of audio
-     │             (webcam, or a video file pretending to be live)
+  CAPTURE          a frame + optional recent audio
+     │             (webcam, video, or Meta companion over Wearables API v1)
      ▼
   CHANGE GATE      did the world change? local, ~1ms, no model call
      │
@@ -396,7 +426,8 @@ still happening. The DJ decides per moment — it isn't a setting.
 
 | Path | What lives there |
 |---|---|
-| `src/badspotify/capture/` | `CaptureSource` interface — webcam, **video file**, replay, glasses stub — plus the change gate |
+| `src/badspotify/capture/` | `CaptureSource` interface — webcam, **video file**, replay, legacy headless glasses receiver — plus the change gate |
+| `src/badspotify/wearables/` | authenticated Wearables API v1; ordered Meta frames become `Observation` and enter the shared graph |
 | `src/badspotify/perceive/` | Gemini scene read, local librosa audio features, text injection |
 | `src/badspotify/music/` | **the antipode engine**, corpus, six candidate strategies |
 | `src/badspotify/agents/` | LangGraph wiring, the judge |
@@ -409,6 +440,7 @@ still happening. The DJ decides per moment — it isn't a setting.
 | `src/videofeed/` | standalone video sampler: samples on a clock **and** on events (scene cuts, audio onsets). Imports nothing from `badspotify` |
 | `app.py` | Gradio surface — describe a scene, drop a photo, drop a video |
 | `frontend/` | **the presentation site** (Next.js, separate from the agent) |
+| `integrations/meta-dat/` | tested Kotlin transport and the Android DAT 0.9 companion hook |
 | `scripts/io/` | **one script per pipeline step** — JSON in, JSON out, pipeable |
 | `scripts/` | corpus builder, Spotify setup, every-noise scraper |
 | `src/badspotify/log.py` | diagnostics to stderr, so stdout stays pipeable |
@@ -452,14 +484,15 @@ only thing crossing the boundary is a recorded session file.
 
 ## Constraints we already checked
 
-**Meta Ray-Ban.** The Wearables Device Access Toolkit is real and exposes video,
-photo, mic and audio out for Ray-Ban Meta Gen 1/2, Display, and the Oakley Meta
-line — but it's Developer Preview, a **native iOS/Android SDK**, publishing is
-disabled, and access is gated to AI-glasses-supported countries. So the port
-isn't a Python import: it's a thin native app that owns the SDK session and
-posts frames to `capture/glasses.py` over localhost. Everything above that file
-is already hardware-agnostic. Audio *out* needs no SDK at all — the glasses are
-a Bluetooth sink today.
+**Meta AI glasses.** The Wearables Device Access Toolkit is a Developer Preview
+native iOS/Android SDK. DAT 0.9 uses a consolidated `Camera` capability:
+`DeviceSession.addCamera(...)`, then `Camera.stream`; old `addStream` examples
+are obsolete. The companion owns registration through Meta AI, camera
+permission and session lifecycle, then posts JPEG observations to the versioned
+LAN API. Audio output stays separate: Spotify can use the glasses as a Bluetooth
+sink. The protocol and Android bridge are built, but physical hardware has not
+validated them yet — see `STATUS.md` rather than reading "compatible" as
+"proven on glasses."
 
 **Spotify.** `audio-features`, `audio-analysis`, `recommendations` and
 `related-artists` were restricted in Nov 2024 to apps already in extended quota
@@ -508,7 +541,7 @@ same JSON is all three tracks at once.
 
 | Criterion | Where it's answered |
 |---|---|
-| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 225 tests guarding specific live-demo failures |
+| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 238 tests guarding specific live-demo failures |
 | UX & intuition | A DJ character with a reacting orb, onboarding, one honest control, and a site that walks judges through the reasoning |
 | Creativity | Geometric opposition *plus* a cultural judge; six competing theories of wrongness rather than one similarity score |
 | Originality | An assistant that is deliberately useless. The failure mode and the feature are the same thing, which is why it holds up live |
@@ -522,7 +555,7 @@ See `STATUS.md` for the current state of each part. The standing ones:
 - No session memory — it'll repeat a joke on a long run
 - Nobody has timed the real thing end to end
 - Nicheness is agreed as an idea but isn't scored or used anywhere
-- `capture/glasses.py` is a stub — needs the native companion app
+- The Meta bridge still needs a registered developer app and physical-glasses run
 - The corpus has no audio files; local playback needs `data/library/` populated
 
 **One bug worth knowing about**, because the shape of it could recur: a calm

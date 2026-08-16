@@ -1,5 +1,23 @@
 # Slopify — presentation site
 
+## Try It inputs
+
+The launch page keeps the two routes separate:
+
+- **Video** stays in the landing-page Try It section. It lists the three
+  bundled samples immediately and can analyze an upload against the local
+  Python agent.
+- **Meta glasses · live** is a separate `/glasses` route. It explains that DAT
+  runs in a native companion and checks Wearables API v1 readiness. It never
+  mounts video samples, upload state, or video analysis controls.
+
+The Meta explanation is compatible with static hosting. Its readiness check is
+for the locally served site: browsers can block an HTTPS page from reaching an
+HTTP service on a private address even though the capability response permits
+cross-origin reads. On the hosted page, use the documented `curl` check instead.
+The native companion, not this site, sends frames. See
+`../integrations/meta-dat/README.md` for setup.
+
 ## Analyze an uploaded video
 
 Start the Python API with `python run.py --serve`. Then run this frontend with
@@ -52,8 +70,9 @@ scene is usually read a few seconds before the song actually lands.
 
 ```
 app/
-  page.tsx         the launch page — seven screens, discrete scroll
-  demo/page.tsx    the demo ground
+  page.tsx          the launch page — seven screens, discrete scroll
+  demo/page.tsx     the video demo ground
+  glasses/page.tsx  the isolated native Meta companion setup
 components/
   SectionHero..FAQ the seven screens, one file each
   ScrollController one gesture, one stop; reads data-stops/data-page-transition

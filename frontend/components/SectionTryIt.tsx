@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -286,7 +287,7 @@ export default function SectionTryIt() {
       <section
         ref={root}
         id="try"
-        className="flex h-svh flex-col justify-center overflow-hidden bg-bone px-gutter"
+        className="flex min-h-svh flex-col bg-bone px-gutter py-16 lg:h-svh lg:justify-center lg:overflow-hidden lg:py-0"
       >
         <div className="mx-auto w-full max-w-content text-center">
           <Label tone="offset">Try it</Label>
@@ -297,7 +298,26 @@ export default function SectionTryIt() {
             {tryIt.body}
           </p>
 
-          <div className="mx-auto mt-rest max-w-[48rem] space-y-3 text-left">
+          <div className="mx-auto mt-block grid max-w-[48rem] gap-2 text-left sm:grid-cols-2">
+            <div className="rounded-card border border-ink bg-ink px-5 py-4 text-paper">
+              <h3 className="font-display text-title">Video version</h3>
+              <p className="mt-1 text-caption text-paper/70">
+                Samples and uploads stay on this page.
+              </p>
+            </div>
+            <Link
+              href="/glasses"
+              aria-label="Open Meta glasses live"
+              className="rounded-card border border-ink/20 bg-paper px-5 py-4 transition hover:border-ink"
+            >
+              <h3 className="font-display text-title">Meta glasses · live</h3>
+              <p className="mt-1 text-caption text-graphite">
+                Open the separate live setup →
+              </p>
+            </Link>
+          </div>
+
+          <div className="mx-auto mt-block grid max-w-[72rem] gap-3 text-left lg:grid-cols-3">
             {samples.map((sample) => (
               <button
                 key={sample.id}
@@ -306,12 +326,11 @@ export default function SectionTryIt() {
                 onClick={(event) =>
                   choose(sample, event.currentTarget.getBoundingClientRect())
                 }
-                className="group grid w-full overflow-hidden rounded-card border border-hairline bg-paper text-left
+                className="group flex w-full flex-col overflow-hidden rounded-card border border-hairline bg-paper text-left
                            transition-[transform,border-color] duration-interaction ease-calm
-                           hover:-translate-y-1 hover:border-ink focus-visible:-translate-y-1
-                           sm:grid-cols-[minmax(220px,0.9fr)_1.1fr]"
+                           hover:-translate-y-1 hover:border-ink focus-visible:-translate-y-1"
               >
-                <div className="relative aspect-[16/10] overflow-hidden bg-ink sm:aspect-auto">
+                <div className="relative aspect-[16/9] overflow-hidden bg-ink">
                   <video
                     className="h-full w-full object-cover"
                     src={sample.src}
@@ -328,9 +347,7 @@ export default function SectionTryIt() {
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-display text-title">{sample.title}</h3>
                     {sample.placeholder && (
-                      <Label className="shrink-0 !text-graphite/70">
-                        placeholder
-                      </Label>
+                      <Label className="shrink-0 !text-graphite/70">placeholder</Label>
                     )}
                   </div>
                   <p className="mt-2 text-caption text-graphite">{sample.blurb}</p>
@@ -339,17 +356,7 @@ export default function SectionTryIt() {
             ))}
           </div>
 
-          {/* Wired now, and wired honestly. The rule that kept this disabled
-              still holds -- a control that silently does the OTHER thing is
-              worse than one plainly switched off -- so it never falls back to
-              the sample. It either shows your footage with your reasoning
-              beside it, or it says exactly why it cannot.
-
-              The row wrapper is what the merge lost: the upload control used
-              to sit in a flex row beside a "use a sample" button, and when the
-              chooser became a list of cards the button survived while its
-              container did not. */}
-          <div className="mt-rest flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-block flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               onClick={() => file.current?.click()}
@@ -383,7 +390,7 @@ export default function SectionTryIt() {
               )}
             </p>
           ) : (
-            <p className="mt-block font-mono text-label uppercase text-graphite/70">
+            <p className="mt-2 font-mono text-label uppercase text-graphite/70">
               {busy
                 ? "Reading your clip — one model call per moment it notices"
                 : "Uploading needs the agent running on this machine"}
