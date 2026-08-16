@@ -60,3 +60,6 @@ data/discovered_uris.json
 
 #Generated locally so a phone will enable its camera. Machine-specific.
 .tls/
+
+#Vercel CLI link + pulled env. Machine-local, and .env.local can hold tokens.
+.vercel/
