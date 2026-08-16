@@ -114,10 +114,15 @@ export const description = {
     {
       id: "park",
       scene: "A sunlit park",
-      read: "peaceful · confidence 0.90 · slow",
+      /* Was "peaceful · confidence 0.90 · slow" set in 10px mono. Three
+         readings, two of which repeat what the photograph and the word
+         "park" already say. The confidence is the only one a reader can't
+         get from looking, so it is the only one left — and it is now large
+         enough to read from the back of a room. */
+      read: "confidence 0.90",
       track: "Bodies",
       artist: "Drowning Pool",
-      why: "It scored the park as about as pleasant as a scene gets, inverted that, and went looking for funeral doom, drone and noise. Nu metal was the closest thing in the corpus, at 0.911 — the highest wrongness score of anything it considered.",
+      why: "Inverted, a pleasant park asks for funeral doom. Nu metal was the closest thing in the corpus — 0.911, the highest wrongness it scored.",
       shot: {
         file: "example-park.jpg",
         note: ["16:9 · grass, low sun, people sitting", "no faces, nothing happening"],
@@ -126,10 +131,10 @@ export const description = {
     {
       id: "library",
       scene: "A quiet library",
-      read: "still · low arousal · steady",
+      read: "arousal 0.08",
       track: "Sandstorm",
       artist: "Darude",
-      why: "A different strategy wins here. Nothing in the room is loud, so genre distance has little to work with — tempo_clash takes it instead, on the grounds that the one thing a silent room cannot survive is relentless arousal.",
+      why: "Nothing here is loud, so genre distance has nothing to work with. tempo_clash wins instead: a silent room cannot survive relentless arousal.",
       shot: {
         file: "example-library.jpg",
         note: ["16:9 · long desks, warm lamps, stacks behind", "one person, far away"],
@@ -157,8 +162,8 @@ export const demo = {
 
 /* ------------------------------------------------------------ 4 · try it -- */
 export const tryIt = {
-  title: "Try it on your own footage.",
-  body: "Drop in a video. It reads the mood every few seconds and shows you which track it would have put on, and where.",
+  title: "Try it on a video.",
+  body: "Choose a sample or upload your own footage. It reads each moment and shows what it chose — and why.",
   /** The demo ground is a real route in this app — see app/demo/page.tsx. */
   action: { label: "Open the demo", href: "/demo" },
   note: "Runs against a local model. Ships with a sample clip, so it works with nothing plugged in.",
@@ -166,27 +171,42 @@ export const tryIt = {
 
 /* ---------------------------------------------------------- 5 · pipeline -- */
 export const pipeline = {
-  title: "A closer look.",
-  /* One sentence. It was three, and the third column of notes below had
-     nowhere to go — this screen is the diagram, not the prose. */
-  body: "Six steps, about every five seconds. The two worth watching are where the line bends.",
   /**
-   * The three decisions underneath the diagram that a drawing can't show.
-   * Kept to three because the diagram is the subject of the screen and this
-   * is the caption — a fourth would push the section past one viewport.
+   * Say what the picture shows.
+   *
+   * This was "A closer look." over "Six steps, about every five seconds. The
+   * two worth watching are where the line bends." Both are about the slide
+   * rather than about the system: the first names a camera move, the second
+   * tells you where to point your eyes. Neither survives the only test that
+   * matters here, which is whether a reader who saw nothing else would learn
+   * what the thing does.
+   */
+  title: "One frame in. One wrong song out.",
+  body: "Every ~5 seconds. Two model calls at most — the rest is local.",
+  /**
+   * Three facts the drawing can't draw. Three, not four: the diagram is the
+   * subject of this screen and these are its caption, and a fourth column
+   * pushes the section past one viewport.
+   *
+   * Headings are literal on purpose. They were "Distance defends, the model
+   * lands it", "Six theories that disagree" and "It knows when it doesn't
+   * know" — the shape of an insight with the content left out, which is
+   * exactly what a skimming reader discounts. Each one now states the fact
+   * and lets the sentence underneath supply the evidence, and each fact is a
+   * number or a name that exists in the repo.
    */
   notes: [
     {
-      title: "Distance defends, the model lands it",
-      body: "The mood vector is reflected through the centre of the cube — instant, and arguable. But distance alone picks noise records nobody knows. Only a model knows the true opposite of a sunlit park is funeral doom.",
+      title: "Most frames never reach a model",
+      body: "The gate compares each frame locally. A still room loops without spending a call.",
     },
     {
-      title: "Six theories that disagree",
-      body: "Wrong on every axis, wrong about energy, wrong in meaning, wrong about the setting, wrong about the occasion, and one that goes looking outside the corpus. Three that argue beat five that agree.",
+      title: "Six strategies, one judge",
+      body: "Genre, tempo, lyrics, meaning, occasion — and one that hunts outside the 47 songs.",
     },
     {
-      title: "It knows when it doesn't know",
-      body: "Below 0.35 confidence it does nothing. Pointed at an unreadable frame it reported “obstructed or blocked camera view” at 0.10 and correctly refused to act.",
+      title: "Under 0.35 confidence it plays nothing",
+      body: "Pointed at a blocked camera it reported 0.10, and stayed quiet.",
     },
   ],
 } as const;

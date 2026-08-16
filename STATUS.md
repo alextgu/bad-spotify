@@ -41,7 +41,7 @@ Last updated: 15 Aug 2026
 | Engine (`service.py`) — one decision, no loop | Built, unproven | |
 | Gradio app (`app.py`) | Built, unproven | |
 | Naming and logo | Built, visual check pending — **Slopify** plus the square purple mark in the hero and app icon; production build and served asset hashes verified 15 Aug | |
-| Glasses | Not started — and not needed | |
+| Meta glasses | Built, unproven — Wearables API v1 and tested Android DAT 0.9 transport/hook exist; no registered physical glasses run yet | |
 
 "Built, unproven" is not a criticism. Everything was deliberately built to run
 on stand-ins so nobody was blocked on accounts and hardware. But it does mean
@@ -59,11 +59,29 @@ the single biggest risk to the demo.
   off when the room really changed *and* the current song has had a fair run.
 - **Backup list.** If anything upstream dies, a pre-picked list of always-wrong
   songs plays anyway. It is never silent.
-- **Tests.** 225 of them, each guarding a specific way the demo could break.
+- **Tests.** 238 Python tests, each guarding a specific way the demo could break.
 - **Timeouts on the model calls.** A slow answer is abandoned and retried
   rather than freezing the loop. A late answer is worth less than a fast fallback.
 
 ## What just changed
+
+**Meta glasses now have a real, isolated integration boundary.** A native DAT
+0.9 Android companion captures sparse JPEG photos and sends them through an
+authenticated, ordered Wearables API. The server turns each one into the same
+`Observation` as other cameras and calls the same `graph.tick`;
+session-scoped duplicates do not cost a model call, and a busy graph returns
+retry timing rather than queueing stale scenes. The launch-page Try It section
+is video-only, with samples listed immediately; `/glasses` is a separate Meta
+companion surface and neither route mounts the other route's controls.
+*Proven by:* thirteen new FastAPI tests cover authentication, metadata,
+app-session restarts, streamed JPEG byte/pixel validation, ordering, duplicate
+suppression, LAN fail-closed behavior, cross-origin capability reads and
+concurrent-frame backpressure; five Kotlin/JVM tests compile and cover the exact
+raw-JPEG request, sequence, single-flight scheduling and retry delay; the
+frontend production build and four Playwright route-isolation tests pass.
+*Still unknown:* the DAT-specific hook matches Meta's official 0.9 API but has
+not been resolved against the private package, signed, registered, or run on
+physical glasses.
 
 **The site shows what it decided, not only that it decides.** Section 6 gained
 a second beat: every recorded decision — six of them, from the three filmed
@@ -262,6 +280,10 @@ Don't re-open these without a reason.
 - **15 Aug** — **Scenario conclusions are inferred, never looked up.** Perception
   produces venue traits, their opposites, and genres in one structured call.
   Offline fallbacks leave that chain empty when they cannot infer it.
+- **15 Aug** — **Meta stays outside the decision engine.** DAT lives in a native
+  companion and sends versioned, ordered JPEG observations into the existing
+  `Observation → graph.tick` path. The browser only explains and checks that
+  connection; it does not claim direct glasses access.
 - **15 Aug** — **Temperature varies winners, not moods.** Score-space softmax is
   applied after inference and inversion. It does not weaken the full opposite,
   change DJ timing, or create another Spotify lookup.

@@ -22,6 +22,14 @@ capture:
   realtime: false         # true = pace it at the video's real speed
   loop: false
 
+# Native wearable companions send sparse JPEG observations to the HUD server.
+# The shared token itself belongs in the environment, never in this file.
+wearables:
+  token_env: SLOPIFY_WEARABLE_TOKEN
+  max_frame_bytes: 5242880
+  max_frame_pixels: 12000000
+  min_interval_ms: 2000
+
 gate:
   # Only escalate to the expensive model when the world actually changed.
   frame_diff_threshold: 0.18     # mean abs pixel delta, normalised 0-1

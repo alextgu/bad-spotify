@@ -88,7 +88,7 @@ export default function Home() {
         </div>
 
         {/* 6 — two beats, and the second one is why the first is allowed to
-            exist. The claim ("0 images stored", "222 tests") is worth nothing
+            exist. The claim ("0 images stored", "238 tests") is worth nothing
             without the evidence, so the evidence sits immediately after it and
             in the same ink, read as one section that turns over rather than as
             two.

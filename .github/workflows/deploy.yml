@@ -1,0 +1,86 @@
+name: Deploy site
+
+# Any push to main puts the site live. Nothing to remember, nothing to run by
+# hand, and no way for the deployed page to drift from what is on main.
+#
+# WHY A WORKFLOW RATHER THAN VERCEL'S OWN GIT INTEGRATION
+# Vercel can watch a repository directly, which is simpler, but it needs the
+# Vercel GitHub App granted access to `alextgu/bad-spotify` -- and that grant
+# belongs to whoever owns the repo. This does the same job using a token, so
+# it works without touching the repository's app permissions.
+#
+# If the Git integration does get connected later, delete this file. Running
+# both means every push deploys twice.
+#
+# SETUP, ONCE. Repo Settings -> Secrets and variables -> Actions -> New secret:
+#   VERCEL_TOKEN        vercel.com/account/tokens  (create one, scope: full)
+#   VERCEL_ORG_ID       team_cVmPwGPbA7kVfEsuAyxPjjBd
+#   VERCEL_PROJECT_ID   prj_1M54T7Fo3sqdSvQa7fduSw01M9eJ
+#
+# The org and project ids are not secrets -- they are in frontend/.vercel --
+# but they live here as secrets so the workflow is portable to another project
+# without editing it.
+
+on:
+  push:
+    branches: [main]
+    # The Python agent does not ship to Vercel, so a backend-only commit
+    # should not spend a build.
+    paths:
+      - "frontend/**"
+      - ".github/workflows/deploy.yml"
+  # And a button, for when you want to redeploy without a commit.
+  workflow_dispatch:
+
+concurrency:
+  # Two pushes in quick succession should not race to be "latest". The newer
+  # one wins and the older is cancelled mid-build.
+  group: deploy-site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # The site lives in a subdirectory; the repository root is the Python
+    # project. This is the setting that catches everyone out.
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      # Typecheck before deploying. Vercel would catch a broken build anyway,
+      # but it is faster and clearer to fail here, and it keeps a red X on the
+      # commit that caused it rather than on a deployment page.
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Deploy to production
+        run: |
+          npm i -g vercel@latest
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" > url.txt
+          echo "Deployed: $(cat url.txt)"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # The production URL Vercel generates is different every time. The alias
+      # is the link that gets shared, so it has to be moved to the new build or
+      # the site silently stays on the old one.
+      - name: Point the shared link at this build
+        run: vercel alias set "$(cat url.txt)" slopify-app.vercel.app --token="$VERCEL_TOKEN" --scope=lightheads
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

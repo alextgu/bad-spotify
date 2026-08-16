@@ -263,7 +263,10 @@ export default function SectionDescription() {
           >
             <div>
               <Label tone="offset">{example.scene}</Label>
-              <p className="mt-2 font-mono text-label lowercase tracking-normal text-graphite">
+              {/* The one measured number, at a size you can actually read.
+                  It was 10.5px mono holding three readings, two of which the
+                  photograph already told you. */}
+              <p className="mt-3 font-mono text-[clamp(0.95rem,1.15vw,1.2rem)] lowercase tracking-normal text-graphite">
                 {example.read}
               </p>
 
@@ -276,11 +279,14 @@ export default function SectionDescription() {
               <p className="mt-block font-display text-[clamp(2.25rem,4.5vw,4rem)] font-semibold leading-[0.95] tracking-[-0.035em] [overflow-wrap:anywhere]">
                 {example.track}
               </p>
-              <p className="mt-3 text-subheading text-graphite">
+              <p className="mt-3 text-[clamp(1.25rem,1.7vw,1.7rem)] font-medium leading-tight tracking-[-0.02em] text-graphite">
                 {example.artist}
               </p>
 
-              <p className="mt-block max-w-measure text-body text-graphite">
+              {/* The reasoning is the product, so it is set at reading size
+                  rather than caption size. It shrank to fit when it was three
+                  sentences; it is one and a half now, and gets the room. */}
+              <p className="mt-block max-w-[36ch] text-[clamp(1.15rem,1.6vw,1.55rem)] leading-[1.5] text-graphite">
                 {example.why}
               </p>
             </div>
