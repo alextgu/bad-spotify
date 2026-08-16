@@ -19,7 +19,7 @@ No API keys, no accounts. Everything below runs on the built-in mocks.
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -r requirements.txt   # one-time, ~2 min
-.venv/bin/pytest -q                                                  # 222 tests, ~10 s
+.venv/bin/pytest -q                                                  # 225 tests, ~10 s
 PYTHONPATH=src .venv/bin/python run.py --source replay --ticks 8 --no-hud
 ```
 
@@ -177,10 +177,10 @@ python scripts/build_seed_corpus.py     # writes data/corpus.seed.json
 python run.py                           # then open http://127.0.0.1:8420/dj
 ```
 
-**Every external service runs on a mock by default.** Perception uses local CLIP
-and falls back to a mock when its packages or model are unavailable. That's
-deliberate — nobody should be blocked on credentials to work on their layer.
-Swap in real backends one at a time via `config.yaml`.
+Every external service degrades to a mock when its credentials or packages are
+unavailable. The checked-in configuration selects Gemini perception and Spotify
+playback; switch `perceive.backend` to `huggingface` for local CLIP, or select
+the mock backends explicitly, in `config.yaml`.
 
 ```bash
 python run.py --video clip.mp4                  # a recording, treated as live
@@ -188,14 +188,15 @@ python run.py --video clip.mp4 --realtime       # ...at its true speed
 python run.py --video clip.mp4 --record demo1   # + write data/sessions/demo1.json
 python run.py --source webcam                   # real camera + mic
 python run.py --ticks 10 --no-hud               # bounded headless run
-pytest tests/ -q                                # 222 tests
+pytest tests/ -q                                # 225 tests
 ```
 
-## Free local video upload app
+## Local video upload app
 
-This path needs no API key and makes no paid model call. It uses the local
-`openai/clip-vit-base-patch32` checkpoint through Hugging Face Transformers.
-The first analysis downloads the model. Later runs use the local model cache.
+This path uses the perception backend selected in `config.yaml`. Gemini needs
+`GOOGLE_API_KEY` in `.env`. The key-free option is `huggingface`, which uses the
+local `openai/clip-vit-base-patch32` checkpoint; its first analysis downloads
+the model and later runs use the local cache.
 
 ```bash
 # terminal 1
@@ -213,6 +214,14 @@ The browser sends the file to the local FastAPI server. The server samples one
 frame every five seconds, reads the matching audio window, classifies the mood,
 and sends each mood through the existing opposite music agent. The page keeps
 the video in the browser and shows the chosen track at each timestamp.
+
+When `player.backend` is `spotify`, the page verifies the Premium account and
+configured device without starting sound, then shows **Spotify playback
+connected** beside the device name. Pressing Play on the analyzed video starts
+the chosen corpus track at each timeline marker; pausing or ending the video
+pauses Spotify. Only corpus track IDs returned by the analyzer are accepted by
+the playback endpoint. Without a Spotify player, analysis and replay still work
+and the badge explains that playback is unavailable.
 
 `ffmpeg` is optional. Install it and place it on `PATH` to include video audio.
 Without it, the same flow runs with images, colour, blur, and motion only.
@@ -499,7 +508,7 @@ same JSON is all three tracks at once.
 
 | Criterion | Where it's answered |
 |---|---|
-| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 222 tests guarding specific live-demo failures |
+| Technical execution | Real graph with conditional edges; a change gate that cuts model calls; every backend degrades instead of crashing; 225 tests guarding specific live-demo failures |
 | UX & intuition | A DJ character with a reacting orb, onboarding, one honest control, and a site that walks judges through the reasoning |
 | Creativity | Geometric opposition *plus* a cultural judge; six competing theories of wrongness rather than one similarity score |
 | Originality | An assistant that is deliberately useless. The failure mode and the feature are the same thing, which is why it holds up live |

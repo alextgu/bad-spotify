@@ -40,6 +40,7 @@ def create_app(runtime=None):
     )
     analysis_lock = asyncio.Lock()
     frame_lock = asyncio.Lock()
+    playback_lock = asyncio.Lock()
 
     @app.get("/")
     async def index():
@@ -80,6 +81,88 @@ def create_app(runtime=None):
             "backends": runtime.backends() if runtime else {},
             "history": [e.model_dump() for e in list(BUS.history)[-60:]],
         })
+
+    @app.get("/api/playback")
+    async def playback_status():
+        """Report whether the explicitly configured Spotify output is ready."""
+        if not runtime:
+            return JSONResponse({
+                "backend": None,
+                "connected": False,
+                "message": "The playback runtime is not ready.",
+            })
+
+        player = runtime.player
+        backend = getattr(player, "name", "unknown")
+        if backend != "spotify":
+            return JSONResponse({
+                "backend": backend,
+                "connected": False,
+                "message": "Spotify playback is not enabled in config.yaml.",
+            })
+
+        try:
+            loop = asyncio.get_running_loop()
+            status = await loop.run_in_executor(None, player.connection_status)
+            return JSONResponse({
+                "backend": "spotify",
+                "message": "Spotify playback connected.",
+                **status,
+            })
+        except Exception as error:
+            return JSONResponse({
+                "backend": "spotify",
+                "connected": False,
+                "message": str(error),
+            })
+
+    @app.post("/api/playback/play")
+    async def playback_play(payload: dict):
+        """Start one corpus track after an explicit action on the demo page."""
+        if not runtime:
+            raise HTTPException(status_code=503, detail="the playback runtime is not ready")
+        player = runtime.player
+        if getattr(player, "name", "") != "spotify":
+            raise HTTPException(
+                status_code=409,
+                detail="Spotify playback is not enabled in config.yaml",
+            )
+
+        track_id = str(payload.get("track_id") or "").strip()
+        track = runtime.graph.corpus.get(track_id)
+        if track is None:
+            raise HTTPException(status_code=404, detail="unknown corpus track")
+
+        async with playback_lock:
+            try:
+                loop = asyncio.get_running_loop()
+                await loop.run_in_executor(None, player.play, track, "interrupt")
+            except Exception as error:
+                raise HTTPException(status_code=502, detail=str(error)) from error
+
+        return {
+            "ok": True,
+            "track_id": track.id,
+            "title": track.title,
+            "artist": track.artist,
+        }
+
+    @app.post("/api/playback/stop")
+    async def playback_stop():
+        """Pause Spotify when the synchronized demo video pauses or ends."""
+        if not runtime:
+            raise HTTPException(status_code=503, detail="the playback runtime is not ready")
+        player = runtime.player
+        if getattr(player, "name", "") != "spotify":
+            raise HTTPException(
+                status_code=409,
+                detail="Spotify playback is not enabled in config.yaml",
+            )
+
+        async with playback_lock:
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, player.stop)
+        return {"ok": True}
 
     @app.post("/api/inject")
     async def inject(payload: dict):

@@ -5,8 +5,8 @@
  * writes to `data/sessions/NAME.json`. If the backend changes that shape, this
  * file is the first thing to update -- everything else is typed off it.
  *
- * The site never calls the agent. It reads one of these files. That is why it
- * can be hosted anywhere, needs no API keys, and cannot fail during a demo.
+ * The hosted site only reads one of these files. The local `/demo` route can
+ * also ask the agent to analyze an upload and drive configured playback.
  */
 
 /** All five axes run 0..1. Both the scene and the target song sit in this space. */

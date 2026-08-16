@@ -88,7 +88,7 @@ Plus one README beside each part that ships on its own: `frontend/`,
 Every one of these was run on 15 Aug 2026 and did what it says.
 
 ```bash
-# tests — 222 pass
+# tests — 225 pass
 source .venv/bin/activate && python -m pytest tests/ -q
 # on Windows: .venv\Scripts\python.exe -m pytest tests -q
 
@@ -121,7 +121,7 @@ cd frontend && npx tsc --noEmit && npm run build
 `pytest` and `gradio` are in `requirements.txt`. `ffmpeg` on PATH is needed for
 video audio; without it the sampler runs vision-only rather than failing.
 
-### Test inventory (222, verified by `--collect-only`)
+### Test inventory (225, verified by `--collect-only`)
 
 | File | Count | Guards |
 |---|---|---|
@@ -129,7 +129,7 @@ video audio; without it the sampler runs vision-only rather than failing.
 | `tests/test_dj_timing.py` | 19 | deadband, jumps, dwell floor, clocks, stable-scene reuse |
 | `tests/test_glasses.py` | 10 | glasses capture, ingest, and frame delivery |
 | `tests/test_live_frames.py` | 6 | live frame endpoint, locking, image validation |
-| `tests/test_local_video_app.py` | 4 | local perception, upload validation, sampled analysis |
+| `tests/test_local_video_app.py` | 6 | local perception, upload validation, sampled analysis, playback API |
 | `tests/test_judge_temperature.py` | 3 | score-space sampling, greedy mode, weak-candidate suppression |
 | `tests/test_pipeline.py` | 15 | vibe reflection, antivibe, strategies, DJ bounds, fallback |
 | `tests/test_register_clash.py` | 24 | occasion mismatch and identity-term filtering |
@@ -138,7 +138,7 @@ video audio; without it the sampler runs vision-only rather than failing.
 | `tests/test_semantic_opposite.py` | 7 | model-inferred fast-food chain, no lookup, zero Spotify calls |
 | `tests/test_service.py` | 13 | `Engine`: describe / look / watch, no speakers by default, no bus leak |
 | `tests/test_spotify_match.py` | 13 | search-result matching (karaoke, tribute bands, wrong artists) |
-| `tests/test_spotify_player.py` | 22 | player behavior against a stand-in Spotify |
+| `tests/test_spotify_player.py` | 23 | player behavior against a stand-in Spotify |
 | `tests/test_tls.py` | 6 | HTTPS certificate generation and server configuration |
 | `tests/test_video_and_session.py` | 7 | video-as-live and the recorded session format |
 | `tests/test_videofeed.py` | 17 | sampling a real generated mp4: cadence, triggers, rate limiting, sinks |
@@ -206,7 +206,7 @@ scripts/io/*.py       one step each, JSON in and out, pipeable.
 | `src/badspotify/dj/` | `controller`: hysteresis, cooldown, queue-vs-interrupt, fallback deck |
 | `src/badspotify/players/` | `mock`, `local`, `spotify`, `spotify_match` |
 | `src/badspotify/voice/` | `narrator` (mock + ElevenLabs) |
-| `src/badspotify/hud/` | FastAPI: `/`, `/dj`, `/api/session`, `/api/state`, `/api/inject`, `/api/analyze-video`, `/ws` |
+| `src/badspotify/hud/` | FastAPI: `/`, `/dj`, `/api/session`, `/api/state`, `/api/inject`, `/api/analyze-video`, `/api/playback*`, `/ws` |
 | `src/badspotify/analysis.py` | uploaded video analysis with stable mood segments and no playback side effects |
 | `src/badspotify/service.py` | `Engine`: `describe()`, `look()`, `watch()` — no loop |
 | `src/badspotify/session.py` | records a run to the JSON the site replays |
@@ -254,7 +254,7 @@ concurrently and a judge picks between them.
 Before you say you're done:
 
 ```bash
-pytest tests/ -q                      # all 222, not just yours
+pytest tests/ -q                      # all 225, not just yours
 python run.py --ticks 6 --no-hud      # the loop still runs on mocks
 ```
 

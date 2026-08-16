@@ -148,6 +148,19 @@ def test_prefers_the_configured_device():
     assert ("transfer", "d2") in fake.calls, "should wake the chosen device"
 
 
+def test_connection_status_checks_the_device_without_transferring_playback():
+    fake = FakeSpotify(devices=[
+        {"id": "d1", "name": "Laptop", "type": "Computer", "is_active": True},
+        {"id": "d2", "name": "Kitchen Speaker", "type": "Speaker",
+         "is_active": False},
+    ])
+    status = player(fake, device_name="kitchen", require_device=True).connection_status()
+
+    assert status["connected"] is True
+    assert status["device"] == "Kitchen Speaker"
+    assert not any(call[0] == "transfer" for call in fake.calls)
+
+
 def test_falls_back_when_the_named_device_is_gone():
     """Someone's laptop is named in config but closed. Don't just die."""
     fake = FakeSpotify(devices=[

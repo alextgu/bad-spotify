@@ -3,6 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import MomentCard from "@/components/MomentCard";
 import Timeline from "@/components/Timeline";
+import {
+  playbackStatus,
+  playTrack,
+  stopPlayback,
+  type PlaybackStatus,
+} from "@/lib/playback";
 import { activeMomentIndex, loadSession } from "@/lib/session";
 import type { Session } from "@/lib/types";
 
@@ -17,11 +23,18 @@ export default function DemoPage() {
   const [videoUrl, setVideoUrl] = useState("/videos/sample.mp4");
   const [t, setT] = useState(0);
   const [videoBroken, setVideoBroken] = useState(false);
+  const [playback, setPlayback] = useState<PlaybackStatus | null>(null);
+  const [checkingPlayback, setCheckingPlayback] = useState(true);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
+  const [nowPlaying, setNowPlaying] = useState<string | null>(null);
+  const lastTrackRef = useRef<string | null>(null);
+  const playbackGenerationRef = useRef(0);
 
   useEffect(() => {
     loadSession()
       .then(setSession)
       .catch((e: Error) => setError(e.message));
+    void refreshPlayback();
   }, []);
 
   useEffect(() => {
@@ -29,6 +42,65 @@ export default function DemoPage() {
       if (videoUrl.startsWith("blob:")) URL.revokeObjectURL(videoUrl);
     };
   }, [videoUrl]);
+
+  async function refreshPlayback() {
+    setCheckingPlayback(true);
+    try {
+      setPlayback(await playbackStatus(API_URL));
+    } catch {
+      setPlayback({
+        backend: null,
+        connected: false,
+        message: "Start the local agent with run.py --serve.",
+      });
+    } finally {
+      setCheckingPlayback(false);
+    }
+  }
+
+  async function playMomentAt(videoTime: number) {
+    if (!playback?.connected || !session) return;
+    const index = activeMomentIndex(session, videoTime);
+    const selected = index >= 0 ? session.moments[index] : null;
+    const trackId = selected?.played?.track_id;
+    if (!selected || !trackId || trackId === lastTrackRef.current) return;
+
+    const generation = ++playbackGenerationRef.current;
+    lastTrackRef.current = trackId;
+    setPlaybackError(null);
+    try {
+      await playTrack(API_URL, trackId);
+      if (generation === playbackGenerationRef.current) {
+        setNowPlaying(
+          `${selected.chosen?.title ?? "Selected song"}${
+            selected.chosen?.artist ? ` — ${selected.chosen.artist}` : ""
+          }`,
+        );
+      }
+    } catch (e) {
+      if (generation === playbackGenerationRef.current) {
+        lastTrackRef.current = null;
+        setNowPlaying(null);
+        setPlaybackError(
+          e instanceof Error ? e.message : "Spotify playback failed.",
+        );
+      }
+    }
+  }
+
+  async function pauseSong() {
+    if (!playback?.connected) return;
+    ++playbackGenerationRef.current;
+    lastTrackRef.current = null;
+    setNowPlaying(null);
+    try {
+      await stopPlayback(API_URL);
+    } catch (e) {
+      setPlaybackError(
+        e instanceof Error ? e.message : "Spotify playback could not be paused.",
+      );
+    }
+  }
 
   async function analyze(file: File) {
     if (file.size > 200 * 1024 * 1024) {
@@ -41,6 +113,7 @@ export default function DemoPage() {
     setVideoBroken(false);
     setSession(null);
     setT(0);
+    void pauseSong();
     setVideoUrl(URL.createObjectURL(file));
 
     const form = new FormData();
@@ -58,6 +131,7 @@ export default function DemoPage() {
       }
       setSession(body as Session);
       videoRef.current?.load();
+      void refreshPlayback();
     } catch (e) {
       setError(e instanceof Error ? e.message : "The video could not be analyzed.");
     } finally {
@@ -69,6 +143,7 @@ export default function DemoPage() {
     setError(null);
     setProcessing(false);
     setT(0);
+    void pauseSong();
     setVideoBroken(false);
     setVideoUrl("/videos/sample.mp4");
     try {
@@ -94,8 +169,19 @@ export default function DemoPage() {
         controls
         playsInline
         src={videoUrl}
-        onTimeUpdate={(event) => setT(event.currentTarget.currentTime)}
-        onSeeked={(event) => setT(event.currentTarget.currentTime)}
+        onTimeUpdate={(event) => {
+          const time = event.currentTarget.currentTime;
+          setT(time);
+          if (!event.currentTarget.paused) void playMomentAt(time);
+        }}
+        onSeeked={(event) => {
+          const time = event.currentTarget.currentTime;
+          setT(time);
+          if (!event.currentTarget.paused) void playMomentAt(time);
+        }}
+        onPlay={(event) => void playMomentAt(event.currentTarget.currentTime)}
+        onPause={() => void pauseSong()}
+        onEnded={() => void pauseSong()}
         onError={() => setVideoBroken(true)}
       />
 
@@ -106,8 +192,31 @@ export default function DemoPage() {
           <div>
             <h1 className="text-xl font-semibold tracking-tight">Demo ground</h1>
             <p className="mt-1 text-sm text-ink-muted">
-              Upload a video. The local model reads its mood every five seconds.
+              Upload a video. The agent reads its mood every five seconds.
             </p>
+            <div
+              className={`mt-2 inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-1 text-xs ${
+                playback?.connected
+                  ? "border-scene/40 bg-scene/10 text-ink-secondary"
+                  : "border-strong bg-surface-1 text-ink-muted"
+              }`}
+            >
+              <span
+                className={`h-2 w-2 shrink-0 rounded-full ${
+                  playback?.connected ? "bg-scene" : "bg-ink-muted"
+                }`}
+              />
+              {checkingPlayback
+                ? "Checking Spotify playback…"
+                : playback?.connected
+                  ? `Spotify playback connected${playback.device ? ` · ${playback.device}` : ""}`
+                  : `Spotify playback unavailable · ${playback?.message ?? "agent offline"}`}
+            </div>
+            {nowPlaying && (
+              <p className="mt-1 text-xs text-ink-secondary">
+                Playing on Spotify: {nowPlaying}
+              </p>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <label className="cursor-pointer rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition duration-interaction ease-brand hover:bg-white/85">
@@ -137,14 +246,19 @@ export default function DemoPage() {
 
         {processing && (
           <div className="pointer-events-auto mx-6 mb-4 rounded-lg border border-scene/40 bg-scene/10 p-4 text-sm text-ink-secondary">
-            Reading frames, audio, colour, and movement. The first run also
-            downloads the local model.
+            Reading frames, audio, colour, and movement. This can take a moment.
           </div>
         )}
 
         {error && (
           <div className="pointer-events-auto mx-6 mb-4 rounded-lg border border-critical/40 bg-critical/10 p-4 text-sm">
             {error}
+          </div>
+        )}
+
+        {playbackError && (
+          <div className="pointer-events-auto mx-6 mb-4 rounded-lg border border-critical/40 bg-critical/10 p-4 text-sm">
+            Spotify playback failed: {playbackError}
           </div>
         )}
 

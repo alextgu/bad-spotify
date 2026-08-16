@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import sys
+import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -11,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from badspotify.hud.server import create_app  #noqa: E402
 from badspotify.analysis import VideoAnalyzer  #noqa: E402
 from badspotify.config import Config  #noqa: E402
+from badspotify.music.corpus import Corpus  #noqa: E402
 from badspotify.perceive.audio_features import AudioFeatures  #noqa: E402
 from badspotify.perceive.scene import (  #noqa: E402
     HuggingFacePerceiver,
@@ -18,6 +21,7 @@ from badspotify.perceive.scene import (  #noqa: E402
     SCENE_LABELS,
     scene_from_text,
 )
+from badspotify.schemas import Track, Vibe  #noqa: E402
 
 
 class FakeClassifier:
@@ -45,6 +49,40 @@ class SequencePerceiver:
         scene = self.scenes[min(self.index, len(self.scenes) - 1)]
         self.index += 1
         return scene
+
+
+class ConnectedPlayer:
+    name = "spotify"
+
+    def __init__(self):
+        self.calls = []
+
+    def connection_status(self):
+        return {
+            "connected": True,
+            "account": "Demo Account",
+            "device": "Demo Speaker",
+        }
+
+    def play(self, track, mode):
+        self.calls.append(("play", track.id, mode))
+
+    def stop(self):
+        self.calls.append(("stop",))
+
+
+def playback_runtime():
+    player = ConnectedPlayer()
+    track = Track(id="known", title="Known Song", artist="Known Artist", vibe=Vibe())
+    runtime = SimpleNamespace(
+        player=player,
+        graph=SimpleNamespace(corpus=Corpus([track])),
+    )
+    return runtime, player
+
+
+def endpoint(app, path):
+    return next(item.endpoint for item in app.routes if item.path == path)
 
 
 def test_local_classifier_builds_a_complete_scene_read():
@@ -88,6 +126,41 @@ def test_upload_endpoint_rejects_unknown_extensions():
     asyncio.run(upload.close())
 
     assert raised.value.status_code == 415
+
+
+def test_playback_api_reports_connection_and_controls_known_track():
+    import asyncio
+
+    runtime, player = playback_runtime()
+    app = create_app(runtime)
+
+    status = asyncio.run(endpoint(app, "/api/playback")())
+    body = json.loads(status.body)
+    assert body["connected"] is True
+    assert body["device"] == "Demo Speaker"
+
+    played = asyncio.run(endpoint(app, "/api/playback/play")({"track_id": "known"}))
+    assert played["title"] == "Known Song"
+    assert player.calls == [("play", "known", "interrupt")]
+
+    asyncio.run(endpoint(app, "/api/playback/stop")())
+    assert player.calls[-1] == ("stop",)
+
+
+def test_playback_api_rejects_tracks_outside_the_corpus():
+    import asyncio
+
+    import pytest
+    from fastapi import HTTPException
+
+    runtime, player = playback_runtime()
+    app = create_app(runtime)
+
+    with pytest.raises(HTTPException) as raised:
+        asyncio.run(endpoint(app, "/api/playback/play")({"track_id": "not-known"}))
+
+    assert raised.value.status_code == 404
+    assert player.calls == []
 
 
 def test_video_analyzer_samples_every_five_seconds(tmp_path):

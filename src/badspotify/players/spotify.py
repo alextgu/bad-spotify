@@ -146,6 +146,42 @@ class SpotifyPlayer:
         except Exception as e:
             raise SpotifyError(explain(e)) from e
 
+    def connection_status(self) -> dict:
+        """Verify the account and report the device playback will use.
+
+        This deliberately does not transfer playback or start sound. The local
+        demo calls it while rendering its connection badge; opening a page must
+        never seize a speaker. ``play()`` still performs the authoritative
+        device check immediately before it starts a track.
+        """
+        account = self.check_account()
+        devices = self.list_devices()
+        if not devices:
+            raise SpotifyError(
+                "No Spotify devices visible. Open Spotify and press play once."
+            )
+
+        chosen = None
+        if self.preferred_device:
+            chosen = next((d for d in devices if self._is_preferred(d)), None)
+            if chosen is None and self.require_device:
+                names = ", ".join(d.get("name", "?") for d in devices) or "none"
+                raise SpotifyError(
+                    f"{self.preferred_device!r} is not awake. Visible: {names}. "
+                    "Open Spotify on it and press play."
+                )
+        if chosen is None:
+            chosen = next((d for d in devices if d.get("is_active")), devices[0])
+
+        return {
+            "connected": True,
+            "account": account.get("display_name") or account.get("id"),
+            "product": account.get("product"),
+            "device": chosen.get("name"),
+            "device_type": chosen.get("type"),
+            "device_active": bool(chosen.get("is_active")),
+        }
+
     def _is_preferred(self, device: dict) -> bool:
         return bool(self.preferred_device) and (
             self.preferred_device.lower() in (device.get("name") or "").lower())

@@ -6,6 +6,13 @@ Start the Python API with `python run.py --serve`. Then run this frontend with
 `npm run dev` and open `/demo`. The page posts the selected video to
 `http://127.0.0.1:8420/api/analyze-video` and displays the returned session.
 
+If `player.backend` is `spotify`, `/demo` also checks the configured account and
+device and displays **Spotify playback connected** when both are reachable.
+After analysis, pressing Play on the video starts the chosen song at each mood
+marker; pausing or ending the video pauses Spotify. Run
+`python scripts/spotify_setup.py` first to prove the account, device, track
+resolution, and speaker path.
+
 Set `NEXT_PUBLIC_BADSPOTIFY_API_URL` when the API uses another host or port.
 Three bundled videos and their footage-derived sessions remain available
 through the `Use sample` button.

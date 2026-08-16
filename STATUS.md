@@ -36,7 +36,7 @@ Last updated: 15 Aug 2026
 | Site — scaffold + demo ground | Built, unproven | |
 | Site — launch page | Built, visual check pending — real example photos plus a first-viewport forest/notes hero collage (the rock photo was never shot; its slot was removed); runtime sources and production build verified 15 Aug | |
 | Site — pipeline diagram | Built, unproven — updated to the six-strategy fan-out; `tsc --noEmit` and `next build` pass, visual check pending | |
-| Local video upload and mood timeline | Built, unproven | |
+| Local video upload, mood timeline, and synchronized Spotify playback | Built, automated checks only | |
 | Video sampler (`src/videofeed/`) | Done — 17 tests, incl. a real generated clip | |
 | Engine (`service.py`) — one decision, no loop | Built, unproven | |
 | Gradio app (`app.py`) | Built, unproven | |
@@ -59,7 +59,7 @@ the single biggest risk to the demo.
   off when the room really changed *and* the current song has had a fair run.
 - **Backup list.** If anything upstream dies, a pre-picked list of always-wrong
   songs plays anyway. It is never silent.
-- **Tests.** 222 of them, each guarding a specific way the demo could break.
+- **Tests.** 225 of them, each guarding a specific way the demo could break.
 - **Timeouts on the model calls.** A slow answer is abandoned and retried
   rather than freezing the loop. A late answer is worth less than a fast fallback.
 
@@ -92,7 +92,7 @@ active; the offline fallback leaves the semantic chain empty. The local
 one perception call, resolves to opera/classical candidates, and triggers the
 genre-aware DJ path. The offline reader returns no special fast-food answer.
 Seven focused tests cover the model boundary, identity filtering, Engine path,
-genre gating, and zero-Spotify-call candidate generation. All 222 tests pass.
+genre gating, and zero-Spotify-call candidate generation. All 225 tests pass.
 *Still unknown:* whether the live model reaches the useful chain from a real
 fast-food photo without an example in its prompt.
 
@@ -128,7 +128,7 @@ and asks before the expensive work: two rooms that invert to the same music
 don't cost a track.
 *Proven by:* a scene held perfectly constant for 62s went from **6 tracks to 1**,
 and a hard cut is still answered within one read (2.5s). 11 new tests in
-`tests/test_dj_timing.py`; 222 pass.
+`tests/test_dj_timing.py`; 225 pass.
 *Thresholds are measured, not taste:* jitter moves the target ≤0.23 and flips
 the top pick 37% of the time; the smallest real scene change moves it 0.56.
 The deadband sits in that gap at 0.30.
@@ -142,9 +142,11 @@ aren't declared on the TypedDict.
 
 **The local video upload path is built.** FastAPI accepts a bounded temporary
 video, samples it through the current video source, and returns a mood and music
-timeline to `/demo`. Stable mood samples keep the current song choice. A new
+timeline to `/demo`. The page checks Spotify without starting sound, starts only
+corpus tracks at timeline changes, and pauses Spotify with the video. Stable mood
+samples keep the current song choice. A new
 choice needs a different mood and enough vibe distance, and carries a two-second
-crossfade marker. Four focused tests pass, all 222 project tests pass, and the
+crossfade marker. Six focused tests pass, all 225 project tests pass, and the
 frontend type check and production build pass. It has been tried with rain footage.
 
 ## Built, but nobody has run it for real
